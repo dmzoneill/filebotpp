@@ -1,4 +1,4 @@
-## filebotpp
+## filebot++
 
 * C#  - WPF - .NET 4.5.2
 
