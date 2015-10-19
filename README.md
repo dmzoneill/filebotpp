@@ -8,18 +8,19 @@ FileBotPP is a application to merge 3 great applicarions together:
  * https://mediaarea.net/en/MediaInfo
 * FFmpeg 
  * https://www.ffmpeg.org
+ 
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/screenshots/sample1.png)
 	
 With the intention of sorting series into the following structure:
 
-* Top Level Folder
- * Series A
-  * Season 1
-  * Season ..
-  * Season 99
- * Series ...
-  * ...
- * Series X
-  * ...
+* Series A
+ * Season 1
+ * Season ..
+ * Season 99
+* Series ...
+ * Season ...
+* Series X
+ * Season...
 
 ## Features
 
