@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:Helpers="clr-namespace:FileBotPP.Helpers"
+             xmlns:helpers="clr-namespace:FileBotPP.Helpers"
              mc:Ignorable="d" 
           d:DesignHeight="800" d:DesignWidth="500" Background="White" Loaded="FileBotPpSettings_OnLoaded">
     <Grid Margin="5,15,5,15">
@@ -73,7 +73,7 @@
 
             <TextBlock Grid.Row="0" Grid.Column="1" Text="FQDN or ip address" HorizontalAlignment="Right"/>
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Proxy Host" FontWeight="Bold"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Name="ProxyHostTextBox" Text="{x:Static Helpers:Settings.ProxyServerHost}"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Name="ProxyHostTextBox" Text="{x:Static helpers:Settings.ProxyServerHost}"/>
 
             <TextBlock Grid.Row="2" Grid.Column="1" Text="Port number" HorizontalAlignment="Right"/>
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Proxy Port" FontWeight="Bold"/>
@@ -85,7 +85,7 @@
 
             <TextBlock Grid.Row="6" Grid.Column="1" Text="Your tvdb api key" HorizontalAlignment="Right"/>
             <TextBlock Grid.Row="7" Grid.Column="0" Text="Tvdb Api Key" FontWeight="Bold"/>
-            <TextBox Grid.Row="7" Grid.Column="1" Name="TvdbApiKeyTextBox" Text="{x:Static Helpers:Settings.TvdbApiKey}"/>
+            <TextBox Grid.Row="7" Grid.Column="1" Name="TvdbApiKeyTextBox" Text="{x:Static helpers:Settings.TvdbApiKey}"/>
 
             <TextBlock Grid.Row="8" Grid.Column="1" Text="How long the tvdb and eztv cache is valid" HorizontalAlignment="Right"/>
             <TextBlock Grid.Row="9" Grid.Column="0" Text="Cache Lifetime" FontWeight="Bold"/>
@@ -111,7 +111,7 @@
 
             <TextBlock Grid.Row="14" Grid.Column="1" Text="Ffmpeg convert options" HorizontalAlignment="Right"/>
             <TextBlock Grid.Row="15" Grid.Column="0" Text="FFmpeg Convert" FontWeight="Bold"/>
-            <TextBox Grid.Row="15" Grid.Column="1" Name="FFmpegConvertTextBox" Text="{x:Static Helpers:Settings.FFmpegConvert}"/>
+            <TextBox Grid.Row="15" Grid.Column="1" Name="FFmpegConvertTextBox" Text="{x:Static helpers:Settings.FFmpegConvert}"/>
 
             <TextBlock Grid.Row="16" Grid.Column="1" Text="save spacer" HorizontalAlignment="Right" Visibility="Hidden"/>
             <Button Grid.Row="17" Grid.Column="1" Name="SaveButton" Click="SaveButton_OnClick" Content="Save Settings" Width="120" HorizontalAlignment="Left"/>

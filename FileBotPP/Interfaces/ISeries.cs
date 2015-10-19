@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using FileBotPP.Metadata.tvdb;
 
 namespace FileBotPP.Interfaces
 {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using FileBotPP.Interfaces;
 using FileBotPP.Metadata;
@@ -41,9 +40,9 @@ namespace FileBotPP.Helpers
 
         private static void clean_series_season_duplicates( IDirectoryItem directory )
         {
-            var checklist = new List<IFileItem>();
+            var checklist = new List< IFileItem >();
 
-            foreach ( var fileitem in directory.Items.OfType<IFileItem>() )
+            foreach ( var fileitem in directory.Items.OfType< IFileItem >() )
             {
                 foreach ( var checkitem in checklist )
                 {
@@ -117,7 +116,7 @@ namespace FileBotPP.Helpers
                             continue;
                         }
 
-                        var missingdirectory = new DirectoryItem {Parent = (IItem) directory, FullName = "Season " + seasonint, Path = newdirectory};
+                        var missingdirectory = new DirectoryItem {Parent = directory, FullName = "Season " + seasonint, Path = newdirectory};
                         var di = new DirectoryInsert {Directory = directory, SubDirectory = missingdirectory, Seasonnum = int.Parse( seasonint )};
                         ItemProvider.NewDirectoryUpdates.Enqueue( di );
                     }
@@ -255,7 +254,7 @@ namespace FileBotPP.Helpers
                     continue;
                 }
 
-                var newfile = new FileItem {FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Parent = (IItem) subdirectory, Missing = true};
+                var newfile = new FileItem {FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Parent = subdirectory, Missing = true};
 
                 var fi = new FileInsert {Directory = subdirectory, File = newfile, EpisodeNum = episode.get_episode_num()};
 

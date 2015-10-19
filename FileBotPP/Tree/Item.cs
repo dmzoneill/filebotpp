@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using FileBotPP.Helpers;
 using FileBotPP.Interfaces;
-using FileBotPP.Metadata;
 
 namespace FileBotPP.Tree
 {

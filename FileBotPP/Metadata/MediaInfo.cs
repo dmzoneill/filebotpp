@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FileBotPP.Interfaces;
-using FileBotPP.Tree;
 
 namespace FileBotPP.Metadata
 {
@@ -1389,26 +1388,26 @@ namespace FileBotPP.Metadata
 
                 if ( section == 1 )
                 {
-                    this.parse_section( section, parts[ 0 ].Trim(), parts[ 1 ].Trim(), General );
+                    this.parse_section( parts[ 0 ].Trim(), parts[ 1 ].Trim(), General );
                 }
                 if ( section == 2 )
                 {
-                    this.parse_section( section, parts[ 0 ].Trim(), parts[ 1 ].Trim(), Video );
+                    this.parse_section( parts[ 0 ].Trim(), parts[ 1 ].Trim(), Video );
                 }
                 if ( section == 3 )
                 {
-                    this.parse_section( section, parts[ 0 ].Trim(), parts[ 1 ].Trim(), Audio );
+                    this.parse_section( parts[ 0 ].Trim(), parts[ 1 ].Trim(), Audio );
                 }
                 if ( section == 4 )
                 {
-                    this.parse_section( section, parts[ 0 ].Trim(), parts[ 1 ].Trim(), Text );
+                    this.parse_section( parts[ 0 ].Trim(), parts[ 1 ].Trim(), Text );
                 }
             }
         }
 
-        private void parse_section( int section, string tkey, string tvalue, IReadOnlyDictionary< string, string > dict )
+        private void parse_section( string tkey, string tvalue, IReadOnlyDictionary< string, string > dict )
         {
-            var property = get_property( section, tkey, dict );
+            var property = get_property( tkey, dict );
 
             if ( property == null )
             {
@@ -1424,7 +1423,7 @@ namespace FileBotPP.Metadata
             }
         }
 
-        private static string get_property( int section, string key, IReadOnlyDictionary< string, string > dict )
+        private static string get_property( string key, IReadOnlyDictionary< string, string > dict )
         {
             if ( dict.Keys.Contains( key ) )
             {
