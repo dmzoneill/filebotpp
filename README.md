@@ -1,31 +1,35 @@
 # filebotpp
 
-FileBotPP (WPF .NET 4.5.2) is a application to merge 3 great applications and 2 online databases together:
+FileBotPP (WPF .NET 4.5.2) is a application that merges 3 great applications and 2 online databases together:
 
-* FileBot 
- * http://www.filebot.net
-* MediaInfo
- * https://mediaarea.net/en/MediaInfo
-* FFmpeg 
- * https://www.ffmpeg.org
-* TvDB 
- * http://thetvdb.com
-* EzTV 
- * http://eztv.it
- 
+* FileBot - http://www.filebot.net
+* MediaInfo - https://mediaarea.net/en/MediaInfo
+* FFmpeg - https://www.ffmpeg.org
+* TvDB - http://thetvdb.com
+* EzTV - http://eztv.it
  
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/sample1.png)
 	
 With the intention of sorting series into the following structure:
 
-* Series A
- * Season 1
- * Season ..
- * Season 99
-* Series ...
- * Season ...
-* Series X
- * Season...
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/structuresample.png)
+
+##Screenshots
+
+### Media Info
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/mediainfo.png)
+
+### Settings
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/settings.png)
+
+### Rename
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/rename.png)
+
+### Folder context
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/foldercontext.png)
+
+### File context
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/filecontext.png)
 
 ## Features
 
@@ -54,20 +58,3 @@ See the install project for creaintg an installer
 
 WTFPL – Do What the Fuck You Want to Public License
 http://www.wtfpl.net/
-
-##Screenshots
-
-### Media Info
-![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/mediainfo.png)
-
-### Settings
-![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/settings.png)
-
-### Rename
-![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/rename.png)
-
-### Folder context
-![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/foldercontext.png)
-
-### File context
-![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/filecontext.png)
