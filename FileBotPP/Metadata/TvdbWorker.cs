@@ -76,13 +76,12 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                if ( !Directory.Exists( "tvdbids/" ) )
+                if ( !Directory.Exists(Common.AppDataFolder + "/tvdbids/") )
                 {
-                    Directory.CreateDirectory( "tvdbids" );
+                    Directory.CreateDirectory(Common.AppDataFolder + "/tvdbids");
                 }
 
-                var tempFile = Directory.GetCurrentDirectory() + "/tvdbids/" + this._seriesName;
-                tempFile = tempFile.Replace( '\\', '/' );
+                var tempFile = Common.AppDataFolder + "/tvdbids/" + this._seriesName;
 
                 string xml;
 
@@ -118,19 +117,18 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                if ( !Directory.Exists( "tvdbids/" ) )
+                if ( !Directory.Exists(Common.AppDataFolder + "/tvdbids/") )
                 {
-                    Directory.CreateDirectory( "tvdbids" );
+                    Directory.CreateDirectory(Common.AppDataFolder + "/tvdbids");
                 }
 
-                var tempFile = Directory.GetCurrentDirectory() + "/tvdbids/" + this._seriesName;
-                tempFile = tempFile.Replace( '\\', '/' );
+                var tempFile = Common.AppDataFolder + "/tvdbids/" + this._seriesName;
 
                 var xml = "";
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         xml = File.ReadAllText( tempFile );
                     }
@@ -201,18 +199,16 @@ namespace FileBotPP.Metadata
                 this.get_series_id_local();
 
                 var cticks = DateTime.Now.Ticks/TimeSpan.TicksPerSecond;
-                var tempFile1 = Directory.GetCurrentDirectory() + "/tvdb/" + this._seriesid;
-                tempFile1 = tempFile1.Replace( '\\', '/' );
+                var tempFile1 = Common.AppDataFolder + "/tvdb/" + this._seriesid;
 
-                var tempFile2 = Directory.GetCurrentDirectory() + "/tvdbids/" + this._seriesName;
-                tempFile2 = tempFile2.Replace( '\\', '/' );
+                var tempFile2 = Common.AppDataFolder + "/tvdbids/" + this._seriesName;
 
                 if ( !File.Exists( tempFile1 ) || !File.Exists( tempFile2 ) )
                 {
                     return false;
                 }
 
-                return ( File.GetLastWriteTime( tempFile1 ).Ticks/TimeSpan.TicksPerSecond + Settings.CacheTimeout) > cticks && ( File.GetLastWriteTime( tempFile2 ).Ticks/TimeSpan.TicksPerSecond + Settings.CacheTimeout) > cticks;
+                return ( File.GetLastWriteTime( tempFile1 ).Ticks/TimeSpan.TicksPerSecond + Settings.CacheTimeout ) > cticks && ( File.GetLastWriteTime( tempFile2 ).Ticks/TimeSpan.TicksPerSecond + Settings.CacheTimeout ) > cticks;
             }
             catch ( Exception ex )
             {
@@ -290,7 +286,7 @@ namespace FileBotPP.Metadata
             }
         }
 
-        private void parse_series_episodes_metadata( XmlDocument document )
+        private void parse_series_episodes_metadata( XmlNode document )
         {
             try
             {
@@ -349,17 +345,16 @@ namespace FileBotPP.Metadata
             {
                 Utils.LogLines.Enqueue( @"Download " + this._seriesName + @" metadata..." );
 
-                if ( !Directory.Exists( "tvdb/" ) )
+                if ( !Directory.Exists(Common.AppDataFolder + "/tvdb/" ) )
                 {
-                    Directory.CreateDirectory( "tvdb" );
+                    Directory.CreateDirectory(Common.AppDataFolder + "/tvdb" );
                 }
 
-                var tempFile = Directory.GetCurrentDirectory() + "/tvdb/" + this._seriesid;
-                tempFile = tempFile.Replace( '\\', '/' );
+                var tempFile = Common.AppDataFolder + "/tvdb/" + this._seriesid;
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         this._xml = Utils.read_file_from_zip( tempFile, "en.xml" );
                         return;

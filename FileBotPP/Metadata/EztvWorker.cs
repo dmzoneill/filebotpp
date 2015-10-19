@@ -75,8 +75,7 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                var tempFile = Directory.GetCurrentDirectory() + "/eztv/" + this._seriesid;
-                tempFile = tempFile.Replace( '\\', '/' );
+                var tempFile = Common.AppDataFolder + "/eztv/" + this._seriesid;
 
                 if ( File.Exists( tempFile ) )
                 {
@@ -98,13 +97,12 @@ namespace FileBotPP.Metadata
 
         private void get_series_data()
         {
-            if ( !Directory.Exists( "eztv/" ) )
+            if ( !Directory.Exists(Common.AppDataFolder + "/eztv/") )
             {
-                Directory.CreateDirectory( "eztv" );
+                Directory.CreateDirectory(Common.AppDataFolder + "/eztv");
             }
 
-            var tempFile = Directory.GetCurrentDirectory() + "/eztv/" + this._seriesid;
-            tempFile = tempFile.Replace( '\\', '/' );
+            var tempFile =  Common.AppDataFolder + "/eztv/" + this._seriesid;
 
             if ( File.Exists( tempFile ) )
             {

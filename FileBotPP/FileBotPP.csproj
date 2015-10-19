@@ -199,9 +199,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="library\error.log">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="library\filebot.cmd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -14,8 +14,8 @@ namespace FileBotPP.Helpers
         private readonly IFileItem _fileitem;
         private int _scanItemsCount;
         private int _scannedItemsCount;
-        private BackgroundWorker _worker;
         private bool _stop;
+        private BackgroundWorker _worker;
 
         public FfmpegCorruptWorker()
         {
@@ -32,6 +32,11 @@ namespace FileBotPP.Helpers
         {
             this._brokenFiles = new ConcurrentQueue< IFileItem >();
             this._directory = directory;
+        }
+
+        public void stop_worker()
+        {
+            this._stop = true;
         }
 
         public void start_scan()
@@ -58,7 +63,7 @@ namespace FileBotPP.Helpers
         private void consume_queue()
         {
             Common.FileBotPp.set_status_text( "File video stream check (" + this._scannedItemsCount + "/" + this._scanItemsCount + ")" );
-            
+
             IFileItem item;
             while ( this._brokenFiles.TryDequeue( out item ) )
             {
@@ -102,7 +107,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        private void scan_folder(IDirectoryItem directory )
+        private void scan_folder( IDirectoryItem directory )
         {
             foreach ( var item in directory.Items.OfType< IDirectoryItem >() )
             {
@@ -122,12 +127,12 @@ namespace FileBotPP.Helpers
             var mi = Environment.CurrentDirectory + "\\Library\\ffmpeg.exe";
             var arguments = "-y -v info -t 5 -i \"" + fitem.Path.Replace( "\\", "/" ) + "\" -c:a copy -c:s mov_text -c:v mpeg4 -f mp4 test.mp4";
 
-            if ( Utils.write_file( "ffmpeg.bat", "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
+            if ( Utils.write_file(Common.AppDataFolder + "\\ffmpeg.bat", "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
             {
                 return;
             }
 
-            var output = Utils.run_process_background( Environment.CurrentDirectory + "\\ffmpeg.bat", "" );
+            var output = Utils.run_process_background(Common.AppDataFolder + "\\ffmpeg.bat", "" );
 
             if ( output > 0 )
             {
@@ -139,11 +144,6 @@ namespace FileBotPP.Helpers
                 Utils.LogLines.Enqueue( "FFmpeg looks ok : " + fitem.Path );
             }
             this._worker.ReportProgress( 1 );
-        }
-
-        public void stop_worker()
-        {
-            this._stop = true;
         }
     }
 }

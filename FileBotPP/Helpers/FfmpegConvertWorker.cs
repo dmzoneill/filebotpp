@@ -128,13 +128,14 @@ namespace FileBotPP.Helpers
 
             var mi = Environment.CurrentDirectory + "\\Library\\ffmpeg.exe";
             var arguments = "-y -v info -i \"" + fitem.Path.Replace( "\\", "/" ) + "\" -c:a copy -c:s mov_text -c:v mpeg4 -f mp4 \"" + fitem.Parent.Path.Replace( "\\", "/" ) + "/" + fitem.ShortName + ".mp4\"";
+            var objpath = Common.AppDataFolder + "\\ffmpegconvert.bat";
 
-            if ( Utils.write_file( "ffmpegconvert.bat", "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
+            if ( Utils.write_file( objpath, "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
             {
                 return;
             }
 
-            var returncode = Utils.run_process_foreground( Environment.CurrentDirectory + "\\ffmpegconvert.bat", "" );
+            var returncode = Utils.run_process_foreground( objpath, "" );
 
             if ( returncode > 0 )
             {

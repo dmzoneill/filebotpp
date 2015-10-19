@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using FileBotPP.Interfaces;
 
 namespace FileBotPP.Helpers
@@ -11,6 +13,12 @@ namespace FileBotPP.Helpers
         {
             SeriesAnalyzer = new SeriesAnalyzer();
             Working = new List< ISupportsStop >();
+
+            AppDataFolder = AppDataFolder.Replace( '\\', '/' );
+            if ( Directory.Exists( AppDataFolder ) )
+            {
+                Directory.CreateDirectory( AppDataFolder );
+            }
         }
 
         public static IFileBotPpWindow FileBotPp { get; set; }
@@ -32,6 +40,8 @@ namespace FileBotPP.Helpers
                 }
             }
         }
+
+        public static string AppDataFolder { get; set; } = Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ) + "/FileBotPP";
 
         public static void stop_all_workers()
         {
