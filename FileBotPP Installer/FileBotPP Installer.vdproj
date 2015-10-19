@@ -333,6 +333,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_7A23D36C68024B3ABC817ADCACA2BC83"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_7BB609356D7F4ACB9BB96ECCD99ED689"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1018,6 +1024,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.5"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.5"
+                    }
+                }
             }
         }
     }
@@ -2213,6 +2227,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7A23D36C68024B3ABC817ADCACA2BC83"
+            {
+            "SourcePath" = "8:..\\FileBotPP\\Images\\filebot\\favicon.ico"
+            "TargetName" = "8:favicon.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_A35039B98BBD4CEEA463F8C3CCE3D789"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_7BB609356D7F4ACB9BB96ECCD99ED689"
             {
             "AssemblyRegister" = "3:1"
@@ -3307,7 +3341,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:FileBotPP"
         "ProductCode" = "8:{5C2E513B-6791-4CBC-96F3-559676AA9228}"
-        "PackageCode" = "8:{98B7415F-9EF1-4F0E-9DE5-C89072A181FB}"
+        "PackageCode" = "8:{E655DE6F-51D3-4F2F-8F6C-4354524DEBCD}"
         "UpgradeCode" = "8:{525434FA-346B-4E22-A948-73D2CDC32F54}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -3438,7 +3472,7 @@
             "Target" = "8:_3C2EF21781DD4B9B9FE9C153AD9A5D69"
             "Folder" = "8:_5DB54DD625FE46FA85AC5DF251C04B16"
             "WorkingFolder" = "8:_A35039B98BBD4CEEA463F8C3CCE3D789"
-            "Icon" = "8:"
+            "Icon" = "8:_7A23D36C68024B3ABC817ADCACA2BC83"
             "Feature" = "8:"
             }
         }
