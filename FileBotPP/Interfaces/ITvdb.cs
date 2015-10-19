@@ -7,8 +7,8 @@ namespace FileBotPP.Interfaces
     {
         void downloads_series_data();
         void get_series_from_workers();
-        List< Series > get_series();
-        Series get_series_by_name( string name );
+        List< ISeries > get_series();
+        ISeries get_series_by_name( string name );
         void free_workers();
         void stop_worker();
     }

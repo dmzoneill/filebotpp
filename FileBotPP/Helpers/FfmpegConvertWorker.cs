@@ -101,7 +101,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        private void convert_folder(IDirectoryItem directory )
+        private void convert_folder(IItem directory )
         {
             foreach ( var item in directory.Items.OfType< IDirectoryItem >() )
             {

@@ -3,14 +3,15 @@ using System.ComponentModel;
 using System.IO;
 using System.Xml;
 using FileBotPP.Helpers;
+using FileBotPP.Interfaces;
 using FileBotPP.Metadata.tvdb;
 
 namespace FileBotPP.Metadata
 {
-    internal class TvdbWorker
+    internal class TvdbWorker : ITvdbWorker
     {
         private readonly string _seriesName;
-        private Series _series;
+        private ISeries _series;
         private int _seriesid = -1;
         private bool _working;
         private string _xml;
@@ -26,6 +27,64 @@ namespace FileBotPP.Metadata
             worker.DoWork += this.Worker_DoWork;
             worker.RunWorkerCompleted += this.Worker_RunWorkerCompleted;
             worker.RunWorkerAsync();
+        }
+
+        public bool is_working()
+        {
+            return this._working;
+        }
+
+        public string get_series_name()
+        {
+            return this._seriesName;
+        }
+
+        public bool is_cached()
+        {
+            try
+            {
+                this.get_series_id_local();
+
+                var cticks = DateTime.Now.Ticks/TimeSpan.TicksPerSecond;
+                var tempFile1 = Common.AppDataFolder + "/tvdb/" + this._seriesid;
+
+                var tempFile2 = Common.AppDataFolder + "/tvdbids/" + this._seriesName;
+
+                if ( !File.Exists( tempFile1 ) || !File.Exists( tempFile2 ) )
+                {
+                    return false;
+                }
+
+                return ( File.GetLastWriteTime( tempFile1 ).Ticks/TimeSpan.TicksPerSecond + Settings.CacheTimeout ) > cticks && ( File.GetLastWriteTime( tempFile2 ).Ticks/TimeSpan.TicksPerSecond + Settings.CacheTimeout ) > cticks;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+                return false;
+            }
+        }
+
+        public void parse_series_data()
+        {
+            try
+            {
+                Utils.LogLines.Enqueue( @"Parsing " + this._seriesName + @" metadata..." );
+
+                var document = new XmlDocument();
+                document.LoadXml( this._xml );
+                this._series = new Series( this._seriesName );
+
+                this.parse_series_episodes_metadata( document );
+                this.parse_series_metadata( document );
+
+                this._xml = null;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
@@ -57,28 +116,18 @@ namespace FileBotPP.Metadata
             }
         }
 
-        public bool is_working()
-        {
-            return this._working;
-        }
-
-        public Series get_series()
+        public ISeries get_series()
         {
             return this._series;
-        }
-
-        public string get_series_name()
-        {
-            return this._seriesName;
         }
 
         private void get_series_id()
         {
             try
             {
-                if ( !Directory.Exists(Common.AppDataFolder + "/tvdbids/") )
+                if ( !Directory.Exists( Common.AppDataFolder + "/tvdbids/" ) )
                 {
-                    Directory.CreateDirectory(Common.AppDataFolder + "/tvdbids");
+                    Directory.CreateDirectory( Common.AppDataFolder + "/tvdbids" );
                 }
 
                 var tempFile = Common.AppDataFolder + "/tvdbids/" + this._seriesName;
@@ -117,9 +166,9 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                if ( !Directory.Exists(Common.AppDataFolder + "/tvdbids/") )
+                if ( !Directory.Exists( Common.AppDataFolder + "/tvdbids/" ) )
                 {
-                    Directory.CreateDirectory(Common.AppDataFolder + "/tvdbids");
+                    Directory.CreateDirectory( Common.AppDataFolder + "/tvdbids" );
                 }
 
                 var tempFile = Common.AppDataFolder + "/tvdbids/" + this._seriesName;
@@ -184,54 +233,6 @@ namespace FileBotPP.Metadata
                     this._seriesid = id;
                     break;
                 }
-            }
-            catch ( Exception ex )
-            {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
-            }
-        }
-
-        public bool is_cached()
-        {
-            try
-            {
-                this.get_series_id_local();
-
-                var cticks = DateTime.Now.Ticks/TimeSpan.TicksPerSecond;
-                var tempFile1 = Common.AppDataFolder + "/tvdb/" + this._seriesid;
-
-                var tempFile2 = Common.AppDataFolder + "/tvdbids/" + this._seriesName;
-
-                if ( !File.Exists( tempFile1 ) || !File.Exists( tempFile2 ) )
-                {
-                    return false;
-                }
-
-                return ( File.GetLastWriteTime( tempFile1 ).Ticks/TimeSpan.TicksPerSecond + Settings.CacheTimeout ) > cticks && ( File.GetLastWriteTime( tempFile2 ).Ticks/TimeSpan.TicksPerSecond + Settings.CacheTimeout ) > cticks;
-            }
-            catch ( Exception ex )
-            {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
-                return false;
-            }
-        }
-
-        public void parse_series_data()
-        {
-            try
-            {
-                Utils.LogLines.Enqueue( @"Parsing " + this._seriesName + @" metadata..." );
-
-                var document = new XmlDocument();
-                document.LoadXml( this._xml );
-                this._series = new Series( this._seriesName );
-
-                this.parse_series_episodes_metadata( document );
-                this.parse_series_metadata( document );
-
-                this._xml = null;
             }
             catch ( Exception ex )
             {
@@ -345,9 +346,9 @@ namespace FileBotPP.Metadata
             {
                 Utils.LogLines.Enqueue( @"Download " + this._seriesName + @" metadata..." );
 
-                if ( !Directory.Exists(Common.AppDataFolder + "/tvdb/" ) )
+                if ( !Directory.Exists( Common.AppDataFolder + "/tvdb/" ) )
                 {
-                    Directory.CreateDirectory(Common.AppDataFolder + "/tvdb" );
+                    Directory.CreateDirectory( Common.AppDataFolder + "/tvdb" );
                 }
 
                 var tempFile = Common.AppDataFolder + "/tvdb/" + this._seriesid;

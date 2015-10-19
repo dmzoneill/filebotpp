@@ -9,15 +9,15 @@ using FileBotPP.Tree;
 
 namespace FileBotPP.Metadata
 {
-    public class Filebot
+    public class Filebot : IFilebot
     {
-        private readonly List< BadNameUpdate > _renameList;
+        private readonly List< IBadNameUpdate > _renameList;
         private IDirectoryItem _checkSeasonDirectory;
         private BackgroundWorker _worker;
 
         public Filebot()
         {
-            this._renameList = new List< BadNameUpdate >();
+            this._renameList = new List< IBadNameUpdate >();
         }
 
         public void check_series( IDirectoryItem directory )

@@ -447,12 +447,35 @@ namespace FileBotPP
             this._timer.Interval = new TimeSpan( 0, 0, 1 );
             this._timer.Start();
 
-            if ( Utils.check_for_eztv_connection() == false )
+            CheckConnections();
+        }
+
+        private void CheckConnections()
+        {
+            this.set_status_text( "Checking for internet access.." );
+            var connectionChecker = new BackgroundWorker();
+            connectionChecker.DoWork += connectionChecker_DoWork;
+            connectionChecker.RunWorkerCompleted += this.connectionChecker_RunWorkerCompleted;
+            connectionChecker.RunWorkerAsync();
+        }
+
+        private void connectionChecker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        {
+            this.SelectFolderButton.IsEnabled = true;
+
+            if ( Common.EztvAvailable )
             {
-                MessageBox.Show( "Unable to access eztv." + Environment.NewLine + "This functionality will be disabled", "Connectivity Issues" );
+                Common.SeriesAnalyzer.fetch_eztv_metadata();
                 return;
             }
-            Common.SeriesAnalyzer.fetch_eztv_metadata();
+
+            MessageBox.Show( "Unable to access eztv." + Environment.NewLine + "This functionality will be disabled", "Connectivity Issues" );
+        }
+
+        private static void connectionChecker_DoWork( object sender, DoWorkEventArgs e )
+        {
+            Common.EztvAvailable = Utils.check_for_eztv_connection();
+            Common.TvdbAvailable = Utils.check_for_tvdb_connection();
         }
 
         private void SeriesTreeView_SelectedItemChanged( object sender, RoutedPropertyChangedEventArgs< object > e )
@@ -549,6 +572,8 @@ namespace FileBotPP
                 return;
             }
 
+            this.set_ready( false );
+
             if ( Common.MetaDataReady == 3 )
             {
                 Common.MetaDataReady = 1;
@@ -563,7 +588,7 @@ namespace FileBotPP
             this.SeriesTreeView.DataContext = ItemProvider.Items;
             ItemProvider.scan_series_folder();
 
-            if ( Utils.check_for_internet_connection() == false )
+            if ( Common.TvdbAvailable == false )
             {
                 MessageBox.Show( "Unable to access thetvdb." + Environment.NewLine + "This functionality will be disabled", "Connectivity Issues" );
                 return;
@@ -626,6 +651,18 @@ namespace FileBotPP
         private void StopThreadsMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
             Common.stop_all_workers();
+        }
+
+        public void set_ready(bool ready)
+        {
+            this.SeriesTreeView.IsEnabled = ready;
+            this.CheckAllFilesButton.IsEnabled = ready;
+            this.RenameButton.IsEnabled = ready;
+            this.MoveButton.IsEnabled = ready;
+            this.DeleteButton.IsEnabled = ready;
+            this.CheckButton.IsEnabled = ready;
+            this.ConvertButton.IsEnabled = ready;
+            this.DownloadButton.IsEnabled = ready;
         }
 
         #endregion

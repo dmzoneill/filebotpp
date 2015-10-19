@@ -9,7 +9,7 @@ using FileBotPP.Metadata.eztv;
 
 namespace FileBotPP.Metadata
 {
-    internal class EztvWorker
+    internal class EztvWorker : IEztvWorker
     {
         private readonly string _series;
         private readonly int _seriesid;

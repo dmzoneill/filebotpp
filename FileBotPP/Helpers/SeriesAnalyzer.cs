@@ -128,7 +128,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        private static void clean_series_season_files_check_episode_name( IDirectoryItem directory, IDirectoryItem subdirectory, IFileItem item )
+        private static void clean_series_season_files_check_episode_name( IDirectoryItem directory, IItem subdirectory, IFileItem item )
         {
             if ( Common.Tvdb == null )
             {
@@ -174,7 +174,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        private static void clean_series_season_file_check_extra( IDirectoryItem directory, IDirectoryItem subdirectory, IFileItem item )
+        private static void clean_series_season_file_check_extra( IDirectoryItem directory, IItem subdirectory, IFileItem item )
         {
             if ( Common.Tvdb == null )
             {
@@ -332,7 +332,7 @@ namespace FileBotPP.Helpers
             return new Torrent();
         }
 
-        private static void clean_series_season_directories( IDirectoryItem directory )
+        private static void clean_series_season_directories( IItem directory )
         {
             foreach ( var seasondirectory in directory.Items.OfType< IDirectoryItem >() )
             {

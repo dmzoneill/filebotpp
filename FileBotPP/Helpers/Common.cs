@@ -42,6 +42,8 @@ namespace FileBotPP.Helpers
         }
 
         public static string AppDataFolder { get; set; } = Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData ) + "/FileBotPP";
+        public static bool EztvAvailable { get; set; }
+        public static bool TvdbAvailable { get; set; }
 
         public static void stop_all_workers()
         {

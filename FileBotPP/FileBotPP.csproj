@@ -109,6 +109,10 @@
     <Compile Include="Interfaces\ISeries.cs" />
     <Compile Include="Interfaces\ITorrent.cs" />
     <Compile Include="Interfaces\IMediaInfo.cs" />
+    <Compile Include="Interfaces\ITvdbWorker.cs" />
+    <Compile Include="Interfaces\IEztvWorker.cs" />
+    <Compile Include="Interfaces\IMediaInfoWorker.cs" />
+    <Compile Include="Interfaces\IFilebot.cs" />
     <Compile Include="Panes\FileBotPpSettings.xaml.cs">
       <DependentUpon>FileBotPpSettings.xaml</DependentUpon>
     </Compile>
@@ -133,6 +137,13 @@
     <Compile Include="Interfaces\IDirectoryItem.cs" />
     <Compile Include="Interfaces\IItem.cs" />
     <Compile Include="Interfaces\IFileItem.cs" />
+    <Compile Include="Interfaces\IBadLocationUpdate.cs" />
+    <Compile Include="Interfaces\IBadNameUpdate.cs" />
+    <Compile Include="Interfaces\IDeletionUpdate.cs" />
+    <Compile Include="Interfaces\IDirectoryInsert.cs" />
+    <Compile Include="Interfaces\IDuplicateUpdate.cs" />
+    <Compile Include="Interfaces\IExtraFileUpdate.cs" />
+    <Compile Include="Interfaces\IFileInsert.cs" />
     <Compile Include="Tree\Item.cs" />
     <Compile Include="Tree\ItemProvider.cs" />
     <Compile Include="Tree\DirectoryItemWatcher.cs" />

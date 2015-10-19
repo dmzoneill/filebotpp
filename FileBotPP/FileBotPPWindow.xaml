@@ -410,7 +410,7 @@
                         <Label Name="ScanLocationLabel" HorizontalAlignment="Left" Content="" Grid.Column="1" FontSize="12" Grid.Row="1" />
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,5" Background="Transparent" Grid.Column="2" Grid.Row="1" >
-                            <Button ToolTip="Select directory for scanning" Name="SelectFolderButton" Click="SelectFolderButton_Click" BorderBrush="Black" BorderThickness="2">
+                            <Button ToolTip="Select directory for scanning" Name="SelectFolderButton" Click="SelectFolderButton_Click" BorderBrush="Black" BorderThickness="2" IsEnabled="False">
                                 <Button.Triggers>
                                     <EventTrigger RoutedEvent="Border.Loaded">
                                         <BeginStoryboard>
@@ -423,7 +423,7 @@
                                 <Image Source="Images/16/Very_Basic/opened_folder-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Check all files for corruption" Name="CheckAllFilesButton" Click="CheckAllFilesButton_Click">
+                            <Button IsEnabled="False" ToolTip="Check all files for corruption" Name="CheckAllFilesButton" Click="CheckAllFilesButton_Click">
                                 <Image Source="Images/16/Files/check_file-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                         </StackPanel>
@@ -434,27 +434,27 @@
                             <RowDefinition Height="230"/>
                         </Grid.RowDefinitions>
                         <StackPanel  Orientation="Vertical" Width="30" Background="White" Margin="0,0,5,0" Grid.Row="0">
-                            <Button ToolTip="Check filename episode name(s)" Name="RenameButton" Click="RenameButton_Click" HorizontalAlignment="Left" Width="30">
+                            <Button IsEnabled="False" ToolTip="Check filename episode name(s)" Name="RenameButton" Click="RenameButton_Click" HorizontalAlignment="Left" Width="30">
                                 <Image Source="Images/16/Editing/rename-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Move file(s) to correct season folder(s)" Name="MoveButton" Click="MoveButton_Click">
+                            <Button IsEnabled="False" ToolTip="Move file(s) to correct season folder(s)" Name="MoveButton" Click="MoveButton_Click">
                                 <Image Source="Images/16/Ecommerce/move_stock-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
-                            <Button  ToolTip="Delete empty/invalid type/corrupt item(s)" Name="DeleteButton" Click="DeleteButton_Click">
+                            <Button IsEnabled="False"  ToolTip="Delete empty/invalid type/corrupt item(s)" Name="DeleteButton" Click="DeleteButton_Click">
                                 <Image Source="Images/16/Editing/delete-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Check files(s) for corruption" Name="CheckButton" Click="CheckButton_Click">
+                            <Button IsEnabled="False" ToolTip="Check files(s) for corruption" Name="CheckButton" Click="CheckButton_Click">
                                 <Image Source="Images/16/Files/check_file-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Convert file(s)" Name="ConvertButton" Click="ConvertButton_OnClick">
+                            <Button IsEnabled="False" ToolTip="Convert file(s)" Name="ConvertButton" Click="ConvertButton_OnClick">
                                 <Image Source="Images/16/Industry/ac_dc_converter-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Download torrent(s)" Name="DownloadButton" Click="DownloadButton_Click">
+                            <Button IsEnabled="False" ToolTip="Download torrent(s)" Name="DownloadButton" Click="DownloadButton_Click">
                                 <Image Source="Images/16/Very_Basic/document-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                         </StackPanel>
@@ -475,7 +475,7 @@
                             </Border>
                         </StackPanel>
                     </Grid>
-                    <TreeView Margin="0" x:Name="SeriesTreeView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  ItemsSource="{Binding}" SelectedItemChanged="SeriesTreeView_SelectedItemChanged">
+                    <TreeView IsEnabled="False" Margin="0" x:Name="SeriesTreeView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  ItemsSource="{Binding}" SelectedItemChanged="SeriesTreeView_SelectedItemChanged">
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <EventSetter Event="MouseRightButtonDown" Handler="SeriesTreeView_MouseRightButtonDown"/>

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using FileBotPP.Metadata.tvdb;
 
 namespace FileBotPP.Interfaces
 {
@@ -7,6 +6,6 @@ namespace FileBotPP.Interfaces
     {
         int get_season_num();
         void add_episode( IEpisode episode );
-        List<IEpisode> get_episodes();
+        List< IEpisode > get_episodes();
     }
 }

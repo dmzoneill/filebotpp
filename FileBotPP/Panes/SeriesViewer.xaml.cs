@@ -7,7 +7,7 @@ using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using FileBotPP.Helpers;
-using FileBotPP.Metadata.tvdb;
+using FileBotPP.Interfaces;
 
 namespace FileBotPP.Panes
 {
@@ -22,13 +22,13 @@ namespace FileBotPP.Panes
             this.InitializeComponent();
         }
 
-        public SeriesViewer( Series series )
+        public SeriesViewer( ISeries series )
         {
             this.Series = series;
             this.InitializeComponent();
         }
 
-        public Series Series { get; set; }
+        public ISeries Series { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged( string propertyName )

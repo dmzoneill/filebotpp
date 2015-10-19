@@ -2,7 +2,7 @@ using FileBotPP.Interfaces;
 
 namespace FileBotPP.Tree
 {
-    public struct DuplicateUpdate
+    public class DuplicateUpdate : IDuplicateUpdate
     {
         public IDirectoryItem Directory { get; set; }
         public IFileItem FileA { get; set; }

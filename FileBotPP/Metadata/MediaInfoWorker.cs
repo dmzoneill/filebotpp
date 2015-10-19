@@ -8,7 +8,7 @@ using FileBotPP.Tree;
 
 namespace FileBotPP.Metadata
 {
-    public class MediaInfoWorker : ISupportsStop
+    public class MediaInfoWorker : ISupportsStop, IMediaInfoWorker
     {
         private readonly ConcurrentQueue< IFileItem > _brokenFiles;
         private readonly IDirectoryItem _directory;
@@ -102,7 +102,7 @@ namespace FileBotPP.Metadata
             }
         }
 
-        private void scan_folder( IDirectoryItem directory )
+        private void scan_folder( IItem directory )
         {
             foreach ( var item in directory.Items.OfType< IDirectoryItem >() )
             {

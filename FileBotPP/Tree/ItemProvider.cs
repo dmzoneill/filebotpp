@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 using FileBotPP.Helpers;
 using FileBotPP.Interfaces;
@@ -16,28 +17,28 @@ namespace FileBotPP.Tree
     {
         private static string _lastFolderScanned = "";
         public static ObservableCollection< IItem > Items;
-        public static ConcurrentQueue< DirectoryInsert > NewDirectoryUpdates;
-        public static ConcurrentQueue< FileInsert > NewFilesUpdates;
+        public static ConcurrentQueue< IDirectoryInsert > NewDirectoryUpdates;
+        public static ConcurrentQueue< IFileInsert > NewFilesUpdates;
         public static ConcurrentQueue< IDirectoryItem > DetectedDirectories;
         public static ConcurrentQueue< IFileItem > DetectedFiles;
-        public static ConcurrentQueue< BadNameUpdate > BadNameFiles;
-        public static ConcurrentQueue< ExtraFileUpdate > ExtraFiles;
-        public static ConcurrentQueue< DuplicateUpdate > DuplicateFiles;
-        public static ConcurrentQueue< BadLocationUpdate > BadLocationFiles;
-        public static ConcurrentQueue< DeletionUpdate > DirectoryDeletions;
+        public static ConcurrentQueue< IBadNameUpdate > BadNameFiles;
+        public static ConcurrentQueue< IExtraFileUpdate > ExtraFiles;
+        public static ConcurrentQueue< IDuplicateUpdate > DuplicateFiles;
+        public static ConcurrentQueue< IBadLocationUpdate > BadLocationFiles;
+        public static ConcurrentQueue< IDeletionUpdate > DirectoryDeletions;
         private static BackgroundWorker _folderScanner;
 
         static ItemProvider()
         {
-            NewDirectoryUpdates = new ConcurrentQueue< DirectoryInsert >();
-            NewFilesUpdates = new ConcurrentQueue< FileInsert >();
+            NewDirectoryUpdates = new ConcurrentQueue< IDirectoryInsert >();
+            NewFilesUpdates = new ConcurrentQueue< IFileInsert >();
             DetectedDirectories = new ConcurrentQueue< IDirectoryItem >();
             DetectedFiles = new ConcurrentQueue< IFileItem >();
-            BadNameFiles = new ConcurrentQueue< BadNameUpdate >();
-            DuplicateFiles = new ConcurrentQueue< DuplicateUpdate >();
-            BadLocationFiles = new ConcurrentQueue< BadLocationUpdate >();
-            DirectoryDeletions = new ConcurrentQueue< DeletionUpdate >();
-            ExtraFiles = new ConcurrentQueue< ExtraFileUpdate >();
+            BadNameFiles = new ConcurrentQueue< IBadNameUpdate >();
+            DuplicateFiles = new ConcurrentQueue< IDuplicateUpdate >();
+            BadLocationFiles = new ConcurrentQueue< IBadLocationUpdate >();
+            DirectoryDeletions = new ConcurrentQueue< IDeletionUpdate >();
+            ExtraFiles = new ConcurrentQueue< IExtraFileUpdate >();
             Items = new ObservableCollection< IItem >();
         }
 
@@ -390,7 +391,7 @@ namespace FileBotPP.Tree
             return parent.Items.Any( child => String.Compare( child.FullName, childname, StringComparison.Ordinal ) == 0 );
         }
 
-        private static void create_collection_tree( IDirectoryItem parent, string path )
+        private static void create_collection_tree( IItem parent, string path )
         {
             try
             {
@@ -403,6 +404,7 @@ namespace FileBotPP.Tree
 
                     DetectedDirectories.Enqueue( item );
 
+                    Thread.Sleep( 5 );
                     create_collection_tree( item, item.Path );
                     _lastFolderScanned = directory.FullName;
                 }
@@ -441,7 +443,7 @@ namespace FileBotPP.Tree
 
         public static void update_model()
         {
-            DirectoryInsert dinsert;
+            IDirectoryInsert dinsert;
             while ( NewDirectoryUpdates.TryDequeue( out dinsert ) )
             {
                 foreach ( var dir in dinsert.Directory.Items.OfType< IDirectoryItem >() )
@@ -459,7 +461,7 @@ namespace FileBotPP.Tree
                 dinsert.Directory.Parent?.Parent?.Update();
             }
 
-            FileInsert finsert;
+            IFileInsert finsert;
             while ( NewFilesUpdates.TryDequeue( out finsert ) )
             {
                 foreach ( var fitem in finsert.Directory.Items.OfType< IFileItem >() )
@@ -477,7 +479,7 @@ namespace FileBotPP.Tree
                 finsert.Directory.Parent?.Parent?.Update();
             }
 
-            BadNameUpdate bnupdate;
+            IBadNameUpdate bnupdate;
 
             while ( BadNameFiles.TryDequeue( out bnupdate ) )
             {
@@ -498,7 +500,7 @@ namespace FileBotPP.Tree
                 bnupdate.Directory.Parent?.Update();
             }
 
-            DuplicateUpdate dfupdate;
+            IDuplicateUpdate dfupdate;
 
             while ( DuplicateFiles.TryDequeue( out dfupdate ) )
             {
@@ -510,7 +512,7 @@ namespace FileBotPP.Tree
                 dfupdate.Directory.Parent?.Update();
             }
 
-            BadLocationUpdate blupdate;
+            IBadLocationUpdate blupdate;
 
             while ( BadLocationFiles.TryDequeue( out blupdate ) )
             {
@@ -530,7 +532,7 @@ namespace FileBotPP.Tree
                 blupdate.Directory.Parent?.Update();
             }
 
-            DeletionUpdate ddeltion;
+            IDeletionUpdate ddeltion;
 
             while ( DirectoryDeletions.TryDequeue( out ddeltion ) )
             {
@@ -539,7 +541,7 @@ namespace FileBotPP.Tree
                 ddeltion.Directory.Parent?.Update();
             }
 
-            ExtraFileUpdate extrafile;
+            IExtraFileUpdate extrafile;
 
             while ( ExtraFiles.TryDequeue( out extrafile ) )
             {
@@ -670,11 +672,11 @@ namespace FileBotPP.Tree
             {
                 if ( directory.Parent == null )
                 {
-                    Items.Remove((IItem)directory);
+                    Items.Remove( directory );
                     delete_invalid_folder_from_filesystem( directory );
                     return;
                 }
-                directory.Parent?.Items.Remove((IItem)directory);
+                directory.Parent?.Items.Remove( directory );
                 directory.Parent?.Update();
                 delete_invalid_folder_from_filesystem( directory );
                 return;
@@ -701,12 +703,12 @@ namespace FileBotPP.Tree
 
             if ( directory.Parent == null )
             {
-                Items.Remove((IItem)directory);
+                Items.Remove( directory );
                 delete_invalid_folder_from_filesystem( directory );
                 return;
             }
 
-            directory.Parent?.Items.Remove((IItem)directory);
+            directory.Parent?.Items.Remove( directory );
             directory.Parent?.Update();
             delete_invalid_folder_from_filesystem( directory );
         }
@@ -741,11 +743,11 @@ namespace FileBotPP.Tree
             {
                 if ( directory.Parent == null )
                 {
-                    Items.Remove((IItem)directory);
+                    Items.Remove( directory );
                     delete_invalid_folder_from_filesystem( directory );
                     return;
                 }
-                directory.Parent?.Items.Remove((IItem)directory);
+                directory.Parent?.Items.Remove( directory );
                 directory.Parent?.Update();
                 delete_invalid_folder_from_filesystem( directory );
             } );
@@ -757,13 +759,13 @@ namespace FileBotPP.Tree
 
             if ( parent == null )
             {
-                Items.Remove((IItem)file);
+                Items.Remove( file );
                 delete_invalid_file_from_filesystem( file );
                 return;
             }
 
             delete_invalid_file_from_filesystem( file );
-            parent.Items.Remove((IItem)file);
+            parent.Items.Remove( file );
             parent.Update();
         }
 
@@ -790,11 +792,11 @@ namespace FileBotPP.Tree
             {
                 if ( ditem.Parent == null )
                 {
-                    Items.Add((IItem)ditem);
+                    Items.Add( ditem );
                 }
                 else
                 {
-                    ditem.Parent.Items.Add((IItem)ditem);
+                    ditem.Parent.Items.Add( ditem );
                 }
 
                 ditem.Update();
@@ -806,11 +808,11 @@ namespace FileBotPP.Tree
             {
                 if ( fitem.Parent == null )
                 {
-                    Items.Add((IItem)fitem);
+                    Items.Add( fitem );
                 }
                 else
                 {
-                    fitem.Parent.Items.Add((IItem) fitem);
+                    fitem.Parent.Items.Add( fitem );
                 }
 
                 fitem.Update();
@@ -827,6 +829,7 @@ namespace FileBotPP.Tree
         {
             Common.FileBotPp.set_status_text( "Series tree populated..." );
             Common.MetaDataReady += 1;
+            Common.FileBotPp.set_ready( true );
         }
 
         private static void FolderScanner_DoWork( object sender, DoWorkEventArgs e )
