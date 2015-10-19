@@ -5829,6 +5829,7 @@
     <Content Include="library\System.Collections.Immutable.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Screenshots\sample1.png" />
     <Resource Include="library\System.Collections.Immutable.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
