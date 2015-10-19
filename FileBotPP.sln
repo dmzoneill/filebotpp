@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileBotPP", "FileBotPP\FileBotPP.csproj", "{BEE33B3C-BCF3-47B5-871A-C673223C0832}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FileBotPP Installer", "FileBotPP Installer\FileBotPP Installer.vdproj", "{A4A5CE4D-8F28-4EC4-A5AC-32E3F8F601C4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BEE33B3C-BCF3-47B5-871A-C673223C0832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEE33B3C-BCF3-47B5-871A-C673223C0832}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEE33B3C-BCF3-47B5-871A-C673223C0832}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEE33B3C-BCF3-47B5-871A-C673223C0832}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4A5CE4D-8F28-4EC4-A5AC-32E3F8F601C4}.Debug|Any CPU.ActiveCfg = Debug
+		{A4A5CE4D-8F28-4EC4-A5AC-32E3F8F601C4}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="FileBotPP.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ProxyServerHost" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ProxyServerPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="AllowedTypes" Type="System.String" Scope="User">
+      <Value Profile="(Default)">mpg,avi,mkv,mp4</Value>
+    </Setting>
+    <Setting Name="TvdbApiKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1B15C109D6C05699</Value>
+    </Setting>
+    <Setting Name="CacheTimeout" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">86400</Value>
+    </Setting>
+    <Setting Name="PoorQualityP" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">480</Value>
+    </Setting>
+    <Setting Name="TorrentPreferredQuality" Type="System.String" Scope="User">
+      <Value Profile="(Default)">720p</Value>
+    </Setting>
+    <Setting Name="FFmpegConvert" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>
