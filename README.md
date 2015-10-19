@@ -1,6 +1,6 @@
 # filebotpp
 
-FileBotPP is a application to merge 3 great applications and 2 online databases together:
+FileBotPP (WPF .NET 4.5.2) is a application to merge 3 great applications and 2 online databases together:
 
 * FileBot 
  * http://www.filebot.net
@@ -65,3 +65,9 @@ http://www.wtfpl.net/
 
 ### Rename
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/rename.png)
+
+### Folder context
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/foldercontext.png)
+
+### File context
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/filecontext.png)
