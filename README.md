@@ -1,12 +1,18 @@
-# filebotpp
+## filebotpp
 
-FileBotPP (WPF .NET 4.5.2) is a application that merges 3 great applications and 2 online databases together:
+* C#  - WPF - .NET 4.5.2
 
-* FileBot - http://www.filebot.net
-* MediaInfo - https://mediaarea.net/en/MediaInfo
-* FFmpeg - https://www.ffmpeg.org
-* TvDB - http://thetvdb.com
-* EzTV - http://eztv.it
+### Description
+
+FileBotPP is a application that merges 3 great applications and 2 online databases together:
+
+* Apps
+ * FileBot - http://www.filebot.net
+ * MediaInfo - https://mediaarea.net/en/MediaInfo
+ * FFmpeg - https://www.ffmpeg.org
+* Databases
+ * TvDB - http://thetvdb.com
+ * EzTV - http://eztv.it
  
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/sample1.png)
 	
@@ -14,24 +20,24 @@ With the intention of sorting series into the following structure:
 
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/structuresample.png)
 
-##Screenshots
+###Screenshots
 
-### Media Info
+#### Media Info
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/mediainfo.png)
 
-### Settings
+#### Settings
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/settings.png)
 
-### Rename
+#### Rename
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/rename.png)
 
-### Folder context
+#### Folder context
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/foldercontext.png)
 
-### File context
+#### File context
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/filecontext.png)
 
-## Features
+### Features
 
 * Organises files into structure defined above
  * Finds missing episodes
@@ -46,15 +52,15 @@ With the intention of sorting series into the following structure:
 * Convert files
 * View all video metadata
 
-## Motivation
+### Motivation
 
 A huge collection of series
 
-## Installation
+### Installation
 
 See the install project for creaintg an installer
 
-## License
+### License
 
 WTFPL – Do What the Fuck You Want to Public License
 http://www.wtfpl.net/
