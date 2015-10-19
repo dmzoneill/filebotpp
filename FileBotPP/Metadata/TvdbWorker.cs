@@ -136,7 +136,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         xml = File.ReadAllText( tempFile );
                     }
@@ -177,7 +177,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         xml = File.ReadAllText( tempFile );
                     }
@@ -355,7 +355,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         this._xml = Utils.read_file_from_zip( tempFile, "en.xml" );
                         return;

@@ -396,7 +396,7 @@ namespace FileBotPP.Tree
             try
             {
                 var dirInfo = new DirectoryInfo( path );
-                var directories = dirInfo.GetDirectories().OrderByAlphaNumeric( x => x.Name ).ToArray();
+                var directories = dirInfo.GetDirectories().order_by_alpha_numeric( x => x.Name ).ToArray();
 
                 foreach ( var directory in directories )
                 {
@@ -409,7 +409,7 @@ namespace FileBotPP.Tree
                     _lastFolderScanned = directory.FullName;
                 }
 
-                var files = dirInfo.GetFiles().OrderByAlphaNumeric( x => x.Name ).ToArray();
+                var files = dirInfo.GetFiles().order_by_alpha_numeric( x => x.Name ).ToArray();
 
                 foreach ( var file in files )
                 {

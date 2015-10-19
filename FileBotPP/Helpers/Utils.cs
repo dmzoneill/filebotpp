@@ -20,7 +20,7 @@ namespace FileBotPP.Helpers
             LogLines = new ConcurrentQueue< string >();
         }
 
-        public static IEnumerable< T > OrderByAlphaNumeric<T>( this IEnumerable< T > source, Func< T, string > selector )
+        public static IEnumerable< T > order_by_alpha_numeric<T>( this IEnumerable< T > source, Func< T, string > selector )
         {
             var max =
                 source.SelectMany(
@@ -339,7 +339,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static T GetVisualParent<T>( Visual referencedVisual ) where T : Visual
+        public static T get_visual_parent<T>( Visual referencedVisual ) where T : Visual
         {
             var parent = referencedVisual;
 

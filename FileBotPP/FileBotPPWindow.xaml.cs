@@ -267,7 +267,7 @@ namespace FileBotPP
                 return;
             }
 
-            var treeViewItem = Utils.GetVisualParent< TreeViewItem >( button );
+            var treeViewItem = Utils.get_visual_parent< TreeViewItem >( button );
 
             if ( treeViewItem == null )
             {
@@ -462,6 +462,8 @@ namespace FileBotPP
         private void connectionChecker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
             this.SelectFolderButton.IsEnabled = true;
+
+            this.set_status_text("");
 
             if ( Common.EztvAvailable )
             {

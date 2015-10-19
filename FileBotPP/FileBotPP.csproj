@@ -98,6 +98,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Helpers\FfmpegConvertWorker.cs" />
+    <Compile Include="Helpers\ISettings.cs" />
     <Compile Include="Interfaces\ISeriesAnalyzer.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="Interfaces\IFileBotPpWindow.cs" />

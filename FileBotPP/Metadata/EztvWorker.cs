@@ -79,7 +79,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         return true;
                     }
@@ -106,7 +106,7 @@ namespace FileBotPP.Metadata
 
             if ( File.Exists( tempFile ) )
             {
-                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                 {
                     var filehtml = File.ReadAllText( tempFile );
                     this.parse_imdb_id( filehtml );
