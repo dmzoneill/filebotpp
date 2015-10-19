@@ -1,4 +1,4 @@
-## filebotpp
+# filebotpp
 
 FileBotPP is a application to merge 3 great applicarions together:
 
@@ -45,11 +45,18 @@ A huge collection of series
 
 See the install project for creaintg an installer
 
-## Contributors
-
-Dave - dmz.oneill@gmail.com
-
 ## License
 
 WTFPL – Do What the Fuck You Want to Public License
 http://www.wtfpl.net/
+
+##Screenshots
+
+### Media Info
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/mediainfo.png)
+
+### Settings
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/settings.png)
+
+### Rename
+![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/rename.png)
