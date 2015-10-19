@@ -1,6 +1,6 @@
 # filebotpp
 
-FileBotPP is a application to merge 3 great applicarions together:
+FileBotPP is a application to merge 3 great applications and 2 online databases together:
 
 * FileBot 
  * http://www.filebot.net
@@ -8,6 +8,11 @@ FileBotPP is a application to merge 3 great applicarions together:
  * https://mediaarea.net/en/MediaInfo
 * FFmpeg 
  * https://www.ffmpeg.org
+* TvDB 
+ * http://thetvdb.com
+* EzTV 
+ * http://eztv.it
+ 
  
 ![alt tag](https://raw.githubusercontent.com/dmzoneill/filebotpp/master/FileBotPP/Screenshots/sample1.png)
 	
