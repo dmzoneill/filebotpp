@@ -2,6 +2,10 @@
 
 * C#  - WPF - .NET 4.5.2
 
+### Download Installer
+
+* http://www.feeditout.com/fio-data/filebotpp.msi
+
 ### Description
 
 FileBotPP is a application that merges 3 great applications and 2 online databases together:
