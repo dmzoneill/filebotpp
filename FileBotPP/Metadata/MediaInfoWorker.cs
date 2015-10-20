@@ -4,7 +4,9 @@ using System.ComponentModel;
 using System.Linq;
 using FileBotPP.Helpers;
 using FileBotPP.Interfaces;
+using FileBotPP.Metadata.Interfaces;
 using FileBotPP.Tree;
+using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Metadata
 {

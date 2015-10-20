@@ -10,6 +10,7 @@ using FileBotPP.Interfaces;
 using FileBotPP.Metadata;
 using FileBotPP.Panes;
 using FileBotPP.Tree;
+using FileBotPP.Tree.Interfaces;
 using Ookii.Dialogs;
 
 namespace FileBotPP
@@ -19,6 +20,7 @@ namespace FileBotPP
     /// </summary>
     public partial class FileBotPpWindow : IFileBotPpWindow
     {
+        private static FileBotPpWindow _instance;
         private IFileItem _item;
         private DispatcherTimer _timer;
 
@@ -27,6 +29,7 @@ namespace FileBotPP
             this.InitializeComponent();
 
             Common.FileBotPp = this;
+            _instance = this;
         }
 
         #region Public Setters
@@ -83,15 +86,29 @@ namespace FileBotPP
 
         private void DownloadButton_Click( object sender, RoutedEventArgs e )
         {
-            this.donwload_torrents();
+            this.download_torrents();
+        }
+
+        private void DownloadAllButton_OnClick( object sender, RoutedEventArgs e )
+        {
+            foreach ( var dir in ItemProvider.Items.OfType< IDirectoryItem >() )
+            {
+                foreach ( var subdir in dir.Items.OfType< IDirectoryItem >().Where( sdir => sdir.Torrent ) )
+                {
+                    foreach ( var tfile in subdir.Items.OfType< IFileItem >().Where( fitem => fitem.Torrent ) )
+                    {
+                        Utils.download_torrent( tfile.TorrentLink );
+                    }
+                }
+            }
         }
 
         private void DownloadTorrentMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
-            this.donwload_torrents();
+            this.download_torrents();
         }
 
-        private void donwload_torrents()
+        private void download_torrents()
         {
             if ( this.SeriesTreeView.SelectedItem == null )
             {
@@ -254,7 +271,7 @@ namespace FileBotPP
 
         #region Tree Check File Name Actions
 
-        private void CheckFilenamesMenuItem_OnClick( object sender, RoutedEventArgs e )
+        private void CheckNamesMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
             this.check_names();
         }
@@ -290,9 +307,14 @@ namespace FileBotPP
             }
         }
 
-        private void RenameButton_Click( object sender, RoutedEventArgs e )
+        private void CheckNamesButton_Click( object sender, RoutedEventArgs e )
         {
             this.check_names();
+        }
+
+        private void CheckNamesAllButton_OnClick( object sender, RoutedEventArgs e )
+        {
+            check_names_all();
         }
 
         private void check_names()
@@ -302,7 +324,7 @@ namespace FileBotPP
                 return;
             }
 
-            var fb = new Filebot();
+            Common.Filebot = new Filebot();
 
             var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
             var file = this.SeriesTreeView.SelectedItem as IFileItem;
@@ -311,20 +333,27 @@ namespace FileBotPP
             {
                 if ( directory.Parent != null )
                 {
-                    fb.check_series( ( IDirectoryItem ) directory.Parent );
+                    Common.Filebot.check_series( ( IDirectoryItem ) directory.Parent );
                 }
                 else
                 {
-                    fb.check_series( directory );
+                    Common.Filebot.check_series( directory );
                 }
             }
             else
             {
                 if ( file?.Parent?.Parent != null )
                 {
-                    fb.check_series( ( IDirectoryItem ) file.Parent.Parent );
+                    Common.Filebot.check_series( ( IDirectoryItem ) file.Parent.Parent );
                 }
             }
+        }
+
+        private static void check_names_all()
+        {
+            Common.Filebot?.stop_worker();
+            Common.Filebot = new Filebot();
+            Common.Filebot.check_series_all();
         }
 
         #endregion
@@ -447,7 +476,7 @@ namespace FileBotPP
             this._timer.Interval = new TimeSpan( 0, 0, 1 );
             this._timer.Start();
 
-            CheckConnections();
+            this.CheckConnections();
         }
 
         private void CheckConnections()
@@ -463,7 +492,7 @@ namespace FileBotPP
         {
             this.SelectFolderButton.IsEnabled = true;
 
-            this.set_status_text("");
+            this.set_status_text( "" );
 
             if ( Common.EztvAvailable )
             {
@@ -655,16 +684,18 @@ namespace FileBotPP
             Common.stop_all_workers();
         }
 
-        public void set_ready(bool ready)
+        public void set_ready( bool ready )
         {
             this.SeriesTreeView.IsEnabled = ready;
             this.CheckAllFilesButton.IsEnabled = ready;
-            this.RenameButton.IsEnabled = ready;
+            this.CheckNamesButton.IsEnabled = ready;
             this.MoveButton.IsEnabled = ready;
             this.DeleteButton.IsEnabled = ready;
             this.CheckButton.IsEnabled = ready;
             this.ConvertButton.IsEnabled = ready;
             this.DownloadButton.IsEnabled = ready;
+            this.CheckNamesAllButton.IsEnabled = ready;
+            this.DownloadAllButton.IsEnabled = ready;
         }
 
         #endregion

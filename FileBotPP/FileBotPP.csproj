@@ -98,22 +98,22 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Helpers\FfmpegConvertWorker.cs" />
-    <Compile Include="Helpers\ISettings.cs" />
-    <Compile Include="Interfaces\ISeriesAnalyzer.cs" />
+    <Compile Include="Helpers\Interfaces\ISettings.cs" />
+    <Compile Include="Helpers\Interfaces\ISeriesAnalyzer.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="Interfaces\IFileBotPpWindow.cs" />
     <Compile Include="Interfaces\ISupportsStop.cs" />
-    <Compile Include="Interfaces\IEztv.cs" />
-    <Compile Include="Interfaces\ITvdb.cs" />
-    <Compile Include="Interfaces\IEpisode.cs" />
-    <Compile Include="Interfaces\ISeason.cs" />
-    <Compile Include="Interfaces\ISeries.cs" />
-    <Compile Include="Interfaces\ITorrent.cs" />
-    <Compile Include="Interfaces\IMediaInfo.cs" />
-    <Compile Include="Interfaces\ITvdbWorker.cs" />
-    <Compile Include="Interfaces\IEztvWorker.cs" />
-    <Compile Include="Interfaces\IMediaInfoWorker.cs" />
-    <Compile Include="Interfaces\IFilebot.cs" />
+    <Compile Include="Metadata\Interfaces\IEztv.cs" />
+    <Compile Include="Metadata\Interfaces\ITvdb.cs" />
+    <Compile Include="Metadata\tvdb\Interfaces\IEpisode.cs" />
+    <Compile Include="Metadata\tvdb\Interfaces\ISeason.cs" />
+    <Compile Include="Metadata\tvdb\Interfaces\ISeries.cs" />
+    <Compile Include="Metadata\eztv\Interfaces\ITorrent.cs" />
+    <Compile Include="Metadata\Interfaces\IMediaInfo.cs" />
+    <Compile Include="Metadata\Interfaces\ITvdbWorker.cs" />
+    <Compile Include="Metadata\Interfaces\IEztvWorker.cs" />
+    <Compile Include="Metadata\Interfaces\IMediaInfoWorker.cs" />
+    <Compile Include="Metadata\Interfaces\IFilebot.cs" />
     <Compile Include="Panes\FileBotPpSettings.xaml.cs">
       <DependentUpon>FileBotPpSettings.xaml</DependentUpon>
     </Compile>
@@ -126,28 +126,28 @@
     <Compile Include="Panes\SeriesViewer.xaml.cs">
       <DependentUpon>SeriesViewer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Tree\BadLocationUpdate.cs" />
-    <Compile Include="Tree\ExtraFileUpdate.cs" />
-    <Compile Include="Tree\BadNameUpdate.cs" />
-    <Compile Include="Tree\DeletionUpdate.cs" />
-    <Compile Include="Tree\DirectoryInsert.cs" />
+    <Compile Include="Payloads\BadLocationUpdate.cs" />
+    <Compile Include="Payloads\ExtraFileUpdate.cs" />
+    <Compile Include="Payloads\BadNameUpdate.cs" />
+    <Compile Include="Payloads\DeletionUpdate.cs" />
+    <Compile Include="Payloads\DirectoryInsert.cs" />
     <Compile Include="Tree\DirectoryItem.cs" />
-    <Compile Include="Tree\DuplicateUpdate.cs" />
-    <Compile Include="Tree\FileInsert.cs" />
+    <Compile Include="Payloads\DuplicateUpdate.cs" />
+    <Compile Include="Payloads\FileInsert.cs" />
     <Compile Include="Tree\FileItem.cs" />
-    <Compile Include="Interfaces\IDirectoryItem.cs" />
-    <Compile Include="Interfaces\IItem.cs" />
-    <Compile Include="Interfaces\IFileItem.cs" />
-    <Compile Include="Interfaces\IBadLocationUpdate.cs" />
-    <Compile Include="Interfaces\IBadNameUpdate.cs" />
-    <Compile Include="Interfaces\IDeletionUpdate.cs" />
-    <Compile Include="Interfaces\IDirectoryInsert.cs" />
-    <Compile Include="Interfaces\IDuplicateUpdate.cs" />
-    <Compile Include="Interfaces\IExtraFileUpdate.cs" />
-    <Compile Include="Interfaces\IFileInsert.cs" />
+    <Compile Include="Tree\Interfaces\IDirectoryItem.cs" />
+    <Compile Include="Tree\Interfaces\IItem.cs" />
+    <Compile Include="Tree\Interfaces\IFileItem.cs" />
+    <Compile Include="Payloads\Interfaces\IBadLocationUpdate.cs" />
+    <Compile Include="Payloads\Interfaces\IBadNameUpdate.cs" />
+    <Compile Include="Payloads\Interfaces\IDeletionUpdate.cs" />
+    <Compile Include="Payloads\Interfaces\IDirectoryInsert.cs" />
+    <Compile Include="Payloads\Interfaces\IDuplicateUpdate.cs" />
+    <Compile Include="Payloads\Interfaces\IExtraFileUpdate.cs" />
+    <Compile Include="Payloads\Interfaces\IFileInsert.cs" />
     <Compile Include="Tree\Item.cs" />
     <Compile Include="Tree\ItemProvider.cs" />
-    <Compile Include="Tree\DirectoryItemWatcher.cs" />
+    <Compile Include="Helpers\DirectoryItemWatcher.cs" />
     <Compile Include="Tree\ItemStatus.cs" />
     <Page Include="FileBotPPWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -5862,6 +5862,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

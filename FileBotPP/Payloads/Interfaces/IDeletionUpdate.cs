@@ -1,4 +1,7 @@
-namespace FileBotPP.Interfaces
+using FileBotPP.Interfaces;
+using FileBotPP.Tree.Interfaces;
+
+namespace FileBotPP.Payloads.Interfaces
 {
     public interface IDeletionUpdate
     {

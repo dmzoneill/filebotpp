@@ -1,4 +1,4 @@
-﻿namespace FileBotPP.Interfaces
+﻿namespace FileBotPP.Metadata.eztv.Interfaces
 {
     public interface ITorrent
     {

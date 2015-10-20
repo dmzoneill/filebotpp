@@ -2,7 +2,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using FileBotPP.Helpers;
-using FileBotPP.Interfaces;
+using FileBotPP.Metadata.Interfaces;
+using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Tree
 {

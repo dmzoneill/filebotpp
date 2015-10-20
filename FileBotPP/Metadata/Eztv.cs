@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using FileBotPP.Helpers;
 using FileBotPP.Interfaces;
+using FileBotPP.Metadata.eztv.Interfaces;
+using FileBotPP.Metadata.Interfaces;
 
 namespace FileBotPP.Metadata
 {

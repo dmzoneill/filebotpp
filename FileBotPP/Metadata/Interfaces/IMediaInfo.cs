@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace FileBotPP.Interfaces
+namespace FileBotPP.Metadata.Interfaces
 {
     public interface IMediaInfo
     {

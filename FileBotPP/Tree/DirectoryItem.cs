@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using FileBotPP.Interfaces;
+using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Tree
 {

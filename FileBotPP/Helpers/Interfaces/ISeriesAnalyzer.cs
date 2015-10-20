@@ -1,4 +1,4 @@
-﻿namespace FileBotPP.Interfaces
+﻿namespace FileBotPP.Helpers.Interfaces
 {
     public interface ISeriesAnalyzer
     {

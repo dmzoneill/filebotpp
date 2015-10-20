@@ -1,4 +1,4 @@
-﻿namespace FileBotPP.Interfaces
+﻿namespace FileBotPP.Metadata.tvdb.Interfaces
 {
     public interface IEpisode
     {

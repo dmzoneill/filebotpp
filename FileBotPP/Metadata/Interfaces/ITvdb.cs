@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using FileBotPP.Metadata.tvdb.Interfaces;
 
-namespace FileBotPP.Interfaces
+namespace FileBotPP.Metadata.Interfaces
 {
     public interface ITvdb
     {

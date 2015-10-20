@@ -8,6 +8,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using FileBotPP.Helpers;
 using FileBotPP.Interfaces;
+using FileBotPP.Metadata.tvdb.Interfaces;
 
 namespace FileBotPP.Panes
 {

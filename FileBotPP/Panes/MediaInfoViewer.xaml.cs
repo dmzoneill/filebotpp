@@ -2,8 +2,8 @@
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using FileBotPP.Interfaces;
 using FileBotPP.Metadata;
+using FileBotPP.Metadata.Interfaces;
 
 namespace FileBotPP.Panes
 {

@@ -3,8 +3,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Xml;
 using FileBotPP.Helpers;
-using FileBotPP.Interfaces;
+using FileBotPP.Metadata.Interfaces;
 using FileBotPP.Metadata.tvdb;
+using FileBotPP.Metadata.tvdb.Interfaces;
 
 namespace FileBotPP.Metadata
 {
@@ -87,6 +88,11 @@ namespace FileBotPP.Metadata
             }
         }
 
+        public ISeries get_series()
+        {
+            return this._series;
+        }
+
         private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
             this._working = false;
@@ -116,11 +122,6 @@ namespace FileBotPP.Metadata
             }
         }
 
-        public ISeries get_series()
-        {
-            return this._series;
-        }
-
         private void get_series_id()
         {
             try
@@ -136,7 +137,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         xml = File.ReadAllText( tempFile );
                     }
@@ -177,7 +178,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         xml = File.ReadAllText( tempFile );
                     }
@@ -355,7 +356,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         this._xml = Utils.read_file_from_zip( tempFile, "en.xml" );
                         return;

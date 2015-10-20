@@ -69,7 +69,7 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator HorizontalAlignment="Stretch" Height="2"/>
-                            <MenuItem Header="Check filename episode name(s)" Name="CheckFilenamesMenuItem" Click="CheckFilenamesMenuItem_OnClick">
+                            <MenuItem Header="Check filename episode name(s)" Name="CheckFilenamesMenuItem" Click="CheckNamesMenuItem_OnClick">
                                 <MenuItem.Icon>
                                     <Image Source="Images/16/Editing/rename-16.png" />
                                 </MenuItem.Icon>
@@ -196,7 +196,7 @@
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <Separator HorizontalAlignment="Stretch" Height="2"/>
-                                <MenuItem Header="Check episode name" Name="CheckFilenamesMenuItem" Click="CheckFilenamesMenuItem_OnClick">
+                                <MenuItem Header="Check episode name" Name="CheckFilenamesMenuItem" Click="CheckNamesMenuItem_OnClick">
                                     <MenuItem.Style>
                                         <Style TargetType="MenuItem">
                                             <Style.Triggers>
@@ -274,6 +274,15 @@
                                 </MenuItem>
                                 <Separator HorizontalAlignment="Stretch" Height="2"/>
                                 <MenuItem Header="Delete file" Foreground="DarkRed" Name="DeleteFileMenuItem" Click="DeleteFileMenuItem_OnClick">
+                                    <MenuItem.Style>
+                                        <Style TargetType="MenuItem">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=Missing}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="false" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </MenuItem.Style>
                                     <MenuItem.Icon>
                                         <Image Source="Images/16/Editing/delete-16.png" />
                                     </MenuItem.Icon>
@@ -402,9 +411,9 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="15*"/>
-                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="128"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Tree Actions" Grid.Row="0" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right" FontWeight="Bold"/>
+                        <TextBlock Text="Tree Actions" Grid.Row="0" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Center" FontWeight="Bold"/>
 
                         <Label Content="Path" Name="PathLabel" Grid.Column="0" FontSize="10.667" HorizontalAlignment="Right" FontWeight="Bold" Grid.Row="1" Visibility="Collapsed"/>
                         <Label Name="ScanLocationLabel" HorizontalAlignment="Left" Content="" Grid.Column="1" FontSize="12" Grid.Row="1" />
@@ -423,8 +432,16 @@
                                 <Image Source="Images/16/Very_Basic/opened_folder-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
+                            <Button IsEnabled="False" ToolTip="Check all filename episode name(s)" Name="CheckNamesAllButton" Click="CheckNamesAllButton_OnClick" HorizontalAlignment="Left">
+                                <Image Source="Images/16/Editing/rename-16.png" Width="16" Height="16" Margin="3"/>
+                            </Button>
+                            <Separator Width="5" Visibility="Hidden"/>
                             <Button IsEnabled="False" ToolTip="Check all files for corruption" Name="CheckAllFilesButton" Click="CheckAllFilesButton_Click">
                                 <Image Source="Images/16/Files/check_file-16.png" Width="16" Height="16" Margin="3"/>
+                            </Button>
+                            <Separator Width="5" Visibility="Hidden"/>
+                            <Button IsEnabled="False" ToolTip="Download all torrent(s)" Name="DownloadAllButton" Click="DownloadAllButton_OnClick">
+                                <Image Source="Images/16/Gaming/magnet-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                         </StackPanel>
                     </Grid>
@@ -434,7 +451,7 @@
                             <RowDefinition Height="230"/>
                         </Grid.RowDefinitions>
                         <StackPanel  Orientation="Vertical" Width="30" Background="White" Margin="0,0,5,0" Grid.Row="0">
-                            <Button IsEnabled="False" ToolTip="Check filename episode name(s)" Name="RenameButton" Click="RenameButton_Click" HorizontalAlignment="Left" Width="30">
+                            <Button IsEnabled="False" ToolTip="Check filename episode name(s)" Name="CheckNamesButton" Click="CheckNamesButton_Click" HorizontalAlignment="Left" Width="30">
                                 <Image Source="Images/16/Editing/rename-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
@@ -455,7 +472,7 @@
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
                             <Button IsEnabled="False" ToolTip="Download torrent(s)" Name="DownloadButton" Click="DownloadButton_Click">
-                                <Image Source="Images/16/Very_Basic/document-16.png" Width="16" Height="16" Margin="3"/>
+                                <Image Source="Images/16/Gaming/magnet-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                         </StackPanel>
                         <StackPanel  Orientation="Vertical" Width="30" Background="White" Margin="0,0,5,0" Grid.Row="1" VerticalAlignment="Bottom">

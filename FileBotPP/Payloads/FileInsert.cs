@@ -1,6 +1,8 @@
 using FileBotPP.Interfaces;
+using FileBotPP.Payloads.Interfaces;
+using FileBotPP.Tree.Interfaces;
 
-namespace FileBotPP.Tree
+namespace FileBotPP.Payloads
 {
     public class FileInsert : IFileInsert
     {

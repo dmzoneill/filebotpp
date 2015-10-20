@@ -4,8 +4,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using FileBotPP.Helpers;
-using FileBotPP.Interfaces;
 using FileBotPP.Metadata.eztv;
+using FileBotPP.Metadata.eztv.Interfaces;
+using FileBotPP.Metadata.Interfaces;
 
 namespace FileBotPP.Metadata
 {
@@ -33,16 +34,6 @@ namespace FileBotPP.Metadata
             worker.DoWork += this.Worker_DoWork;
             worker.RunWorkerCompleted += this.Worker_RunWorkerCompleted;
             worker.RunWorkerAsync();
-        }
-
-        private void Worker_DoWork( object sender, DoWorkEventArgs e )
-        {
-            this.get_series_data();
-        }
-
-        private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            this._working = false;
         }
 
         public bool is_working()
@@ -79,7 +70,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         return true;
                     }
@@ -95,18 +86,28 @@ namespace FileBotPP.Metadata
             }
         }
 
+        private void Worker_DoWork( object sender, DoWorkEventArgs e )
+        {
+            this.get_series_data();
+        }
+
+        private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        {
+            this._working = false;
+        }
+
         private void get_series_data()
         {
-            if ( !Directory.Exists(Common.AppDataFolder + "/eztv/") )
+            if ( !Directory.Exists( Common.AppDataFolder + "/eztv/" ) )
             {
-                Directory.CreateDirectory(Common.AppDataFolder + "/eztv");
+                Directory.CreateDirectory( Common.AppDataFolder + "/eztv" );
             }
 
-            var tempFile =  Common.AppDataFolder + "/eztv/" + this._seriesid;
+            var tempFile = Common.AppDataFolder + "/eztv/" + this._seriesid;
 
             if ( File.Exists( tempFile ) )
             {
-                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                 {
                     var filehtml = File.ReadAllText( tempFile );
                     this.parse_imdb_id( filehtml );

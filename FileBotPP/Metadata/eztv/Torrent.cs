@@ -1,4 +1,4 @@
-﻿using FileBotPP.Interfaces;
+﻿using FileBotPP.Metadata.eztv.Interfaces;
 
 namespace FileBotPP.Metadata.eztv
 {

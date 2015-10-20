@@ -1,7 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using FileBotPP.Metadata.Interfaces;
 
-namespace FileBotPP.Interfaces
+namespace FileBotPP.Tree.Interfaces
 {
     public interface IItem
     {

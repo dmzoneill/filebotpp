@@ -1,4 +1,4 @@
-﻿using FileBotPP.Interfaces;
+﻿using FileBotPP.Metadata.tvdb.Interfaces;
 
 namespace FileBotPP.Metadata.tvdb
 {

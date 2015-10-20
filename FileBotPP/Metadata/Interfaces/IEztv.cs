@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using FileBotPP.Metadata.eztv.Interfaces;
 
-namespace FileBotPP.Interfaces
+namespace FileBotPP.Metadata.Interfaces
 {
     public interface IEztv
     {

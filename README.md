@@ -4,7 +4,8 @@
 
 ### Download Installer
 
-* http://www.feeditout.com/fio-data/filebotpp.msi
+* Latest tested stable version  - You can use the installer project to make your own
+ * http://www.feeditout.com/fio-data/filebotpp.msi
 
 ### Description
 

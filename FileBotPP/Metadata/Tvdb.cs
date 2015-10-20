@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using FileBotPP.Helpers;
 using FileBotPP.Interfaces;
+using FileBotPP.Metadata.Interfaces;
+using FileBotPP.Metadata.tvdb.Interfaces;
 
 namespace FileBotPP.Metadata
 {

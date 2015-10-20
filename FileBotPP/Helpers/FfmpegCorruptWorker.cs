@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using FileBotPP.Interfaces;
 using FileBotPP.Tree;
+using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Helpers
 {

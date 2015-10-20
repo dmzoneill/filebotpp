@@ -4,10 +4,13 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using FileBotPP.Interfaces;
+using FileBotPP.Helpers.Interfaces;
 using FileBotPP.Metadata;
 using FileBotPP.Metadata.eztv;
+using FileBotPP.Metadata.eztv.Interfaces;
+using FileBotPP.Payloads;
 using FileBotPP.Tree;
+using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Helpers
 {

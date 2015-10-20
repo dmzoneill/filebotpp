@@ -10,6 +10,8 @@ using System.Threading;
 using System.Windows.Forms;
 using FileBotPP.Helpers;
 using FileBotPP.Interfaces;
+using FileBotPP.Payloads.Interfaces;
+using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Tree
 {
