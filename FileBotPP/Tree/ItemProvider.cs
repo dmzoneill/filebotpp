@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using FileBotPP.Helpers;
-using FileBotPP.Interfaces;
 using FileBotPP.Payloads.Interfaces;
 using FileBotPP.Tree.Interfaces;
 
@@ -87,6 +86,13 @@ namespace FileBotPP.Tree
                 return;
             }
 
+            var invalid = new string( Path.GetInvalidFileNameChars() ) + new string( Path.GetInvalidPathChars() );
+
+            foreach ( var c in invalid )
+            {
+                fileitem.SuggestedName = fileitem.SuggestedName.Replace( c.ToString(), "" );
+            }
+
             fileitem.FullName = fileitem.SuggestedName;
             fileitem.Extension = fileitem.SuggestedName.Split( '.' ).Last();
             fileitem.NewPath = fileitem.Parent.Path + "\\" + fileitem.SuggestedName;
@@ -160,9 +166,10 @@ namespace FileBotPP.Tree
                     episodenum = Int32.Parse( fepnum.Groups[ 2 ].Value );
                 }
             }
-            catch
+            catch ( Exception ex )
             {
-                // ignored
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
 
             if ( fileitem.Parent == null )
@@ -198,8 +205,8 @@ namespace FileBotPP.Tree
                 break;
             }
 
-            fileitem.Parent.Items.Remove( fileitem );
             fileitem.Parent.Items.Insert( addpoint, fileitem );
+            fileitem.Parent.Items.Remove( fileitem );
             fileitem.Update();
 
             IItem missingitem = null;
@@ -230,9 +237,10 @@ namespace FileBotPP.Tree
                     episodenum = Int32.Parse( fepnum.Groups[ 2 ].Value );
                 }
             }
-            catch
+            catch ( Exception ex )
             {
-                // ignored
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
 
             if ( parent == null )
@@ -318,6 +326,19 @@ namespace FileBotPP.Tree
             for ( var x = 0; x < parent.Items.Count; x++ )
             {
                 var entryname = parent.Items[ x ].FullName.Split( ' ' );
+
+                if ( entryname.Length < 2 )
+                {
+                    addpoint++;
+                    continue;
+                }
+
+                if ( Regex.IsMatch( entryname[ 1 ], @"^\d+$", RegexOptions.IgnoreCase ) == false )
+                {
+                    addpoint++;
+                    continue;
+                }
+
                 try
                 {
                     var entrynum = Int32.Parse( entryname[ 1 ] );
@@ -330,8 +351,10 @@ namespace FileBotPP.Tree
 
                     break;
                 }
-                catch ( Exception )
+                catch ( Exception ex )
                 {
+                    Utils.LogLines.Enqueue( ex.Message );
+                    Utils.LogLines.Enqueue( ex.StackTrace );
                     parent.Items.Insert( addpoint, child );
                     return;
                 }
@@ -398,6 +421,7 @@ namespace FileBotPP.Tree
             try
             {
                 var dirInfo = new DirectoryInfo( path );
+
                 var directories = dirInfo.GetDirectories().order_by_alpha_numeric( x => x.Name ).ToArray();
 
                 foreach ( var directory in directories )
@@ -433,13 +457,19 @@ namespace FileBotPP.Tree
                         Parent = parent
                     };
 
+                    if ( parent == null )
+                    {
+                        item.BadLocation = true;
+                    }
+
                     DetectedFiles.Enqueue( item );
                 }
                 _folderScanner.ReportProgress( 1 );
             }
-            catch ( Exception )
+            catch ( Exception ex )
             {
-                // ignore
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -448,13 +478,20 @@ namespace FileBotPP.Tree
             IDirectoryInsert dinsert;
             while ( NewDirectoryUpdates.TryDequeue( out dinsert ) )
             {
-                foreach ( var dir in dinsert.Directory.Items.OfType< IDirectoryItem >() )
+                var exists = false;
+
+                foreach ( var item in dinsert.Directory.Items )
                 {
-                    if ( String.CompareOrdinal( dir.FullName, dinsert.SubDirectory.FullName ) == 0 )
+                    if ( String.CompareOrdinal( item.FullName, dinsert.SubDirectory.FullName ) == 0 )
                     {
-                        // ReSharper disable once RedundantJumpStatement
-                        continue;
+                        exists = true;
+                        break;
                     }
+                }
+
+                if ( exists )
+                {
+                    continue;
                 }
 
                 insert_item_ordered( dinsert.Directory, dinsert.SubDirectory, dinsert.Seasonnum );
@@ -466,13 +503,20 @@ namespace FileBotPP.Tree
             IFileInsert finsert;
             while ( NewFilesUpdates.TryDequeue( out finsert ) )
             {
+                var exists = false;
+
                 foreach ( var fitem in finsert.Directory.Items.OfType< IFileItem >() )
                 {
                     if ( String.CompareOrdinal( fitem.FullName, finsert.File.FullName ) == 0 )
                     {
-                        // ReSharper disable once RedundantJumpStatement
-                        continue;
+                        exists = true;
+                        break;
                     }
+                }
+
+                if ( exists )
+                {
+                    continue;
                 }
 
                 insert_item_ordered( finsert.Directory, finsert.File, finsert.EpisodeNum );
@@ -480,6 +524,7 @@ namespace FileBotPP.Tree
                 finsert.Directory.Parent?.Update();
                 finsert.Directory.Parent?.Parent?.Update();
             }
+
 
             IBadNameUpdate bnupdate;
 
@@ -561,14 +606,12 @@ namespace FileBotPP.Tree
 
             if ( subdirs == null )
             {
-                if ( !directory.Items.OfType< IDirectoryItem >().Any() )
+                if ( directory.Items.OfType< IDirectoryItem >().Any() )
                 {
-                    return;
-                }
-
-                foreach ( var seasondir in directory.Items.OfType< IDirectoryItem >() )
-                {
-                    moveitems.AddRange( seasondir.Items.OfType< IFileItem >().Where( file => file.BadLocation ) );
+                    foreach ( var seasondir in directory.Items.OfType< IDirectoryItem >() )
+                    {
+                        moveitems.AddRange( seasondir.Items.OfType< IFileItem >().Where( file => file.BadLocation ) );
+                    }
                 }
 
                 moveitems.AddRange( directory.Items.OfType< IFileItem >().Where( file => file.BadLocation ) );
@@ -600,6 +643,7 @@ namespace FileBotPP.Tree
             if ( Directory.Exists( newdir ) == false )
             {
                 Directory.CreateDirectory( newdir );
+                insert_folder_ordered( new DirectoryItem {FullName = targetDirectory, Path = newdir, Parent = fitem.Parent} );
             }
 
             if ( fitem.Parent?.Parent != null )
@@ -723,9 +767,10 @@ namespace FileBotPP.Tree
 
                 Directory.Delete( directory.Path, true );
             }
-            catch ( Exception e )
+            catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( "Error " + e.Message );
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -778,9 +823,10 @@ namespace FileBotPP.Tree
                 Utils.LogLines.Enqueue( "Deleting file " + file.Path );
                 File.Delete( file.Path );
             }
-            catch ( Exception e )
+            catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( "Error " + e.Message );
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
         }
 

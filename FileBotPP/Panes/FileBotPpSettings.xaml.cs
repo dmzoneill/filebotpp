@@ -29,9 +29,10 @@ namespace FileBotPP.Panes
                 this.TorrentQualityComboBox.SelectedIndex = load_torrent_quality();
                 this.PoorQualityComboBox.SelectedIndex = load_video_quality();
             }
-            catch ( Exception )
+            catch (Exception ex)
             {
-                // ignored
+                Utils.LogLines.Enqueue(ex.Message);
+                Utils.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
@@ -143,7 +144,7 @@ namespace FileBotPP.Panes
             if ( this.test_conection() )
             {
                 Settings.ProxyServerHost = this.ProxyHostTextBox.Text;
-                Settings.ProxyServerPort = this.ProxyPortTextBox.Text.Length> 0 ? int.Parse( this.ProxyPortTextBox.Text ) : 0;
+                Settings.ProxyServerPort = this.ProxyPortTextBox.Text.Length > 0 ? int.Parse( this.ProxyPortTextBox.Text ) : 0;
             }
             else
             {
@@ -163,8 +164,10 @@ namespace FileBotPP.Panes
                 client.Connect( this.ProxyHostTextBox.Text, int.Parse( this.ProxyPortTextBox.Text ) );
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Utils.LogLines.Enqueue(ex.Message);
+                Utils.LogLines.Enqueue(ex.StackTrace);
                 return false;
             }
         }

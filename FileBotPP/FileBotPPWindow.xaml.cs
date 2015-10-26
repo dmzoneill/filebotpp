@@ -20,7 +20,6 @@ namespace FileBotPP
     /// </summary>
     public partial class FileBotPpWindow : IFileBotPpWindow
     {
-        private static FileBotPpWindow _instance;
         private IFileItem _item;
         private DispatcherTimer _timer;
 
@@ -29,9 +28,9 @@ namespace FileBotPP
             this.InitializeComponent();
 
             Common.FileBotPp = this;
-            _instance = this;
+            this.SettingsScrollViewer.Content = new FileBotPpSettings();
         }
-
+        
         #region Public Setters
 
         private void update_log_console()
@@ -78,6 +77,15 @@ namespace FileBotPP
         {
             this.EpisodeCountLabel.Visibility = Visibility.Visible;
             this.EpisodeCount.Content = text;
+        }
+
+        public void set_ready(bool ready)
+        {
+            this.SeriesTreeView.IsEnabled = ready;
+
+            this.CheckAllFilesButton.IsEnabled = ready;
+            this.DownloadAllButton.IsEnabled = ready;
+            this.CheckNamesAllButton.IsEnabled = ready;
         }
 
         #endregion
@@ -462,6 +470,7 @@ namespace FileBotPP
         private void Window_Closing( object sender, CancelEventArgs e )
         {
             this._timer.Stop();
+            Common.stop_all_workers();
         }
 
         private void _timer_Tick( object sender, EventArgs e )
@@ -683,21 +692,7 @@ namespace FileBotPP
         {
             Common.stop_all_workers();
         }
-
-        public void set_ready( bool ready )
-        {
-            this.SeriesTreeView.IsEnabled = ready;
-            this.CheckAllFilesButton.IsEnabled = ready;
-            this.CheckNamesButton.IsEnabled = ready;
-            this.MoveButton.IsEnabled = ready;
-            this.DeleteButton.IsEnabled = ready;
-            this.CheckButton.IsEnabled = ready;
-            this.ConvertButton.IsEnabled = ready;
-            this.DownloadButton.IsEnabled = ready;
-            this.CheckNamesAllButton.IsEnabled = ready;
-            this.DownloadAllButton.IsEnabled = ready;
-        }
-
+        
         #endregion
     }
 }

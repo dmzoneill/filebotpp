@@ -52,8 +52,8 @@ namespace FileBotPP.Helpers
                 worker.stop_worker();
             }
 
-            Eztv.stop_worker();
-            Tvdb.stop_worker();
+            Eztv?.stop_worker();
+            Tvdb?.stop_worker();
             Filebot?.stop_worker();
 
             Working = new List< ISupportsStop >();

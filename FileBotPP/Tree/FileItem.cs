@@ -1,4 +1,5 @@
-﻿using FileBotPP.Helpers;
+﻿using System;
+using FileBotPP.Helpers;
 using FileBotPP.Metadata.Interfaces;
 using FileBotPP.Tree.Interfaces;
 
@@ -87,9 +88,10 @@ namespace FileBotPP.Tree
                             return true;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignored
+                        Utils.LogLines.Enqueue(ex.Message);
+                        Utils.LogLines.Enqueue(ex.StackTrace);
                     }
                 }
                 return this.ItemBadQuality;

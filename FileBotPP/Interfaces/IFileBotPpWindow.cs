@@ -12,5 +12,7 @@ namespace FileBotPP.Interfaces
         void set_series_count( string text );
         void set_episode_count( string text );
         void set_ready( bool ready );
+
+
     }
 }

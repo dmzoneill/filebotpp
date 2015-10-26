@@ -80,8 +80,10 @@ namespace FileBotPP.Metadata
 
                 return false;
             }
-            catch ( Exception )
+            catch (Exception ex)
             {
+                Utils.LogLines.Enqueue(ex.Message);
+                Utils.LogLines.Enqueue(ex.StackTrace);
                 return false;
             }
         }

@@ -65,6 +65,20 @@ namespace FileBotPP.Helpers
         {
             foreach ( var subdirectory in directory.Items.OfType< IDirectoryItem >() )
             {
+                string seasonNum;
+
+                try
+                {
+                    seasonNum = subdirectory.FullName?.Length < 8 ? "99" : subdirectory.FullName?.Substring( 7 ).Trim();
+                }
+                catch ( Exception ex )
+                {
+                    Utils.LogLines.Enqueue( ex.Message );
+                    Utils.LogLines.Enqueue( ex.StackTrace );
+                    ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = subdirectory, File = null, SuggestName = ""} );
+                    seasonNum = "99";
+                }
+
                 foreach ( var file in subdirectory.Items.OfType< IFileItem >() )
                 {
                     if ( String.Compare( file.FullName, "Thumbs.db", StringComparison.Ordinal ) == 0 )
@@ -72,8 +86,6 @@ namespace FileBotPP.Helpers
                         ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = subdirectory, File = file} );
                         continue;
                     }
-
-                    var seasonNum = subdirectory.FullName.Substring( 7 ).Trim();
 
                     var test1 = @"^" + Regex.Escape( directory.FullName ) + @"\s+-\s+(" + seasonNum + @")x[0-9]{2}";
                     var test2 = @"^" + Regex.Escape( directory.FullName ) + @"\s+-\s+(" + seasonNum + @")xSpecial\s+[0-9]+";
@@ -224,11 +236,26 @@ namespace FileBotPP.Helpers
 
             try
             {
+                if ( subdirectory.FullName.ToLower().Contains( "season " ) == false )
+                {
+                    Utils.LogLines.Enqueue( "Unable to determine season number: " + subdirectory.Path );
+                    ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
+                    return;
+                }
+
+                if ( Regex.IsMatch( subdirectory.FullName.Substring( 7 ).Trim(), @"^\d+$", RegexOptions.IgnoreCase ) == false )
+                {
+                    ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
+                    return;
+                }
+
                 cSeasonNum = int.Parse( subdirectory.FullName.Substring( 7 ).Trim() );
             }
-            catch ( Exception )
+            catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( "Unable to determine season number" + subdirectory.Path );
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+                Utils.LogLines.Enqueue( "Unable to determine season number: " + subdirectory.Path );
                 ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
                 return;
             }
@@ -364,7 +391,7 @@ namespace FileBotPP.Helpers
                     continue;
                 }
 
-                var match = Regex.Match( item.FullName, "^" + directory.FullName + "\\.? - (\\d+)x[0-9]+" );
+                var match = Regex.Match( item.FullName, "^" + Regex.Escape( directory.FullName ) + "\\.? - (\\d+)x[0-9]+" );
 
                 if ( match.Success )
                 {
@@ -375,7 +402,7 @@ namespace FileBotPP.Helpers
 
                     if ( File.Exists( checkdir ) == false )
                     {
-                        Utils.LogLines.Enqueue( @"Created Directory: " + checkdir );
+                        Utils.LogLines.Enqueue( @"Created season directory: " + checkdir );
                     }
 
                     if ( File.Exists( checkdir + "\\" + item.FullName ) )
