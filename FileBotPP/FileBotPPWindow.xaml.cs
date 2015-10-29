@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -33,154 +34,281 @@ namespace FileBotPP
             this.SettingsScrollViewer.Content = new FileBotPpSettings();
         }
 
-       
+        #region Tree refresh folder
+
+        private void RefreshMenuItem_OnClick( object sender, RoutedEventArgs e )
+        {
+            try
+            {
+                var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
+
+                if ( directory == null )
+                {
+                    return;
+                }
+
+                directory.Items.Clear();
+                ItemProvider.refresh_tree_directory( directory, directory.Path );
+                ItemProvider.folder_scan_update();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        #endregion
+
+        #region Tree add series
+
+        private void AddSeriesMenuItem_OnClick( object sender, RoutedEventArgs e )
+        {
+            this.AddSeries();
+        }
+
+        private void AddSeriesButton_OnClick( object sender, RoutedEventArgs e )
+        {
+            this.AddSeries();
+        }
+
+        private void AddSeries()
+        {
+            try
+            {
+                var asw = new AddSeriesWindow {Top = this.Top + ( this.Height/2 ) - 30, Left = this.Left + ( this.Width/2 ) - 225};
+                asw.ShowDialog();
+
+                if ( Common.AddSeriesName == null )
+                {
+                    return;
+                }
+
+                Directory.CreateDirectory( Common.ScanLocation + "\\" + Common.AddSeriesName );
+
+                Common.Tvdb.downloads_series_data( Common.AddSeriesName );
+
+                Thread.Sleep( 100 );
+
+                var newseries = new DirectoryItem {FullName = Common.AddSeriesName, Path = Common.ScanLocation + "\\" + Common.AddSeriesName};
+                ItemProvider.insert_folder_ordered( newseries );
+
+                var item = this.SeriesTreeView.ItemContainerGenerator.ContainerFromItem( newseries ) as TreeViewItem;
+
+                if ( item == null )
+                {
+                    return;
+                }
+
+                item.IsSelected = true;
+                item.BringIntoView();
+
+                Common.SeriesAnalyzer.analyze_series_folder( newseries );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        #endregion
+
         #region Tree Rename folder names
 
         private void RenameDirectoryMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
-            if ( this._lastSelected == null )
+            try
             {
-                return;
-            }
+                if ( this._lastSelected == null )
+                {
+                    return;
+                }
 
-            var children = Utils.AllChildren( this._lastSelected );
-            var outersp = children.OfType< StackPanel >().First();
-            outersp.Children[ 2 ].Visibility = Visibility.Collapsed;
+                var children = Utils.AllChildren( this._lastSelected );
+                var outersp = children.OfType< StackPanel >().First();
+                outersp.Children[ 2 ].Visibility = Visibility.Collapsed;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void DirectoryNameTextBlock_MouseDown( object sender, MouseButtonEventArgs e )
         {
-            if ( e.ClickCount != 2 )
+            try
             {
-                return;
+                if ( e.ClickCount != 2 )
+                {
+                    return;
+                }
+
+                var textblock = sender as TextBlock;
+
+                if ( textblock == null )
+                {
+                    return;
+                }
+
+                textblock.Visibility = Visibility.Collapsed;
             }
-
-            var textblock = sender as TextBlock;
-
-            if ( textblock == null )
+            catch ( Exception ex )
             {
-                return;
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            textblock.Visibility = Visibility.Collapsed;
         }
 
         private void FolderRenameTextBox_PreviewKeyDown( object sender, KeyEventArgs e )
         {
-            var textbox = sender as TextBox;
-
-            if ( textbox == null )
+            try
             {
-                return;
-            }
+                var textbox = sender as TextBox;
 
-            var treeViewItem = Utils.get_visual_parent< TreeViewItem >( textbox );
-            var diritem = treeViewItem?.Header as IDirectoryItem;
+                if ( textbox == null )
+                {
+                    return;
+                }
 
-            var stackpanel = Utils.get_visual_parent< StackPanel >( textbox );
-            var textblock = stackpanel.Children[ 2 ] as TextBlock;
+                var treeViewItem = Utils.get_visual_parent< TreeViewItem >( textbox );
+                var diritem = treeViewItem?.Header as IDirectoryItem;
 
-            if ( textblock == null || diritem == null )
-            {
-                return;
-            }
+                var stackpanel = Utils.get_visual_parent< StackPanel >( textbox );
+                var textblock = stackpanel.Children[ 2 ] as TextBlock;
 
-            if ( e.Key == Key.Escape )
-            {
-                textbox.Text = diritem.FullName;
+                if ( textblock == null || diritem == null )
+                {
+                    return;
+                }
+
+                if ( e.Key == Key.Escape )
+                {
+                    textbox.Text = diritem.FullName;
+                    textblock.Visibility = Visibility.Visible;
+                    return;
+                }
+
+                if ( e.Key != Key.Return )
+                {
+                    return;
+                }
+
+                e.Handled = true;
+
                 textblock.Visibility = Visibility.Visible;
-                return;
-            }
 
-            if ( e.Key != Key.Return )
+                if ( string.Compare( textbox.Text, textblock.Text, StringComparison.Ordinal ) == 0 )
+                {
+                    return;
+                }
+
+                diritem.Rename( textbox.Text );
+            }
+            catch ( Exception ex )
             {
-                return;
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            e.Handled = true;
-
-            textblock.Visibility = Visibility.Visible;
-
-            if ( string.Compare( textbox.Text, textblock.Text, StringComparison.Ordinal ) == 0 )
-            {
-                return;
-            }
-
-            diritem.Rename( textbox.Text );
         }
 
         private void FileNameTextBlock_OnMouseDown( object sender, MouseButtonEventArgs e )
         {
-            if ( e.ClickCount != 2 )
+            try
             {
-                return;
+                if ( e.ClickCount != 2 )
+                {
+                    return;
+                }
+
+                var textblock = sender as TextBlock;
+
+                if ( textblock == null )
+                {
+                    return;
+                }
+
+                textblock.Visibility = Visibility.Collapsed;
             }
-
-            var textblock = sender as TextBlock;
-
-            if ( textblock == null )
+            catch ( Exception ex )
             {
-                return;
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            textblock.Visibility = Visibility.Collapsed;
         }
 
         private void RenameFileMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
-            if ( this._lastSelected == null )
+            try
             {
-                return;
-            }
+                if ( this._lastSelected == null )
+                {
+                    return;
+                }
 
-            var children = Utils.AllChildren( this._lastSelected );
-            var outersp = children.OfType< StackPanel >().First();
-            var innersp = outersp.Children.OfType< StackPanel >().First();
-            innersp.Children[ 0 ].Visibility = Visibility.Collapsed;
+                var children = Utils.AllChildren( this._lastSelected );
+                var outersp = children.OfType< StackPanel >().First();
+                var innersp = outersp.Children.OfType< StackPanel >().First();
+                innersp.Children[ 0 ].Visibility = Visibility.Collapsed;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void FileRenameTextBox_PreviewKeyDown( object sender, KeyEventArgs e )
         {
-            var textbox = sender as TextBox;
-
-            if ( textbox == null )
+            try
             {
-                return;
-            }
+                var textbox = sender as TextBox;
 
-            var treeViewItem = Utils.get_visual_parent< TreeViewItem >( textbox );
-            var fileitem = treeViewItem?.Header as IFileItem;
+                if ( textbox == null )
+                {
+                    return;
+                }
 
-            var stackpanel = Utils.get_visual_parent< StackPanel >( textbox );
-            var textblock = stackpanel.Children[ 0 ] as TextBlock;
+                var treeViewItem = Utils.get_visual_parent< TreeViewItem >( textbox );
+                var fileitem = treeViewItem?.Header as IFileItem;
 
-            if ( textblock == null || fileitem == null )
-            {
-                return;
-            }
+                var stackpanel = Utils.get_visual_parent< StackPanel >( textbox );
+                var textblock = stackpanel.Children[ 0 ] as TextBlock;
 
-            if ( e.Key == Key.Escape )
-            {
-                textbox.Text = fileitem.FullName;
+                if ( textblock == null || fileitem == null )
+                {
+                    return;
+                }
+
+                if ( e.Key == Key.Escape )
+                {
+                    textbox.Text = fileitem.FullName;
+                    textblock.Visibility = Visibility.Visible;
+                    return;
+                }
+
+                if ( e.Key != Key.Return )
+                {
+                    return;
+                }
+
+                e.Handled = true;
+
                 textblock.Visibility = Visibility.Visible;
-                return;
-            }
 
-            if ( e.Key != Key.Return )
+                if ( string.Compare( textbox.Text, textblock.Text, StringComparison.Ordinal ) == 0 )
+                {
+                    return;
+                }
+
+                fileitem.Rename( textbox.Text );
+            }
+            catch ( Exception ex )
             {
-                return;
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            e.Handled = true;
-
-            textblock.Visibility = Visibility.Visible;
-
-            if ( string.Compare( textbox.Text, textblock.Text, StringComparison.Ordinal ) == 0 )
-            {
-                return;
-            }
-
-            fileitem.Rename( textbox.Text );
         }
 
         #endregion
@@ -189,57 +317,121 @@ namespace FileBotPP
 
         private void update_log_console()
         {
-            string value;
-            while ( Utils.LogLines.TryDequeue( out value ) )
+            try
             {
-                this.LogTextBox.AppendText( value + Environment.NewLine );
-                this.LogScroller.ScrollToEnd();
+                string value;
+                while ( Utils.LogLines.TryDequeue( out value ) )
+                {
+                    this.LogTextBox.AppendText( value + Environment.NewLine );
+                    this.LogScroller.ScrollToEnd();
+                }
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
         public void set_status_text( string text )
         {
-            this.StatusLabel.Visibility = Visibility.Visible;
-            this.Status.Content = text;
+            try
+            {
+                this.StatusLabel.Visibility = Visibility.Visible;
+                this.Status.Content = text;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         public void set_eztv_progress( string text )
         {
-            this.EzTvLabel.Visibility = Visibility.Visible;
-            this.EzTvProgress.Content = text;
+            try
+            {
+                this.EzTvLabel.Visibility = Visibility.Visible;
+                this.EzTvProgress.Content = text;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         public void set_tvdb_progress( string text )
         {
-            this.TvDbLabel.Visibility = Visibility.Visible;
-            this.TvDbProgress.Content = text;
+            try
+            {
+                this.TvDbLabel.Visibility = Visibility.Visible;
+                this.TvDbProgress.Content = text;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         public void set_season_count( string text )
         {
-            this.SeasonCountLabel.Visibility = Visibility.Visible;
-            this.SeasonCount.Content = text;
+            try
+            {
+                this.SeasonCountLabel.Visibility = Visibility.Visible;
+                this.SeasonCount.Content = text;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         public void set_series_count( string text )
         {
-            this.SeriesCountLabel.Visibility = Visibility.Visible;
-            this.SeriesCount.Content = text;
+            try
+            {
+                this.SeriesCountLabel.Visibility = Visibility.Visible;
+                this.SeriesCount.Content = text;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         public void set_episode_count( string text )
         {
-            this.EpisodeCountLabel.Visibility = Visibility.Visible;
-            this.EpisodeCount.Content = text;
+            try
+            {
+                this.EpisodeCountLabel.Visibility = Visibility.Visible;
+                this.EpisodeCount.Content = text;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         public void set_ready( bool ready )
         {
-            this.SeriesTreeView.IsEnabled = ready;
-
-            this.CheckAllFilesButton.IsEnabled = ready;
-            this.DownloadAllButton.IsEnabled = ready;
-            this.CheckNamesAllButton.IsEnabled = ready;
+            try
+            {
+                this.SeriesTreeView.IsEnabled = ready;
+                this.CheckAllFilesButton.IsEnabled = ready;
+                this.DownloadAllButton.IsEnabled = ready;
+                this.CheckNamesAllButton.IsEnabled = ready;
+                this.AddSeriesButton.IsEnabled = ready;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         #endregion
@@ -253,15 +445,23 @@ namespace FileBotPP
 
         private void DownloadAllButton_OnClick( object sender, RoutedEventArgs e )
         {
-            foreach ( var dir in ItemProvider.Items.OfType< IDirectoryItem >() )
+            try
             {
-                foreach ( var subdir in dir.Items.OfType< IDirectoryItem >().Where( sdir => sdir.Torrent ) )
+                foreach ( var dir in ItemProvider.Items.OfType< IDirectoryItem >() )
                 {
-                    foreach ( var tfile in subdir.Items.OfType< IFileItem >().Where( fitem => fitem.Torrent ) )
+                    foreach ( var subdir in dir.Items.OfType< IDirectoryItem >().Where( sdir => sdir.Torrent ) )
                     {
-                        Utils.download_torrent( tfile.TorrentLink );
+                        foreach ( var tfile in subdir.Items.OfType< IFileItem >().Where( fitem => fitem.Torrent ) )
+                        {
+                            Utils.download_torrent( tfile.TorrentLink );
+                        }
                     }
                 }
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -272,49 +472,57 @@ namespace FileBotPP
 
         private void download_torrents()
         {
-            if ( this.SeriesTreeView.SelectedItem == null )
+            try
             {
-                return;
-            }
-
-            var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( directory != null )
-            {
-                if ( directory.Parent == null )
+                if ( this.SeriesTreeView.SelectedItem == null )
                 {
-                    foreach ( var dir in directory.Items.OfType< IDirectoryItem >() )
+                    return;
+                }
+
+                var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
+
+                if ( directory != null )
+                {
+                    if ( directory.Parent == null )
                     {
-                        foreach ( var tfile in dir.Items.OfType< IFileItem >().Where( fitem => fitem.Torrent ) )
+                        foreach ( var dir in directory.Items.OfType< IDirectoryItem >() )
                         {
-                            Utils.download_torrent( tfile.TorrentLink );
+                            foreach ( var tfile in dir.Items.OfType< IFileItem >().Where( fitem => fitem.Torrent ) )
+                            {
+                                Utils.download_torrent( tfile.TorrentLink );
+                            }
                         }
                     }
-                }
-                else
-                {
-                    foreach ( var source in directory.Items.OfType< IFileItem >().Where( fitem => fitem.Torrent ) )
+                    else
                     {
-                        Utils.download_torrent( source.TorrentLink );
+                        foreach ( var source in directory.Items.OfType< IFileItem >().Where( fitem => fitem.Torrent ) )
+                        {
+                            Utils.download_torrent( source.TorrentLink );
+                        }
                     }
+
+                    return;
                 }
 
-                return;
-            }
+                if ( file == null )
+                {
+                    return;
+                }
 
-            if ( file == null )
+
+                if ( file.Torrent == false )
+                {
+                    return;
+                }
+
+                Utils.download_torrent( file.TorrentLink );
+            }
+            catch ( Exception ex )
             {
-                return;
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-
-            if ( file.Torrent == false )
-            {
-                return;
-            }
-
-            Utils.download_torrent( file.TorrentLink );
         }
 
         #endregion
@@ -333,29 +541,37 @@ namespace FileBotPP
 
         private void convert_files()
         {
-            if ( this.SeriesTreeView.SelectedItem == null )
+            try
             {
-                return;
+                if ( this.SeriesTreeView.SelectedItem == null )
+                {
+                    return;
+                }
+
+                var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
+
+                if ( directory != null )
+                {
+                    var fmp1 = new FfmpegConvertWorker( directory );
+                    fmp1.start_convert();
+                    Common.Working.Add( fmp1 );
+                }
+
+                if ( file == null )
+                {
+                    return;
+                }
+
+                var fmp2 = new FfmpegConvertWorker( file );
+                fmp2.start_convert();
+                Common.Working.Add( fmp2 );
             }
-
-            var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( directory != null )
+            catch ( Exception ex )
             {
-                var fmp1 = new FfmpegConvertWorker( directory );
-                fmp1.start_convert();
-                Common.Working.Add( fmp1 );
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            if ( file == null )
-            {
-                return;
-            }
-
-            var fmp2 = new FfmpegConvertWorker( file );
-            fmp2.start_convert();
-            Common.Working.Add( fmp2 );
         }
 
         #endregion
@@ -384,49 +600,73 @@ namespace FileBotPP
 
         private void delete_files()
         {
-            if ( this.SeriesTreeView.SelectedItem == null )
+            try
             {
-                return;
+                if ( this.SeriesTreeView.SelectedItem == null )
+                {
+                    return;
+                }
+
+                var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
+
+                if ( directory != null )
+                {
+                    ItemProvider.delete_invalid_folder( directory );
+                }
+
+                if ( file == null )
+                {
+                    return;
+                }
+
+                ItemProvider.delete_invalid_file( file );
             }
-
-            var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( directory != null )
+            catch ( Exception ex )
             {
-                ItemProvider.delete_invalid_folder( directory );
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            if ( file == null )
-            {
-                return;
-            }
-
-            ItemProvider.delete_invalid_file( file );
         }
 
         private void delete_file()
         {
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( file == null )
+            try
             {
-                return;
-            }
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
 
-            ItemProvider.delete_file( file );
+                if ( file == null )
+                {
+                    return;
+                }
+
+                ItemProvider.delete_file( file );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void delete_folder()
         {
-            var folder = this.SeriesTreeView.SelectedItem as IDirectoryItem;
-
-            if ( folder == null )
+            try
             {
-                return;
-            }
+                var folder = this.SeriesTreeView.SelectedItem as IDirectoryItem;
 
-            ItemProvider.delete_folder( folder );
+                if ( folder == null )
+                {
+                    return;
+                }
+
+                ItemProvider.delete_folder( folder );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         #endregion
@@ -440,32 +680,40 @@ namespace FileBotPP
 
         private void RenameFilesButton_Click( object sender, RoutedEventArgs e )
         {
-            var button = sender as Button;
-            if ( button == null )
+            try
             {
-                return;
-            }
-
-            var treeViewItem = Utils.get_visual_parent< TreeViewItem >( button );
-
-            if ( treeViewItem == null )
-            {
-                return;
-            }
-
-            var fitem = treeViewItem.Header as IFileItem;
-            if ( fitem != null )
-            {
-                ItemProvider.rename_file_item( fitem );
-            }
-            else
-            {
-                var header = treeViewItem.Header as IDirectoryItem;
-
-                if ( header != null )
+                var button = sender as Button;
+                if ( button == null )
                 {
-                    ItemProvider.rename_directory_items( header );
+                    return;
                 }
+
+                var treeViewItem = Utils.get_visual_parent< TreeViewItem >( button );
+
+                if ( treeViewItem == null )
+                {
+                    return;
+                }
+
+                var fitem = treeViewItem.Header as IFileItem;
+                if ( fitem != null )
+                {
+                    ItemProvider.rename_file_item( fitem );
+                }
+                else
+                {
+                    var header = treeViewItem.Header as IDirectoryItem;
+
+                    if ( header != null )
+                    {
+                        ItemProvider.rename_directory_items( header );
+                    }
+                }
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -481,41 +729,57 @@ namespace FileBotPP
 
         private void check_names()
         {
-            if ( this.SeriesTreeView.SelectedItem == null )
+            try
             {
-                return;
-            }
-
-            Common.Filebot = new Filebot();
-
-            var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( directory != null )
-            {
-                if ( directory.Parent != null )
+                if ( this.SeriesTreeView.SelectedItem == null )
                 {
-                    Common.Filebot.check_series( ( IDirectoryItem ) directory.Parent );
+                    return;
+                }
+
+                Common.Filebot = new Filebot();
+
+                var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
+
+                if ( directory != null )
+                {
+                    if ( directory.Parent != null )
+                    {
+                        Common.Filebot.check_series( ( IDirectoryItem ) directory.Parent );
+                    }
+                    else
+                    {
+                        Common.Filebot.check_series( directory );
+                    }
                 }
                 else
                 {
-                    Common.Filebot.check_series( directory );
+                    if ( file?.Parent?.Parent != null )
+                    {
+                        Common.Filebot.check_series( ( IDirectoryItem ) file.Parent.Parent );
+                    }
                 }
             }
-            else
+            catch ( Exception ex )
             {
-                if ( file?.Parent?.Parent != null )
-                {
-                    Common.Filebot.check_series( ( IDirectoryItem ) file.Parent.Parent );
-                }
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
         private static void check_names_all()
         {
-            Common.Filebot?.stop_worker();
-            Common.Filebot = new Filebot();
-            Common.Filebot.check_series_all();
+            try
+            {
+                Common.Filebot?.stop_worker();
+                Common.Filebot = new Filebot();
+                Common.Filebot.check_series_all();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         #endregion
@@ -534,31 +798,39 @@ namespace FileBotPP
 
         private void move_files()
         {
-            if ( this.SeriesTreeView.SelectedItem == null )
+            try
             {
-                return;
+                if ( this.SeriesTreeView.SelectedItem == null )
+                {
+                    return;
+                }
+
+                Common.FileBotPp.set_status_text( "Moving files to correct folders" );
+                Utils.LogLines.Enqueue( "Moving files to correct folders" );
+
+                var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
+
+                if ( directory != null )
+                {
+                    ItemProvider.move_files_to_valid_folders( directory );
+                }
+
+                if ( file == null )
+                {
+                    return;
+                }
+
+                ItemProvider.move_file_to_valid_folder( file );
+
+                Common.FileBotPp.set_status_text( "Files moved, see log for details" );
+                Utils.LogLines.Enqueue( "Files moved, see log for details" );
             }
-
-            Common.FileBotPp.set_status_text( "Moving files to correct folders" );
-            Utils.LogLines.Enqueue( "Moving files to correct folders" );
-
-            var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( directory != null )
+            catch ( Exception ex )
             {
-                ItemProvider.move_files_to_valid_folders( directory );
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            if ( file == null )
-            {
-                return;
-            }
-
-            ItemProvider.move_file_to_valid_folder( file );
-
-            Common.FileBotPp.set_status_text( "Files moved, see log for details" );
-            Utils.LogLines.Enqueue( "Files moved, see log for details" );
         }
 
         #endregion
@@ -567,13 +839,21 @@ namespace FileBotPP
 
         private void CheckAllFilesButton_Click( object sender, RoutedEventArgs e )
         {
-            var fmi = new MediaInfoWorker();
-            fmi.start_scan();
-            Common.Working.Add( fmi );
+            try
+            {
+                var fmi = new MediaInfoWorker();
+                fmi.start_scan();
+                Common.Working.Add( fmi );
 
-            var ffmpeg = new FfmpegCorruptWorker();
-            ffmpeg.start_scan();
-            Common.Working.Add( ffmpeg );
+                var ffmpeg = new FfmpegCorruptWorker();
+                ffmpeg.start_scan();
+                Common.Working.Add( ffmpeg );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void CheckButton_Click( object sender, RoutedEventArgs e )
@@ -583,33 +863,41 @@ namespace FileBotPP
 
         private void check_files_corruption()
         {
-            if ( this.SeriesTreeView.SelectedItem == null )
+            try
             {
-                return;
+                if ( this.SeriesTreeView.SelectedItem == null )
+                {
+                    return;
+                }
+
+                var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
+
+                if ( directory != null )
+                {
+                    var dmi = new MediaInfoWorker( directory );
+                    dmi.start_scan();
+
+                    var ffmpeg = new FfmpegCorruptWorker( directory );
+                    ffmpeg.start_scan();
+                }
+
+                if ( file == null )
+                {
+                    return;
+                }
+
+                var fmi = new MediaInfoWorker( file );
+                fmi.start_scan();
+
+                var ffmpegfile = new FfmpegCorruptWorker( file );
+                ffmpegfile.start_scan();
             }
-
-            var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( directory != null )
+            catch ( Exception ex )
             {
-                var dmi = new MediaInfoWorker( directory );
-                dmi.start_scan();
-
-                var ffmpeg = new FfmpegCorruptWorker( directory );
-                ffmpeg.start_scan();
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            if ( file == null )
-            {
-                return;
-            }
-
-            var fmi = new MediaInfoWorker( file );
-            fmi.start_scan();
-
-            var ffmpegfile = new FfmpegCorruptWorker( file );
-            ffmpegfile.start_scan();
         }
 
         private void CheckCorruptMenuItem_OnClick( object sender, RoutedEventArgs e )
@@ -623,8 +911,16 @@ namespace FileBotPP
 
         private void Window_Closing( object sender, CancelEventArgs e )
         {
-            this._timer.Stop();
-            Common.stop_all_workers();
+            try
+            {
+                this._timer.Stop();
+                Common.stop_all_workers();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void _timer_Tick( object sender, EventArgs e )
@@ -634,236 +930,334 @@ namespace FileBotPP
 
         private void Window_Loaded( object sender, RoutedEventArgs e )
         {
-            this._timer = new DispatcherTimer();
-            this._timer.Tick += this._timer_Tick;
-            this._timer.Interval = new TimeSpan( 0, 0, 1 );
-            this._timer.Start();
+            try
+            {
+                this._timer = new DispatcherTimer();
+                this._timer.Tick += this._timer_Tick;
+                this._timer.Interval = new TimeSpan( 0, 0, 1 );
+                this._timer.Start();
 
-            this.CheckConnections();
+                this.CheckConnections();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void CheckConnections()
         {
-            this.set_status_text( "Checking for internet access.." );
-            var connectionChecker = new BackgroundWorker();
-            connectionChecker.DoWork += connectionChecker_DoWork;
-            connectionChecker.RunWorkerCompleted += this.connectionChecker_RunWorkerCompleted;
-            connectionChecker.RunWorkerAsync();
+            try
+            {
+                this.set_status_text( "Checking for internet access.." );
+                var connectionChecker = new BackgroundWorker();
+                connectionChecker.DoWork += connectionChecker_DoWork;
+                connectionChecker.RunWorkerCompleted += this.connectionChecker_RunWorkerCompleted;
+                connectionChecker.RunWorkerAsync();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void connectionChecker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
-            this.SelectFolderButton.IsEnabled = true;
-
-            this.set_status_text( "" );
-
-            if ( Common.EztvAvailable )
+            try
             {
-                Common.SeriesAnalyzer.fetch_eztv_metadata();
-                return;
-            }
+                this.SelectFolderButton.IsEnabled = true;
 
-            MessageBox.Show( "Unable to access eztv." + Environment.NewLine + "This functionality will be disabled", "Connectivity Issues" );
+                this.set_status_text( "" );
+
+                if ( Common.EztvAvailable )
+                {
+                    Common.SeriesAnalyzer.fetch_eztv_metadata();
+                    return;
+                }
+
+                MessageBox.Show( "Unable to access eztv." + Environment.NewLine + "This functionality will be disabled", "Connectivity Issues" );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private static void connectionChecker_DoWork( object sender, DoWorkEventArgs e )
         {
-            Common.EztvAvailable = Utils.check_for_eztv_connection();
-            Common.TvdbAvailable = Utils.check_for_tvdb_connection();
+            try
+            {
+                Common.EztvAvailable = Utils.check_for_eztv_connection();
+                Common.TvdbAvailable = Utils.check_for_tvdb_connection();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void SeriesTreeView_SelectedItemChanged( object sender, RoutedPropertyChangedEventArgs< object > e )
         {
-            if ( this.SeriesTreeView.SelectedItem == null )
+            try
             {
-                return;
-            }
-
-            var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( directory != null )
-            {
-                var fname = ItemProvider.get_series_name_from_folder( directory );
-                var series = Common.Tvdb?.get_series_by_name( fname );
-
-                if ( series != null )
+                if ( this.SeriesTreeView.SelectedItem == null )
                 {
-                    this.TvdbTab.Content = new SeriesViewer( series );
+                    return;
+                }
+
+                var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
+
+                if ( directory != null )
+                {
+                    var fname = ItemProvider.get_series_name_from_folder( directory );
+                    var series = Common.Tvdb?.get_series_by_name( fname );
+
+                    if ( series != null )
+                    {
+                        this.TvdbTab.Content = new SeriesViewer( series );
+                    }
+                    else
+                    {
+                        this.TvdbTab.Content = new QuestionMissing();
+                    }
+                }
+
+                if ( file == null )
+                {
+                    return;
+                }
+
+                var name = ItemProvider.get_series_name_from_file( file );
+
+                if ( name != null )
+                {
+                    var series = Common.Tvdb?.get_series_by_name( name );
+                    if ( series != null )
+                    {
+                        this.TvdbTab.Content = new SeriesViewer( series );
+                    }
+                    else
+                    {
+                        this.TvdbTab.Content = new QuestionMissing();
+                    }
                 }
                 else
                 {
                     this.TvdbTab.Content = new QuestionMissing();
                 }
-            }
 
-            if ( file == null )
-            {
-                return;
-            }
-
-            var name = ItemProvider.get_series_name_from_file( file );
-
-            if ( name != null )
-            {
-                var series = Common.Tvdb?.get_series_by_name( name );
-                if ( series != null )
+                if ( file.Missing )
                 {
-                    this.TvdbTab.Content = new SeriesViewer( series );
+                    this.MediaTab.Content = new QuestionMissing();
+                    return;
                 }
-                else
+
+                MediaInfoWorker.scan_file_one_time( file );
+
+                if ( file.Mediainfo == null )
                 {
-                    this.TvdbTab.Content = new QuestionMissing();
+                    this.MediaTab.Content = new QuestionMissing();
+                    return;
                 }
+
+                this._item = file;
+
+                var fetchMetaDataWorker = new BackgroundWorker();
+                fetchMetaDataWorker.DoWork += this.fetchMetaDataWorker_DoWork;
+                fetchMetaDataWorker.RunWorkerCompleted += this.fetchMetaDataWorker_RunWorkerCompleted;
+                fetchMetaDataWorker.RunWorkerAsync();
             }
-            else
+            catch ( Exception ex )
             {
-                this.TvdbTab.Content = new QuestionMissing();
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            if ( file.Missing )
-            {
-                this.MediaTab.Content = new QuestionMissing();
-                return;
-            }
-
-            MediaInfoWorker.scan_file_one_time( file );
-
-            if ( file.Mediainfo == null )
-            {
-                this.MediaTab.Content = new QuestionMissing();
-                return;
-            }
-
-            this._item = file;
-
-            var fetchMetaDataWorker = new BackgroundWorker();
-            fetchMetaDataWorker.DoWork += this.fetchMetaDataWorker_DoWork;
-            fetchMetaDataWorker.RunWorkerCompleted += this.fetchMetaDataWorker_RunWorkerCompleted;
-            fetchMetaDataWorker.RunWorkerAsync();
         }
 
         private void SeriesTreeView_MouseRightButtonDown( object sender, MouseButtonEventArgs e )
         {
-            var item = sender as TreeViewItem;
-            if ( item == null )
+            try
             {
-                return;
-            }
+                var item = sender as TreeViewItem;
+                if ( item == null )
+                {
+                    return;
+                }
 
-            item.Focus();
-            e.Handled = true;
+                item.Focus();
+                e.Handled = true;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void SelectFolderButton_Click( object sender, RoutedEventArgs e )
         {
-            var dialog = new VistaFolderBrowserDialog {Description = @"Please select your series folder.", UseDescriptionForTitle = true};
-
-            var result = dialog.ShowDialog();
-
-            if ( result != System.Windows.Forms.DialogResult.OK )
+            try
             {
-                return;
+                var dialog = new VistaFolderBrowserDialog {Description = @"Please select your series folder.", UseDescriptionForTitle = true};
+
+                var result = dialog.ShowDialog();
+
+                if ( result != System.Windows.Forms.DialogResult.OK )
+                {
+                    return;
+                }
+
+                this.set_ready( false );
+
+                if ( Common.MetaDataReady == 3 )
+                {
+                    Common.MetaDataReady = 1;
+                }
+
+                this.PathLabel.Visibility = Visibility.Visible;
+
+                Common.ScanLocation = dialog.SelectedPath;
+                this.ScanLocationLabel.Content = dialog.SelectedPath;
+
+                ItemProvider.Items.Clear();
+                this.SeriesTreeView.DataContext = ItemProvider.Items;
+                ItemProvider.scan_series_folder();
+
+                if ( Common.TvdbAvailable == false )
+                {
+                    MessageBox.Show( "Unable to access thetvdb." + Environment.NewLine + "This functionality will be disabled", "Connectivity Issues" );
+                    return;
+                }
+
+                Common.SeriesAnalyzer.fetch_tvdb_metadata();
             }
-
-            this.set_ready( false );
-
-            if ( Common.MetaDataReady == 3 )
+            catch ( Exception ex )
             {
-                Common.MetaDataReady = 1;
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            this.PathLabel.Visibility = Visibility.Visible;
-
-            Common.ScanLocation = dialog.SelectedPath;
-            this.ScanLocationLabel.Content = dialog.SelectedPath;
-
-            ItemProvider.Items.Clear();
-            this.SeriesTreeView.DataContext = ItemProvider.Items;
-            ItemProvider.scan_series_folder();
-
-            if ( Common.TvdbAvailable == false )
-            {
-                MessageBox.Show( "Unable to access thetvdb." + Environment.NewLine + "This functionality will be disabled", "Connectivity Issues" );
-                return;
-            }
-
-            Common.SeriesAnalyzer.fetch_tvdb_metadata();
         }
 
         private void fetchMetaDataWorker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
-            this.MediaTab.Content = new MediaInfoViewer( this._item.Mediainfo, this._item.FullName );
+            try
+            {
+                this.MediaTab.Content = new MediaInfoViewer( this._item.Mediainfo, this._item.FullName );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void fetchMetaDataWorker_DoWork( object sender, DoWorkEventArgs e )
         {
-            if ( this._item.Mediainfo != null )
+            try
             {
-                return;
-            }
+                if ( this._item.Mediainfo != null )
+                {
+                    return;
+                }
 
-            MediaInfoWorker.scan_file_one_time( this._item );
+                MediaInfoWorker.scan_file_one_time( this._item );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void OpenFolderMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
-            var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( directory != null )
+            try
             {
-                Utils.open_file( directory.Path );
-            }
+                var directory = this.SeriesTreeView.SelectedItem as IDirectoryItem;
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
 
-            if ( file == null )
+                if ( directory != null )
+                {
+                    Utils.open_file( directory.Path );
+                }
+
+                if ( file == null )
+                {
+                    return;
+                }
+
+                Utils.open_file( file.Parent.Path );
+            }
+            catch ( Exception ex )
             {
-                return;
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
-
-            Utils.open_file( file.Parent.Path );
         }
 
         private void PlayFileMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
-            var file = this.SeriesTreeView.SelectedItem as IFileItem;
-
-            if ( file == null )
+            try
             {
-                return;
-            }
+                var file = this.SeriesTreeView.SelectedItem as IFileItem;
 
-            Utils.open_file( file.Path );
+                if ( file == null )
+                {
+                    return;
+                }
+
+                Utils.open_file( file.Path );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void ExitMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
-            Common.stop_all_workers();
-            this.Close();
+            try
+            {
+                Common.stop_all_workers();
+                this.Close();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void StopThreadsMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
-            Common.stop_all_workers();
+            try
+            {
+                Common.stop_all_workers();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void SeriesTreeView_OnSelected( object sender, RoutedEventArgs e )
         {
-            this._lastSelected = ( TreeViewItem ) e.OriginalSource;
-        }
-
-        private void AddSeriesMenuItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            var asw = new AddSeriesWindow { Top = this.Top + (this.Height / 2) - 30, Left = this.Left + (this.Width / 2) - 175 };
-            asw.ShowDialog();
-
-            if ( Common.AddSeriesName == null )
+            try
             {
-                return;
+                this._lastSelected = ( TreeViewItem ) e.OriginalSource;
             }
-
-            Directory.CreateDirectory( Common.ScanLocation + "\\" + Common.AddSeriesName );
-            ItemProvider.Items.Insert( 0, new DirectoryItem { FullName = Common.AddSeriesName, Path = Common.ScanLocation + "\\" + Common.AddSeriesName} );
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         #endregion

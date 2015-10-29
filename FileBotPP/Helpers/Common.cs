@@ -38,7 +38,7 @@ namespace FileBotPP.Helpers
                 _metaDataReady = value;
                 if ( _metaDataReady > 2 )
                 {
-                    SeriesAnalyzer.analyze_series_folder();
+                    SeriesAnalyzer.analyze_all_series_folders();
                 }
             }
         }

@@ -16,7 +16,9 @@ namespace FileBotPP.Metadata
         private readonly string[] _dirs;
         private readonly List< ISeries > _series;
         private readonly List< ITvdbWorker > _workers;
-        private BackgroundWorker _mainWorker;
+        private BackgroundWorker _allSeriesWorker;
+        private string _seriesName;
+        private BackgroundWorker _seriesWorker;
         private bool _stop;
 
         public Tvdb( string[] dirs )
@@ -28,22 +30,38 @@ namespace FileBotPP.Metadata
 
         public void downloads_series_data()
         {
-            this._mainWorker = new BackgroundWorker();
-            this._mainWorker.DoWork += this._mainWorker_DoWork;
-            this._mainWorker.RunWorkerCompleted += _mainWorker_RunWorkerCompleted;
-            this._mainWorker.ProgressChanged += _mainWorker_ProgressChanged;
-            this._mainWorker.WorkerReportsProgress = true;
-            this._mainWorker.RunWorkerAsync();
+            try
+            {
+                this._allSeriesWorker = new BackgroundWorker();
+                this._allSeriesWorker.DoWork += this.AllSeriesWorkerDoWork;
+                this._allSeriesWorker.RunWorkerCompleted += AllSeriesWorkerRunWorkerCompleted;
+                this._allSeriesWorker.ProgressChanged += AllSeriesWorkerProgressChanged;
+                this._allSeriesWorker.WorkerReportsProgress = true;
+                this._allSeriesWorker.RunWorkerAsync();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         public void get_series_from_workers()
         {
-            foreach ( var worker in this._workers.Where( worker => worker.get_series() != null ) )
+            try
             {
-                this._series.Add( worker.get_series() );
-            }
+                foreach ( var worker in this._workers.Where( worker => worker.get_series() != null ) )
+                {
+                    this._series.Add( worker.get_series() );
+                }
 
-            this._workers.Clear();
+                this._workers.Clear();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         public List< ISeries > get_series()
@@ -53,12 +71,29 @@ namespace FileBotPP.Metadata
 
         public ISeries get_series_by_name( string name )
         {
-            return this._series.FirstOrDefault( series => String.Compare( series.get_name(), name, StringComparison.Ordinal ) == 0 );
+            try
+            {
+                return this._series.FirstOrDefault( series => String.Compare( series.get_name(), name, StringComparison.Ordinal ) == 0 );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+                return null;
+            }
         }
 
         public void free_workers()
         {
-            this._workers.Clear();
+            try
+            {
+                this._workers.Clear();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         public void stop_worker()
@@ -66,80 +101,164 @@ namespace FileBotPP.Metadata
             this._stop = true;
         }
 
-        private static void _mainWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
+        public void downloads_series_data( string name )
         {
-            var percent = e.ProgressPercentage/100.0;
-            Common.FileBotPp.set_tvdb_progress( percent + "%" );
-        }
-
-        private static void _mainWorker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            Common.FileBotPp.set_status_text( "Tvdb done..." );
-            Common.MetaDataReady += 1;
-        }
-
-        private void _mainWorker_DoWork( object sender, DoWorkEventArgs e )
-        {
-            Utils.LogLines.Enqueue( @"Fetching TVDB metadata..." );
-
-            var wait = true;
-
-            foreach ( var inode in this._dirs )
+            try
             {
-                if ( this._stop )
-                {
-                    break;
-                }
+                this._seriesName = name;
+                this._seriesWorker = new BackgroundWorker();
+                this._seriesWorker.DoWork += this.SeriesWorkerDoWork;
+                this._seriesWorker.WorkerReportsProgress = true;
+                this._seriesWorker.RunWorkerAsync();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
 
-                this.wait_limit_workers( 5, wait );
+        private void SeriesWorkerDoWork( object sender, DoWorkEventArgs e )
+        {
+            try
+            {
+                Utils.LogLines.Enqueue( @"Fetching TVDB metadata for " + this._seriesName + "..." );
 
-                var tvdbwoker = new TvdbWorker( inode );
-                this._workers.Add( tvdbwoker );
-                wait = !tvdbwoker.is_cached();
+                var tvdbwoker = new TvdbWorker( this._seriesName );
                 tvdbwoker.Run();
 
-                var percent = ( this._workers.Count/( double ) this._dirs.Length )*10000.0;
-                this._mainWorker.ReportProgress( ( int ) percent );
-            }
+                Thread.Sleep( 50 );
 
-            this.wait_for_workers();
-            if ( this._stop )
-            {
-                return;
+                while ( tvdbwoker.is_working() )
+                {
+                    Thread.Sleep( 1000 );
+                }
+
+                this._series.Add( tvdbwoker.get_series() );
             }
-            this.get_series_from_workers();
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        private static void AllSeriesWorkerProgressChanged( object sender, ProgressChangedEventArgs e )
+        {
+            try
+            {
+                var percent = e.ProgressPercentage/100.0;
+                Common.FileBotPp.set_tvdb_progress( percent + "%" );
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        private static void AllSeriesWorkerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        {
+            try
+            {
+                Common.FileBotPp.set_status_text( "Tvdb done..." );
+                Common.MetaDataReady += 1;
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        private void AllSeriesWorkerDoWork( object sender, DoWorkEventArgs e )
+        {
+            try
+            {
+                Utils.LogLines.Enqueue( @"Fetching TVDB metadata..." );
+
+                var wait = true;
+
+                foreach ( var inode in this._dirs )
+                {
+                    if ( this._stop )
+                    {
+                        break;
+                    }
+
+                    this.wait_limit_workers( 5, wait );
+
+                    var tvdbwoker = new TvdbWorker( inode );
+                    this._workers.Add( tvdbwoker );
+                    wait = !tvdbwoker.is_cached();
+                    tvdbwoker.Run();
+
+                    var percent = ( this._workers.Count/( double ) this._dirs.Length )*10000.0;
+                    this._allSeriesWorker.ReportProgress( ( int ) percent );
+                }
+
+                this.wait_for_workers();
+
+                if ( this._stop )
+                {
+                    return;
+                }
+
+                this.get_series_from_workers();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void wait_for_workers()
         {
-            Thread.Sleep( 50 );
-
-            Utils.LogLines.Enqueue( @"Waiting for threads" );
-
-            var count = 2;
-
-            while ( count > 1 )
+            try
             {
-                count = this._workers.Count( worker => worker.is_working() );
+                Thread.Sleep( 50 );
+
+                Utils.LogLines.Enqueue( @"Waiting for threads" );
+
+                var count = 2;
+
+                while ( count > 1 )
+                {
+                    count = this._workers.Count( worker => worker.is_working() );
+
+                    Thread.Sleep( 50 );
+                }
 
                 Thread.Sleep( 50 );
             }
-
-            Thread.Sleep( 50 );
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
 
         private void wait_limit_workers( int num, bool wait )
         {
-            var count = num + 1;
-
-            while ( count > num )
+            try
             {
-                count = this._workers.Count( worker => worker.is_working() );
+                var count = num + 1;
+
+                while ( count > num )
+                {
+                    count = this._workers.Count( worker => worker.is_working() );
+
+                    Thread.Sleep( wait ? Random.Next( 10, 40 ) : 5 );
+                }
 
                 Thread.Sleep( wait ? Random.Next( 10, 40 ) : 5 );
             }
-
-            Thread.Sleep( wait ? Random.Next( 10, 40 ) : 5 );
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
         }
     }
 }

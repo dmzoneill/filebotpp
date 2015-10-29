@@ -63,7 +63,13 @@
                 <TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="DirectoryNameTextBlock" VerticalAlignment="Center" MouseDown="DirectoryNameTextBlock_MouseDown">
                     <TextBlock.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Open containing folder" Name="OpenFolderFileMenuItem" Click="OpenFolderMenuItem_OnClick">
+                            <MenuItem Header="Refresh" Name="RefreshMenuItem" Click="RefreshMenuItem_OnClick">
+                                <MenuItem.Icon>
+                                    <Image Source="Images/16/Very_Basic/refresh-16.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator HorizontalAlignment="Stretch" Height="2"/>
+                            <MenuItem Header="Open containing folder" Name="OpenFolderMenuItem" Click="OpenFolderMenuItem_OnClick">
                                 <MenuItem.Icon>
                                     <Image Source="Images/16/Very_Basic/opened_folder-16.png" />
                                 </MenuItem.Icon>
@@ -445,7 +451,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="15*"/>
-                            <ColumnDefinition Width="128"/>
+                            <ColumnDefinition Width="158"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Tree Actions" Grid.Row="0" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Center" FontWeight="Bold"/>
 
@@ -476,6 +482,10 @@
                             <Separator Width="5" Visibility="Hidden"/>
                             <Button IsEnabled="False" ToolTip="Download all torrent(s)" Name="DownloadAllButton" Click="DownloadAllButton_OnClick">
                                 <Image Source="Images/16/Gaming/magnet-16.png" Width="16" Height="16" Margin="3"/>
+                            </Button>
+                            <Separator Width="5" Visibility="Hidden"/>
+                            <Button IsEnabled="False" ToolTip="Add series" Name="AddSeriesButton" Click="AddSeriesButton_OnClick">
+                                <Image Source="Images/16/Files/add_file-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                         </StackPanel>
                     </Grid>

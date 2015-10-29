@@ -500,6 +500,62 @@ namespace FileBotPP.Tree
             }
         }
 
+        public static void refresh_tree_directory( IItem parent, string path )
+        {
+            try
+            {
+                var dirInfo = new DirectoryInfo( path );
+
+                var directories = dirInfo.GetDirectories().order_by_alpha_numeric( x => x.Name ).ToArray();
+
+                foreach ( var directory in directories )
+                {
+                    var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent};
+
+                    DetectedDirectories.Enqueue( item );
+                    _lastFolderScanned = directory.FullName;
+
+                    Thread.Sleep( 5 );
+                    refresh_tree_directory( item, item.Path );
+                }
+
+                var files = dirInfo.GetFiles().order_by_alpha_numeric( x => x.Name ).ToArray();
+
+                foreach ( var file in files )
+                {
+                    var shortname = file.Name;
+                    var extension = "";
+
+                    if ( file.Name.Contains( "." ) )
+                    {
+                        shortname = file.Name.Substring( 0, file.Name.LastIndexOf( ".", StringComparison.Ordinal ) );
+                        extension = file.Name.Substring( file.Name.LastIndexOf( ".", StringComparison.Ordinal ) + 1 );
+                    }
+
+                    var item = new FileItem
+                    {
+                        FullName = file.Name,
+                        ShortName = shortname,
+                        Extension = extension,
+                        Path = file.FullName,
+                        Parent = parent
+                    };
+
+                    if ( parent == null )
+                    {
+                        item.BadLocation = true;
+                    }
+
+                    DetectedFiles.Enqueue( item );
+                }
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
         public static void update_model()
         {
             IDirectoryInsert dinsert;
@@ -750,6 +806,7 @@ namespace FileBotPP.Tree
                     return;
                 }
                 directory.Parent?.Items.Remove( directory );
+                directory.Update();
                 directory.Parent?.Update();
                 delete_invalid_folder_from_filesystem( directory );
                 return;
@@ -818,10 +875,12 @@ namespace FileBotPP.Tree
                 if ( directory.Parent == null )
                 {
                     Items.Remove( directory );
+                    directory.Update();
                     delete_invalid_folder_from_filesystem( directory );
                     return;
                 }
                 directory.Parent?.Items.Remove( directory );
+                directory.Update();
                 directory.Parent?.Update();
                 delete_invalid_folder_from_filesystem( directory );
             } );
@@ -858,6 +917,11 @@ namespace FileBotPP.Tree
         }
 
         private static void FolderScanner_ProgressChanged( object sender, ProgressChangedEventArgs e )
+        {
+            folder_scan_update();
+        }
+
+        public static void folder_scan_update()
         {
             Common.FileBotPp.set_status_text( get_last_scanned_folder() );
 

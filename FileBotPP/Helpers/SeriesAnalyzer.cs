@@ -16,7 +16,9 @@ namespace FileBotPP.Helpers
 {
     public class SeriesAnalyzer : ISeriesAnalyzer
     {
-        private BackgroundWorker _scanAnalyzer;
+        private BackgroundWorker _scanAllSeriesAnalyzer;
+        private BackgroundWorker _scanSeriesAnalyzer;
+        private IDirectoryItem _seriesFolder;
 
         public void fetch_tvdb_metadata()
         {
@@ -31,14 +33,25 @@ namespace FileBotPP.Helpers
             Common.Eztv.downloads_series_data();
         }
 
-        public void analyze_series_folder()
+        public void analyze_all_series_folders()
         {
             Common.FileBotPp.set_status_text( "Analysing..." );
 
-            this._scanAnalyzer = new BackgroundWorker {WorkerReportsProgress = true};
-            this._scanAnalyzer.DoWork += this.ScanAnalyzer_DoWork;
-            this._scanAnalyzer.RunWorkerCompleted += ScanAnalyzer_RunWorkerCompleted;
-            this._scanAnalyzer.RunWorkerAsync();
+            this._scanAllSeriesAnalyzer = new BackgroundWorker {WorkerReportsProgress = true};
+            this._scanAllSeriesAnalyzer.DoWork += this.ScanAllSeriesAnalyzerDoWork;
+            this._scanAllSeriesAnalyzer.RunWorkerCompleted += ScanAllSeriesAnalyzerRunWorkerCompleted;
+            this._scanAllSeriesAnalyzer.RunWorkerAsync();
+        }
+
+        public void analyze_series_folder( IDirectoryItem folder )
+        {
+            this._seriesFolder = folder;
+            Common.FileBotPp.set_status_text( "Analysing " + folder.FullName + " ..." );
+
+            this._scanSeriesAnalyzer = new BackgroundWorker {WorkerReportsProgress = true};
+            this._scanSeriesAnalyzer.DoWork += this.ScanSeriesAnalyzerDoWork;
+            this._scanSeriesAnalyzer.RunWorkerCompleted += ScanSeriesAnalyzerRunWorkerCompleted;
+            this._scanSeriesAnalyzer.RunWorkerAsync();
         }
 
         private static void clean_series_season_duplicates( IDirectoryItem directory )
@@ -458,13 +471,21 @@ namespace FileBotPP.Helpers
                         continue;
                     }
 
-                    var missingseason = new DirectoryItem {FullName = check, Path = "", Missing = true};
+                    var missingseason = new DirectoryItem {FullName = check, Path = directory.Path + "\\" + check, Missing = true, Parent = directory };
 
                     foreach ( var episode in season.get_episodes() )
                     {
                         var epnum = season.get_season_num() + "x" + string.Format( "{0:00}", episode.get_episode_num() );
-                        var fileitem = new FileItem {FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Missing = true};
+                        var fileitem = new FileItem {FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Missing = true, Parent = missingseason, Path = directory.Path + "\\" + check + "\\" + directory.FullName + " - " + epnum + " - " + episode.get_episode_name() };
                         missingseason.Items.Add( fileitem );
+
+                        var torrent = clean_series_season_files_find_torrent(series.ImdbId, episode.get_episode_num(), season.get_season_num() );
+
+                        if (torrent.Epname != null && String.CompareOrdinal(torrent.Epname, "") != 0)
+                        {
+                            fileitem.Torrent = true;
+                            fileitem.TorrentLink = torrent.Magnetlink;
+                        }
                     }
 
                     var di = new DirectoryInsert {Directory = directory, SubDirectory = missingseason, Seasonnum = season.get_season_num()};
@@ -475,13 +496,18 @@ namespace FileBotPP.Helpers
             }
         }
 
-        private static void ScanAnalyzer_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        private static void ScanAllSeriesAnalyzerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
             ItemProvider.update_model();
             Common.FileBotPp.set_status_text( "Analysis complete" );
         }
 
-        private void ScanAnalyzer_DoWork( object sender, DoWorkEventArgs e )
+        private static void ScanSeriesAnalyzerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        {
+            ItemProvider.update_model();
+        }
+
+        private void ScanAllSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
         {
             foreach ( var inode in ItemProvider.Items.OfType< IFileItem >() )
             {
@@ -495,6 +521,15 @@ namespace FileBotPP.Helpers
                 clean_series_season_directories( inode );
                 clean_series_season_files( inode );
             }
+        }
+
+        private void ScanSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
+        {
+            System.Threading.Thread.Sleep( 500 );
+            clean_series_top_level_directories( this._seriesFolder );
+            clean_series_top_level_files( this._seriesFolder );
+            clean_series_season_directories( this._seriesFolder );
+            clean_series_season_files( this._seriesFolder );
         }
     }
 }
