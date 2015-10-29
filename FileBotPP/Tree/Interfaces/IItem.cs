@@ -30,6 +30,9 @@ namespace FileBotPP.Tree.Interfaces
         string FullName { get; set; }
         string Path { get; set; }
         event PropertyChangedEventHandler PropertyChanged;
+
+        bool Rename( string newName, IDirectoryItem sender = null );
+
         void Update();
     }
 }

@@ -101,6 +101,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AddSeriesWindow.xaml.cs">
+      <DependentUpon>AddSeriesWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\FfmpegConvertWorker.cs" />
     <Compile Include="Helpers\Interfaces\ISettings.cs" />
     <Compile Include="Helpers\Interfaces\ISeriesAnalyzer.cs" />
@@ -153,6 +156,10 @@
     <Compile Include="Tree\ItemProvider.cs" />
     <Compile Include="Helpers\DirectoryItemWatcher.cs" />
     <Compile Include="Tree\ItemStatus.cs" />
+    <Page Include="AddSeriesWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="FileBotPPWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

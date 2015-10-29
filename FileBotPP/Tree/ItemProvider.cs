@@ -225,6 +225,33 @@ namespace FileBotPP.Tree
             }
         }
 
+        public static void move_item( IDirectoryItem diritem )
+        {
+            var items = diritem.Parent == null ? Items : diritem.Parent.Items;
+            items.Remove( diritem );
+
+            var addpoint = 0;
+            foreach ( var t in items )
+            {
+                if ( string.Compare( diritem.FullName, t.FullName, StringComparison.Ordinal ) > 0 )
+                {
+                    addpoint++;
+                    continue;
+                }
+                break;
+            }
+
+            if ( addpoint == items.Count )
+            {
+                items.Add( diritem );
+                diritem.Update();
+                return;
+            }
+
+            items.Insert( addpoint, diritem );
+            diritem.Update();
+        }
+
         public static void move_item( IFileItem fileitem, IDirectoryItem parent )
         {
             var episodenum = 0;

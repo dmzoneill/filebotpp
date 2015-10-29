@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:tree="clr-namespace:FileBotPP.Tree"
         mc:Ignorable="d"
         Title="Filebot++" Height="650" Width="1000" MinWidth="1000" MinHeight="600" Loaded="Window_Loaded" Closing="Window_Closing" ResizeMode="CanResizeWithGrip" Icon="Images/filebot/icon-32.png" WindowStartupLocation="CenterScreen">
@@ -32,7 +33,7 @@
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
         <HierarchicalDataTemplate DataType="{x:Type tree:DirectoryItem}" ItemsSource="{Binding Items}">
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="1">
                 <Border BorderBrush="Black" BorderThickness="1" Height="12" Margin="0,0,5,0" MinWidth="12">
                     <UniformGrid Rows="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="18" Margin="0" >
                         <Rectangle Fill="{x:Static tree:ItemStatus.EmptyColour}" ToolTip="{x:Static tree:ItemStatus.EmptyTooltip}" MinWidth="4" Name="EmptyRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
@@ -59,7 +60,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="FileNameTextBlock" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="DirectoryNameTextBlock" VerticalAlignment="Center" MouseDown="DirectoryNameTextBlock_MouseDown">
                     <TextBlock.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Open containing folder" Name="OpenFolderFileMenuItem" Click="OpenFolderMenuItem_OnClick">
@@ -117,6 +118,12 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator HorizontalAlignment="Stretch" Height="2"/>
+                            <MenuItem Header="Rename folder" Name="RenameDirectoryMenuItem" Click="RenameDirectoryMenuItem_OnClick">
+                                <MenuItem.Icon>
+                                    <Image Source="Images/16/Editing/rename-16.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator HorizontalAlignment="Stretch" Height="2"/>
                             <MenuItem Header="Delete folder" Foreground="DarkRed" Name="DeleteFileMenuItem" Click="DeleteFolderMenuItem_OnClick">
                                 <MenuItem.Icon>
                                     <Image Source="Images/16/Editing/delete-16.png" />
@@ -125,6 +132,17 @@
                         </ContextMenu>
                     </TextBlock.ContextMenu>
                 </TextBlock>
+                <TextBox BorderThickness="1" Padding="1" Name="FolderRenameTextBox" VerticalAlignment="Center" Text="{Binding Path=FullName}" HorizontalAlignment="Stretch" PreviewKeyDown="FolderRenameTextBox_PreviewKeyDown">
+                    <TextBox.Style>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=DirectoryNameTextBlock, Path=Visibility}" Value="Visible">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
             </StackPanel>
             <DataTemplate.Triggers>
                 <DataTrigger Binding="{Binding Path=Empty}">
@@ -181,7 +199,7 @@
                     </UniformGrid>
                 </Border>
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                    <TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="FileNameTextBlock" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="FileNameTextBlock" VerticalAlignment="Center"  MouseDown="FileNameTextBlock_OnMouseDown">
                         <TextBlock.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Play Video" Name="PlayFileMenuItem" Click="PlayFileMenuItem_OnClick">
@@ -272,6 +290,12 @@
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <Separator HorizontalAlignment="Stretch" Height="2"/>
+                                <MenuItem Header="Rename file" Name="RenameFileMenuItem" Click="RenameFileMenuItem_OnClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="Images/16/Editing/rename-16.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator HorizontalAlignment="Stretch" Height="2"/>
                                 <MenuItem Header="Delete file" Foreground="DarkRed" Name="DeleteFileMenuItem" Click="DeleteFileMenuItem_OnClick">
                                     <MenuItem.Style>
                                         <Style TargetType="MenuItem">
@@ -289,6 +313,17 @@
                             </ContextMenu>
                         </TextBlock.ContextMenu>
                     </TextBlock>
+                    <TextBox BorderThickness="1" Padding="1" Name="FileRenameTextBox" VerticalAlignment="Center" Text="{Binding Path=FullName}" HorizontalAlignment="Stretch" PreviewKeyDown="FileRenameTextBox_PreviewKeyDown">
+                        <TextBox.Style>
+                            <Style TargetType="{x:Type TextBox}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=FileNameTextBlock, Path=Visibility}" Value="Visible">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Visibility="Visible">
                         <Button ToolTip="Rename file" Width="16" Height="16" Margin="0,0,5,0" Name="RenameFileButton" Click="RenameFilesButton_Click">
                             <Image Source="Images/16/Editing/rename-16.png" />
@@ -313,7 +348,7 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
-                    </StackPanel>
+                        </StackPanel>
                 </StackPanel>
             </StackPanel>
             <DataTemplate.Triggers>
@@ -545,7 +580,16 @@
                             </Border>
                         </StackPanel>
                     </Grid>
-                    <TreeView IsEnabled="False" Margin="0" x:Name="SeriesTreeView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  ItemsSource="{Binding}" SelectedItemChanged="SeriesTreeView_SelectedItemChanged">
+                    <TreeView IsEnabled="False" Margin="0" x:Name="SeriesTreeView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  ItemsSource="{Binding}" SelectedItemChanged="SeriesTreeView_SelectedItemChanged" TreeViewItem.Selected="SeriesTreeView_OnSelected">
+                        <TreeView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Add Series" Name="AddSeriesMenuItem" Click="AddSeriesMenuItem_OnClick">
+                                    <MenuItem.Icon>
+                                        <Image Source="Images/16/Folders/add_folder-16.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <EventSetter Event="MouseRightButtonDown" Handler="SeriesTreeView_MouseRightButtonDown"/>

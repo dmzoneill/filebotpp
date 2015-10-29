@@ -63,16 +63,13 @@ namespace FileBotPP.Tree
         public virtual bool Duplicate { get; set; }
         public virtual bool Dirty { get; set; }
         public virtual bool Extra { get; set; }
-
         public virtual int Count
         {
             get { return 1; }
             set { }
         }
-
         public virtual IMediaInfo Mediainfo { get; set; }
         public IItem Parent { get; set; }
-
         public string FullName
         {
             get { return this.ItemFullName; }
@@ -82,7 +79,6 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "FullName" );
             }
         }
-
         public string Path
         {
             get { return this.ItemPath; }
@@ -115,6 +111,11 @@ namespace FileBotPP.Tree
             this.OnPropertyChanged( "Extra" );
 
             this.Parent?.Update();
+        }
+
+        public virtual bool Rename( string newName, IDirectoryItem sender = null)
+        {
+            return false;
         }
 
         protected void OnPropertyChanged( string propertyName )

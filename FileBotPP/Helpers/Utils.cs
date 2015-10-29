@@ -7,6 +7,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace FileBotPP.Helpers
@@ -36,6 +38,18 @@ namespace FileBotPP.Helpers
             try
             {
                 var wrGeturl = WebRequest.Create( url );
+
+                if ( string.Compare( Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
+                {
+                    var wp = new WebProxy( Settings.ProxyServerHost + ":" + Settings.ProxyServerPort, true );
+                    wrGeturl.Proxy = wp;
+                }
+                else
+                {
+                    wrGeturl.Proxy = null;
+                    ;
+                }
+
                 var objStream = wrGeturl.GetResponse().GetResponseStream();
                 if ( objStream != null )
                 {
@@ -63,6 +77,10 @@ namespace FileBotPP.Helpers
                 {
                     var wp = new WebProxy( Settings.ProxyServerHost + ":" + Settings.ProxyServerPort, true );
                     client.Proxy = wp;
+                }
+                else
+                {
+                    client.Proxy = null;
                 }
 
                 client.DownloadFile( url, filename );
@@ -298,6 +316,10 @@ namespace FileBotPP.Helpers
                         var wp = new WebProxy( Settings.ProxyServerHost + ":" + Settings.ProxyServerPort, true );
                         client.Proxy = wp;
                     }
+                    else
+                    {
+                        client.Proxy = null;
+                    }
 
                     using ( client.OpenRead( url ) )
                     {
@@ -349,6 +371,57 @@ namespace FileBotPP.Helpers
             }
 
             return parent as T;
+        }
+
+        public static T get_visual_child<T>( Visual referencedVisual ) where T : Visual
+        {
+            var parent = referencedVisual;
+
+            if ( parent == null )
+            {
+                return null;
+            }
+
+            for ( var x = 0; x < VisualTreeHelper.GetChildrenCount( parent ); x++ )
+            {
+                var child = VisualTreeHelper.GetChild( parent, x );
+
+                if ( ReferenceEquals( child.GetType(), typeof (StackPanel) ) )
+                {
+                    var sp = child as StackPanel;
+
+                    if ( sp == null )
+                    {
+                        continue;
+                    }
+
+                    foreach ( var spchild in sp.Children )
+                    {
+                        return get_visual_child< T >( spchild as Visual );
+                    }
+                }
+                else if ( ReferenceEquals( child.GetType(), typeof (T) ) )
+                {
+                    return child as T;
+                }
+            }
+
+            return null;
+        }
+
+        public static List< Visual > AllChildren( DependencyObject parent )
+        {
+            var list = new List< Visual >();
+            for ( var i = 0; i < VisualTreeHelper.GetChildrenCount( parent ); i++ )
+            {
+                var child = VisualTreeHelper.GetChild( parent, i );
+                if ( child is Visual )
+                {
+                    list.Add( child as Visual );
+                }
+                list.AddRange( AllChildren( child ) );
+            }
+            return list;
         }
     }
 }

@@ -58,5 +58,7 @@ namespace FileBotPP.Helpers
 
             Working = new List< ISupportsStop >();
         }
+
+        public static string AddSeriesName = null;
     }
 }

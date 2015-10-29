@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,7 @@ namespace FileBotPP
     public partial class FileBotPpWindow : IFileBotPpWindow
     {
         private IFileItem _item;
+        private TreeViewItem _lastSelected;
         private DispatcherTimer _timer;
 
         public FileBotPpWindow()
@@ -30,7 +32,159 @@ namespace FileBotPP
             Common.FileBotPp = this;
             this.SettingsScrollViewer.Content = new FileBotPpSettings();
         }
-        
+
+       
+        #region Tree Rename folder names
+
+        private void RenameDirectoryMenuItem_OnClick( object sender, RoutedEventArgs e )
+        {
+            if ( this._lastSelected == null )
+            {
+                return;
+            }
+
+            var children = Utils.AllChildren( this._lastSelected );
+            var outersp = children.OfType< StackPanel >().First();
+            outersp.Children[ 2 ].Visibility = Visibility.Collapsed;
+        }
+
+        private void DirectoryNameTextBlock_MouseDown( object sender, MouseButtonEventArgs e )
+        {
+            if ( e.ClickCount != 2 )
+            {
+                return;
+            }
+
+            var textblock = sender as TextBlock;
+
+            if ( textblock == null )
+            {
+                return;
+            }
+
+            textblock.Visibility = Visibility.Collapsed;
+        }
+
+        private void FolderRenameTextBox_PreviewKeyDown( object sender, KeyEventArgs e )
+        {
+            var textbox = sender as TextBox;
+
+            if ( textbox == null )
+            {
+                return;
+            }
+
+            var treeViewItem = Utils.get_visual_parent< TreeViewItem >( textbox );
+            var diritem = treeViewItem?.Header as IDirectoryItem;
+
+            var stackpanel = Utils.get_visual_parent< StackPanel >( textbox );
+            var textblock = stackpanel.Children[ 2 ] as TextBlock;
+
+            if ( textblock == null || diritem == null )
+            {
+                return;
+            }
+
+            if ( e.Key == Key.Escape )
+            {
+                textbox.Text = diritem.FullName;
+                textblock.Visibility = Visibility.Visible;
+                return;
+            }
+
+            if ( e.Key != Key.Return )
+            {
+                return;
+            }
+
+            e.Handled = true;
+
+            textblock.Visibility = Visibility.Visible;
+
+            if ( string.Compare( textbox.Text, textblock.Text, StringComparison.Ordinal ) == 0 )
+            {
+                return;
+            }
+
+            diritem.Rename( textbox.Text );
+        }
+
+        private void FileNameTextBlock_OnMouseDown( object sender, MouseButtonEventArgs e )
+        {
+            if ( e.ClickCount != 2 )
+            {
+                return;
+            }
+
+            var textblock = sender as TextBlock;
+
+            if ( textblock == null )
+            {
+                return;
+            }
+
+            textblock.Visibility = Visibility.Collapsed;
+        }
+
+        private void RenameFileMenuItem_OnClick( object sender, RoutedEventArgs e )
+        {
+            if ( this._lastSelected == null )
+            {
+                return;
+            }
+
+            var children = Utils.AllChildren( this._lastSelected );
+            var outersp = children.OfType< StackPanel >().First();
+            var innersp = outersp.Children.OfType< StackPanel >().First();
+            innersp.Children[ 0 ].Visibility = Visibility.Collapsed;
+        }
+
+        private void FileRenameTextBox_PreviewKeyDown( object sender, KeyEventArgs e )
+        {
+            var textbox = sender as TextBox;
+
+            if ( textbox == null )
+            {
+                return;
+            }
+
+            var treeViewItem = Utils.get_visual_parent< TreeViewItem >( textbox );
+            var fileitem = treeViewItem?.Header as IFileItem;
+
+            var stackpanel = Utils.get_visual_parent< StackPanel >( textbox );
+            var textblock = stackpanel.Children[ 0 ] as TextBlock;
+
+            if ( textblock == null || fileitem == null )
+            {
+                return;
+            }
+
+            if ( e.Key == Key.Escape )
+            {
+                textbox.Text = fileitem.FullName;
+                textblock.Visibility = Visibility.Visible;
+                return;
+            }
+
+            if ( e.Key != Key.Return )
+            {
+                return;
+            }
+
+            e.Handled = true;
+
+            textblock.Visibility = Visibility.Visible;
+
+            if ( string.Compare( textbox.Text, textblock.Text, StringComparison.Ordinal ) == 0 )
+            {
+                return;
+            }
+
+            fileitem.Rename( textbox.Text );
+        }
+
+        #endregion
+
         #region Public Setters
 
         private void update_log_console()
@@ -79,7 +233,7 @@ namespace FileBotPP
             this.EpisodeCount.Content = text;
         }
 
-        public void set_ready(bool ready)
+        public void set_ready( bool ready )
         {
             this.SeriesTreeView.IsEnabled = ready;
 
@@ -531,7 +685,7 @@ namespace FileBotPP
             if ( directory != null )
             {
                 var fname = ItemProvider.get_series_name_from_folder( directory );
-                var series = Common.Tvdb.get_series_by_name( fname );
+                var series = Common.Tvdb?.get_series_by_name( fname );
 
                 if ( series != null )
                 {
@@ -552,7 +706,7 @@ namespace FileBotPP
 
             if ( name != null )
             {
-                var series = Common.Tvdb.get_series_by_name( name );
+                var series = Common.Tvdb?.get_series_by_name( name );
                 if ( series != null )
                 {
                     this.TvdbTab.Content = new SeriesViewer( series );
@@ -692,7 +846,26 @@ namespace FileBotPP
         {
             Common.stop_all_workers();
         }
-        
+
+        private void SeriesTreeView_OnSelected( object sender, RoutedEventArgs e )
+        {
+            this._lastSelected = ( TreeViewItem ) e.OriginalSource;
+        }
+
+        private void AddSeriesMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            var asw = new AddSeriesWindow { Top = this.Top + (this.Height / 2) - 30, Left = this.Left + (this.Width / 2) - 175 };
+            asw.ShowDialog();
+
+            if ( Common.AddSeriesName == null )
+            {
+                return;
+            }
+
+            Directory.CreateDirectory( Common.ScanLocation + "\\" + Common.AddSeriesName );
+            ItemProvider.Items.Insert( 0, new DirectoryItem { FullName = Common.AddSeriesName, Path = Common.ScanLocation + "\\" + Common.AddSeriesName} );
+        }
+
         #endregion
     }
 }
