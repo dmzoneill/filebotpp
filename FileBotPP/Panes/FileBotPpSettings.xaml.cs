@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 using FileBotPP.Helpers;
+using FileBotPP.Tree;
+using MahApps.Metro.Controls;
 
 namespace FileBotPP.Panes
 {
@@ -28,11 +30,12 @@ namespace FileBotPP.Panes
                 this.CacheTimeoutTextBox.Text = Settings.CacheTimeout.ToString();
                 this.TorrentQualityComboBox.SelectedIndex = load_torrent_quality();
                 this.PoorQualityComboBox.SelectedIndex = load_video_quality();
+                this.load_fswatcher_values();
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue(ex.Message);
-                Utils.LogLines.Enqueue(ex.StackTrace);
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -51,6 +54,17 @@ namespace FileBotPP.Panes
                 default:
                     return 1;
             }
+        }
+
+        private void load_fswatcher_values()
+        {
+            var min = Settings.FilesSystemWatcherMinRefreshTime;
+            var max = Settings.FilesSystemWatcherMaxRefreshTime;
+            var enabled = Settings.FilesSystemWatcherEnabled;
+
+            this.RangeSlider.LowerValue = min;
+            this.RangeSlider.UpperValue = max;
+            this.ToggleSwitch.IsChecked = enabled;
         }
 
         private static int load_video_quality()
@@ -141,6 +155,24 @@ namespace FileBotPP.Panes
             Settings.TvdbApiKey = this.TvdbApiKeyTextBox.Text;
             Settings.FFmpegConvert = this.FFmpegConvertTextBox.Text;
 
+            Settings.FilesSystemWatcherMaxRefreshTime = ( int ) this.RangeSlider.UpperValue;
+            Settings.FilesSystemWatcherMinRefreshTime = ( int ) this.RangeSlider.LowerValue;
+
+            var lastvalue = Settings.FilesSystemWatcherEnabled;
+
+            Settings.FilesSystemWatcherEnabled = this.ToggleSwitch.IsChecked ?? false;
+
+            if ( this.ToggleSwitch.IsChecked == false )
+            {
+                FsPoller.stop_all();
+            }
+
+            if ( lastvalue == false && Settings.FilesSystemWatcherEnabled )
+            {
+                FsPoller.start_all();
+            }
+
+
             if ( this.test_conection() )
             {
                 Settings.ProxyServerHost = this.ProxyHostTextBox.Text;
@@ -164,10 +196,10 @@ namespace FileBotPP.Panes
                 client.Connect( this.ProxyHostTextBox.Text, int.Parse( this.ProxyPortTextBox.Text ) );
                 return true;
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue(ex.Message);
-                Utils.LogLines.Enqueue(ex.StackTrace);
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
                 return false;
             }
         }
@@ -181,6 +213,30 @@ namespace FileBotPP.Panes
         {
             var regex = new Regex( "[^0-9.-]+" ); //regex that matches disallowed text
             return !regex.IsMatch( text );
+        }
+
+        private void RangeSlider_OnLowerValueChanged( object sender, RangeParameterChangedEventArgs e )
+        {
+            try
+            {
+                this.LabelLowerText.Text = this.RangeSlider.LowerValue.ToString();
+            }
+            catch
+            {
+                // handled
+            }
+        }
+
+        private void RangeSlider_OnUpperValueChanged( object sender, RangeParameterChangedEventArgs e )
+        {
+            try
+            {
+                this.LabelUpperText.Text = this.RangeSlider.UpperValue.ToString();
+            }
+            catch
+            {
+                // handled
+            }
         }
     }
 }

@@ -1,13 +1,24 @@
-﻿<Window x:Class="FileBotPP.FileBotPpWindow"
+﻿<Controls:MetroWindow x:Class="FileBotPP.FileBotPpWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:tree="clr-namespace:FileBotPP.Tree"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Filebot++" Height="650" Width="1000" MinWidth="1000" MinHeight="600" Loaded="Window_Loaded" Closing="Window_Closing" ResizeMode="CanResizeWithGrip" Icon="Images/filebot/icon-32.png" WindowStartupLocation="CenterScreen">
-    <Window.Resources>
+        Title="Filebot++" Height="650" Width="1000" MinWidth="1000" MinHeight="600" Loaded="Window_Loaded" Closing="Window_Closing" ResizeMode="CanResizeWithGrip" Icon="Images/filebot/icon-32-26.png" WindowStartupLocation="CenterScreen"
+        BorderThickness="1" 
+        GlowBrush="Black"
+        WindowTransitionsEnabled="False">
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button Name="StopThreadButton" Click="StopThreadsMenuItem_OnClick" ToolTip="Stop All Threads">
+                <Image Source="Images/16/Transport/stop_sign-16.png" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Button>
+            <Button Name="SettingsTitleButton" Content="Settings" Click="SettingsTitleButton_OnClick"/>
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
+    <Controls:MetroWindow.Resources>
         <Style x:Key="GridSplitterVerticalGripStyle" TargetType="{x:Type GridSplitter}">
             <Setter Property="VerticalAlignment" Value="Stretch" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -392,30 +403,13 @@
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
-    </Window.Resources>
+    </Controls:MetroWindow.Resources>
     <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
-            <RowDefinition Height="22"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="32"/>
         </Grid.RowDefinitions>
-        <Menu HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent" Margin="5,2,0,0" Grid.Row="0">
-            <MenuItem Header="_File" Background="Transparent" >
-                <MenuItem Header="Stop all Threads" Name="StopThreadsMenuItem" Click="StopThreadsMenuItem_OnClick">
-                    <MenuItem.Icon>
-                        <Image Source="Images/16/Transport/stop_sign-16.png" />
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="_Exit" Name="ExitMenuItem" Click="ExitMenuItem_OnClick">
-                    <MenuItem.Icon>
-                        <Image Source="Images/16/Household/exit_sign-16.png" />
-                    </MenuItem.Icon>
-                </MenuItem>
-            </MenuItem>
-            <MenuItem Header="_Help">
-            </MenuItem>
-        </Menu>
-        <Grid Margin="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1">
+        <Grid Margin="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="20"/>
                 <ColumnDefinition Width="400*" MinWidth="400"/>
@@ -451,7 +445,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="15*"/>
-                            <ColumnDefinition Width="158"/>
+                            <ColumnDefinition Width="155"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Tree Actions" Grid.Row="0" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Center" FontWeight="Bold"/>
 
@@ -469,22 +463,42 @@
                                         </BeginStoryboard>
                                     </EventTrigger>
                                 </Button.Triggers>
+                                <Button.Style>
+                                    <Style>
+                                    </Style>
+                                </Button.Style>
                                 <Image Source="Images/16/Very_Basic/opened_folder-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
                             <Button IsEnabled="False" ToolTip="Check all filename episode name(s)" Name="CheckNamesAllButton" Click="CheckNamesAllButton_OnClick" HorizontalAlignment="Left">
+                                <Button.Style>
+                                    <Style>
+                                    </Style>
+                                </Button.Style>
                                 <Image Source="Images/16/Editing/rename-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
                             <Button IsEnabled="False" ToolTip="Check all files for corruption" Name="CheckAllFilesButton" Click="CheckAllFilesButton_Click">
+                                <Button.Style>
+                                    <Style>
+                                    </Style>
+                                </Button.Style>
                                 <Image Source="Images/16/Files/check_file-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
                             <Button IsEnabled="False" ToolTip="Download all torrent(s)" Name="DownloadAllButton" Click="DownloadAllButton_OnClick">
+                                <Button.Style>
+                                    <Style>
+                                    </Style>
+                                </Button.Style>
                                 <Image Source="Images/16/Gaming/magnet-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                             <Separator Width="5" Visibility="Hidden"/>
                             <Button IsEnabled="False" ToolTip="Add series" Name="AddSeriesButton" Click="AddSeriesButton_OnClick">
+                                <Button.Style>
+                                    <Style>
+                                    </Style>
+                                </Button.Style>
                                 <Image Source="Images/16/Files/add_file-16.png" Width="16" Height="16" Margin="3"/>
                             </Button>
                         </StackPanel>
@@ -591,6 +605,11 @@
                         </StackPanel>
                     </Grid>
                     <TreeView IsEnabled="False" Margin="0" x:Name="SeriesTreeView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  ItemsSource="{Binding}" SelectedItemChanged="SeriesTreeView_SelectedItemChanged" TreeViewItem.Selected="SeriesTreeView_OnSelected">
+                        <TreeView.Style>
+                            <Style TargetType="{x:Type TreeView}">
+                                
+                            </Style>
+                        </TreeView.Style>
                         <TreeView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Add Series" Name="AddSeriesMenuItem" Click="AddSeriesMenuItem_OnClick">
@@ -632,6 +651,11 @@
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
                 <TabControl x:Name="TabControl" HorizontalAlignment="Stretch" Margin="5,0,5,0" VerticalAlignment="Stretch">
+                    <TabControl.Style>
+                        <Style TargetType="{x:Type TabControl}">
+
+                        </Style>
+                    </TabControl.Style>
                     <TabItem Header="Show Info" Name="ShowInfoTab">
                         <ScrollViewer Name="TvdbTab" Margin="0"/>
                     </TabItem>
@@ -639,8 +663,8 @@
                         <ScrollViewer Name="MediaTab" Margin="0"/>
                     </TabItem>
                     <TabItem Header="Log">
-                        <ScrollViewer Margin="0" Name="LogScroller">
-                            <TextBox TextWrapping="NoWrap" AcceptsReturn="True" Name="LogTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                        <ScrollViewer Margin="0" Name="LogScroller" HorizontalScrollBarVisibility="Auto">
+                            <TextBox TextWrapping="NoWrap" AcceptsReturn="True" Name="LogTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
                         </ScrollViewer>
                     </TabItem>
                     <TabItem Header="Settings">
@@ -649,7 +673,7 @@
                 </TabControl>
             </Grid>
         </Grid>
-        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2" Grid.ColumnSpan="2" Margin="0">
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" Margin="0">
             <Grid.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,2">
                     <GradientStop Color="LightBlue" Offset="1" />
@@ -661,9 +685,9 @@
                 <ColumnDefinition Width="55"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="48"/>
-                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="40"/>
                 <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="40"/>
                 <ColumnDefinition Width="65"/>
                 <ColumnDefinition Width="45"/>
                 <ColumnDefinition Width="45"/>
@@ -686,4 +710,4 @@
             <Label x:Name="EzTvProgress" Content="" Grid.Column="12" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
         </Grid>
     </Grid>
-</Window>
+</Controls:MetroWindow>

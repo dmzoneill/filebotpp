@@ -94,5 +94,36 @@ namespace FileBotPP.Helpers
                 Properties.Settings.Default.Save();
             }
         }
+
+        public static int FilesSystemWatcherMinRefreshTime
+        {
+            get { return Properties.Settings.Default.FsWatcherMinRefresh; }
+            set
+            {
+                Properties.Settings.Default.FsWatcherMinRefresh = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public static int FilesSystemWatcherMaxRefreshTime
+        {
+            get { return Properties.Settings.Default.FsWatcherMaxRefresh; }
+            set
+            {
+                Properties.Settings.Default.FsWatcherMaxRefresh = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        public static bool FilesSystemWatcherEnabled
+        {
+            get { return Properties.Settings.Default.FsWatcherEnabled; }
+            set
+            {
+                Properties.Settings.Default.FsWatcherEnabled = value;
+                Properties.Settings.Default.Save();
+            }
+        }
+        
     }
 }

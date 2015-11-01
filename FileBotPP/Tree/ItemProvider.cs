@@ -28,6 +28,7 @@ namespace FileBotPP.Tree
         public static ConcurrentQueue< IBadLocationUpdate > BadLocationFiles;
         public static ConcurrentQueue< IDeletionUpdate > DirectoryDeletions;
         private static BackgroundWorker _folderScanner;
+        private static IFsPoller fsPoller;
 
         static ItemProvider()
         {
@@ -320,23 +321,37 @@ namespace FileBotPP.Tree
             fileitem.Parent.Items.Insert( addpoint, fileitem );
         }
 
-        public static void insert_folder_ordered( IDirectoryItem item )
+        public static void insert_item_ordered( IItem item )
         {
-            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
+            var whichitems = item.Parent == null ? Items : item.Parent.Items;
+            var point = 0;
+
+            for ( var x = 0; x < whichitems.Count; x++ )
             {
-                var whichitems = item.Parent == null ? Items : item.Parent.Items;
-                var point = 0;
-                for ( var x = 0; x < whichitems.Count; x++ )
+                var entryname = whichitems[ x ].FullName;
+
+                if ( String.Compare( entryname, item.FullName, StringComparison.Ordinal ) > 0 )
                 {
-                    var entryname = whichitems[ x ].FullName;
-                    if ( String.Compare( entryname, item.FullName, StringComparison.Ordinal ) > 0 )
-                    {
-                        point = x;
-                        break;
-                    }
+                    break;
                 }
 
-                if ( point == 0 )
+                point++;
+            }
+
+            if ( point == 0 )
+            {
+                if ( whichitems.Count > 0 )
+                {
+                    whichitems.Insert( point, item );
+                }
+                else
+                {
+                    whichitems.Add( item );
+                }
+            }
+            else
+            {
+                if ( point >= whichitems.Count )
                 {
                     whichitems.Add( item );
                 }
@@ -344,7 +359,12 @@ namespace FileBotPP.Tree
                 {
                     whichitems.Insert( point, item );
                 }
-            } );
+            }
+        }
+
+        public static void insert_item_ordered_threadsafe( IItem item )
+        {
+            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate { insert_item_ordered( item ); } );
         }
 
         public static void insert_item_ordered( IDirectoryItem parent, IDirectoryItem child, int seasonnum )
@@ -453,7 +473,7 @@ namespace FileBotPP.Tree
 
                 foreach ( var directory in directories )
                 {
-                    var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent};
+                    var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent, Polling = true};
 
                     DetectedDirectories.Enqueue( item );
 
@@ -510,7 +530,7 @@ namespace FileBotPP.Tree
 
                 foreach ( var directory in directories )
                 {
-                    var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent};
+                    var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent, Polling = true};
 
                     DetectedDirectories.Enqueue( item );
                     _lastFolderScanned = directory.FullName;
@@ -680,6 +700,8 @@ namespace FileBotPP.Tree
                 extrafile.Directory.Update();
                 extrafile.Directory.Parent?.Update();
             }
+
+            Common.MetaDataReady += 1;
         }
 
         public static void move_files_to_valid_folders( IDirectoryItem directory )
@@ -726,7 +748,8 @@ namespace FileBotPP.Tree
             if ( Directory.Exists( newdir ) == false )
             {
                 Directory.CreateDirectory( newdir );
-                insert_folder_ordered( new DirectoryItem {FullName = targetDirectory, Path = newdir, Parent = fitem.Parent} );
+                var newdirentry = new DirectoryItem {FullName = targetDirectory, Path = newdir, Parent = fitem.Parent, Polling = true};
+                insert_item_ordered( newdirentry );
             }
 
             if ( fitem.Parent?.Parent != null )
@@ -868,6 +891,15 @@ namespace FileBotPP.Tree
             delete_invalid_file_from_tree( file );
         }
 
+        public static void delete_file_in_memory( IFileItem file )
+        {
+            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
+            {
+                file.Parent?.Items.Remove( file );
+                file.Parent?.Update();
+            } );
+        }
+
         public static void delete_folder( IDirectoryItem directory )
         {
             Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
@@ -883,6 +915,22 @@ namespace FileBotPP.Tree
                 directory.Update();
                 directory.Parent?.Update();
                 delete_invalid_folder_from_filesystem( directory );
+            } );
+        }
+
+        public static void delete_folder_in_memory( IDirectoryItem directory )
+        {
+            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
+            {
+                if ( directory.Parent == null )
+                {
+                    Items.Remove( directory );
+                    directory.Update();
+                    return;
+                }
+                directory.Parent?.Items.Remove( directory );
+                directory.Update();
+                directory.Parent?.Update();
             } );
         }
 
@@ -936,9 +984,11 @@ namespace FileBotPP.Tree
                 else
                 {
                     ditem.Parent.Items.Add( ditem );
+                    ditem.Parent.Update();
                 }
 
                 ditem.Update();
+                ditem.Polling = true;
             }
 
             IFileItem fitem;
@@ -964,6 +1014,11 @@ namespace FileBotPP.Tree
             Common.FileBotPp.set_episode_count( Items.OfType< IDirectoryItem >().Sum( item => item.Count ).ToString() );
         }
 
+        public static void folder_scan_update_threadsafe()
+        {
+            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) folder_scan_update );
+        }
+
         private static void FolderScanner_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
             Common.FileBotPp.set_status_text( "Series tree populated..." );
@@ -973,7 +1028,14 @@ namespace FileBotPP.Tree
 
         private static void FolderScanner_DoWork( object sender, DoWorkEventArgs e )
         {
+            if ( fsPoller != null )
+            {
+                FsPoller.stop_all();
+                fsPoller = null;
+            }
+
             create_collection_tree( null, Common.ScanLocation );
+            fsPoller = new FsPoller();
         }
 
         public static void scan_series_folder()
@@ -1001,6 +1063,32 @@ namespace FileBotPP.Tree
         public static string get_series_name_from_folder( IDirectoryItem ditem )
         {
             return ditem.Parent == null ? ditem.FullName : ditem.Parent.FullName;
+        }
+
+        public static IFileItem ContainsFile( string name )
+        {
+            foreach ( var item in Items.OfType< IFileItem >() )
+            {
+                if ( String.Compare( item.FullName, name, StringComparison.Ordinal ) == 0 )
+                {
+                    return item;
+                }
+            }
+
+            return null;
+        }
+
+        public static IDirectoryItem ContainsDirectory( string name )
+        {
+            foreach ( var item in Items.OfType< IDirectoryItem >() )
+            {
+                if ( String.Compare( item.FullName, name, StringComparison.Ordinal ) == 0 )
+                {
+                    return item;
+                }
+            }
+
+            return null;
         }
     }
 }

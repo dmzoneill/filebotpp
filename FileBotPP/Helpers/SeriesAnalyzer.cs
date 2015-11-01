@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using FileBotPP.Helpers.Interfaces;
 using FileBotPP.Metadata;
 using FileBotPP.Metadata.eztv;
@@ -38,7 +39,7 @@ namespace FileBotPP.Helpers
             Common.FileBotPp.set_status_text( "Analysing..." );
 
             this._scanAllSeriesAnalyzer = new BackgroundWorker {WorkerReportsProgress = true};
-            this._scanAllSeriesAnalyzer.DoWork += this.ScanAllSeriesAnalyzerDoWork;
+            this._scanAllSeriesAnalyzer.DoWork += ScanAllSeriesAnalyzerDoWork;
             this._scanAllSeriesAnalyzer.RunWorkerCompleted += ScanAllSeriesAnalyzerRunWorkerCompleted;
             this._scanAllSeriesAnalyzer.RunWorkerAsync();
         }
@@ -471,17 +472,17 @@ namespace FileBotPP.Helpers
                         continue;
                     }
 
-                    var missingseason = new DirectoryItem {FullName = check, Path = directory.Path + "\\" + check, Missing = true, Parent = directory };
+                    var missingseason = new DirectoryItem {FullName = check, Path = directory.Path + "\\" + check, Missing = true, Parent = directory};
 
                     foreach ( var episode in season.get_episodes() )
                     {
                         var epnum = season.get_season_num() + "x" + string.Format( "{0:00}", episode.get_episode_num() );
-                        var fileitem = new FileItem {FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Missing = true, Parent = missingseason, Path = directory.Path + "\\" + check + "\\" + directory.FullName + " - " + epnum + " - " + episode.get_episode_name() };
+                        var fileitem = new FileItem {FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Missing = true, Parent = missingseason, Path = directory.Path + "\\" + check + "\\" + directory.FullName + " - " + epnum + " - " + episode.get_episode_name()};
                         missingseason.Items.Add( fileitem );
 
-                        var torrent = clean_series_season_files_find_torrent(series.ImdbId, episode.get_episode_num(), season.get_season_num() );
+                        var torrent = clean_series_season_files_find_torrent( series.ImdbId, episode.get_episode_num(), season.get_season_num() );
 
-                        if (torrent.Epname != null && String.CompareOrdinal(torrent.Epname, "") != 0)
+                        if ( torrent.Epname != null && String.CompareOrdinal( torrent.Epname, "" ) != 0 )
                         {
                             fileitem.Torrent = true;
                             fileitem.TorrentLink = torrent.Magnetlink;
@@ -500,6 +501,7 @@ namespace FileBotPP.Helpers
         {
             ItemProvider.update_model();
             Common.FileBotPp.set_status_text( "Analysis complete" );
+            Common.MetaDataReady += 1;
         }
 
         private static void ScanSeriesAnalyzerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
@@ -507,7 +509,7 @@ namespace FileBotPP.Helpers
             ItemProvider.update_model();
         }
 
-        private void ScanAllSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
+        private static void ScanAllSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
         {
             foreach ( var inode in ItemProvider.Items.OfType< IFileItem >() )
             {
@@ -521,11 +523,13 @@ namespace FileBotPP.Helpers
                 clean_series_season_directories( inode );
                 clean_series_season_files( inode );
             }
+
+            // here
         }
 
         private void ScanSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
         {
-            System.Threading.Thread.Sleep( 500 );
+            Thread.Sleep( 500 );
             clean_series_top_level_directories( this._seriesFolder );
             clean_series_top_level_files( this._seriesFolder );
             clean_series_season_directories( this._seriesFolder );

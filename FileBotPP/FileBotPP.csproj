@@ -65,6 +65,10 @@
     <ApplicationManifest>FileBotPP.exe.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MahApps.Metro, Version=1.1.2.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.1.2.0\lib\net45\MahApps.Metro.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Ookii.Dialogs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c15020868fd6249, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>library\Ookii.Dialogs.dll</HintPath>
@@ -83,6 +87,10 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.1.2.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -105,6 +113,8 @@
       <DependentUpon>AddSeriesWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Helpers\FfmpegConvertWorker.cs" />
+    <Compile Include="Tree\FsPoller.cs" />
+    <Compile Include="Tree\Interfaces\IFsPoller.cs" />
     <Compile Include="Helpers\Interfaces\ISettings.cs" />
     <Compile Include="Helpers\Interfaces\ISeriesAnalyzer.cs" />
     <Compile Include="Helpers\Settings.cs" />
@@ -154,7 +164,6 @@
     <Compile Include="Payloads\Interfaces\IFileInsert.cs" />
     <Compile Include="Tree\Item.cs" />
     <Compile Include="Tree\ItemProvider.cs" />
-    <Compile Include="Helpers\DirectoryItemWatcher.cs" />
     <Compile Include="Tree\ItemStatus.cs" />
     <Page Include="AddSeriesWindow.xaml">
       <SubType>Designer</SubType>
@@ -234,6 +243,7 @@
     <None Include="library\filebot.sh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -5807,6 +5817,7 @@
     <Resource Include="Images\filebot\icon.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\filebot\icon-32-26.png" />
     <Content Include="library\7-Zip-JBinding.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -5826,6 +5837,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="library\fpcalc.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="library\FSWatcher.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="library\jnidispatch.dll">

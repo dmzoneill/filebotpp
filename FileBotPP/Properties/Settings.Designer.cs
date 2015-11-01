@@ -118,5 +118,41 @@ namespace FileBotPP.Properties {
                 this["FFmpegConvert"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15")]
+        public int FsWatcherMinRefresh {
+            get {
+                return ((int)(this["FsWatcherMinRefresh"]));
+            }
+            set {
+                this["FsWatcherMinRefresh"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
+        public int FsWatcherMaxRefresh {
+            get {
+                return ((int)(this["FsWatcherMaxRefresh"]));
+            }
+            set {
+                this["FsWatcherMaxRefresh"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool FsWatcherEnabled {
+            get {
+                return ((bool)(this["FsWatcherEnabled"]));
+            }
+            set {
+                this["FsWatcherEnabled"] = value;
+            }
+        }
     }
 }
