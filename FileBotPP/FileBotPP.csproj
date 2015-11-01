@@ -5839,9 +5839,6 @@
     <Content Include="library\fpcalc.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="library\FSWatcher.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="library\jnidispatch.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
