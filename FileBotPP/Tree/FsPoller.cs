@@ -50,6 +50,11 @@ namespace FileBotPP.Tree
         {
             try
             {
+                if ( this._timer == null )
+                {
+                    return;
+                }
+
                 this._timer.Tick -= this.TimerOnElapsed;
                 this._timer.IsEnabled = false;
                 this._timer.Stop();
@@ -58,6 +63,19 @@ namespace FileBotPP.Tree
             {
                 Utils.LogLines.Enqueue( ex.Message );
                 Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        public void remove_poller()
+        {
+            try
+            {
+                Fspollers.Remove( this );
+            }
+            catch (Exception ex)
+            {
+                Utils.LogLines.Enqueue(ex.Message);
+                Utils.LogLines.Enqueue(ex.StackTrace);
             }
         }
 

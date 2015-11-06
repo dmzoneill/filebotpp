@@ -78,6 +78,7 @@ namespace FileBotPP.Metadata
 
                 this.parse_series_episodes_metadata( document );
                 this.parse_series_metadata( document );
+                this.download_artwork();
 
                 this._xml = null;
             }
@@ -280,6 +281,21 @@ namespace FileBotPP.Metadata
                 this._series.Poster = seriesdata.SelectSingleNode( ".//poster" )?.InnerText.Trim();
                 this._series.TmsWantedOld = seriesdata.SelectSingleNode( ".//tms_wanted_old" )?.InnerText.Trim();
                 this._series.Zap2ItId = seriesdata.SelectSingleNode( ".//zap2it_id" )?.InnerText.Trim();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        private void download_artwork()
+        {
+            try
+            {
+                Tvdb.FileDownloads.Enqueue( new[] {"http://thetvdb.com/banners/_cache/" + this._series.Poster, Common.AppDataFolder + "/tvdbartwork/poster/" + this._series.Id + ".jpg"} );
+                Tvdb.FileDownloads.Enqueue( new[] {"http://thetvdb.com/banners/_cache/" + this._series.Fanart, Common.AppDataFolder + "/tvdbartwork/fanart/" + this._series.Id + ".jpg"} );
+                Tvdb.FileDownloads.Enqueue( new[] {"http://thetvdb.com/banners/_cache/" + this._series.Banner, Common.AppDataFolder + "/tvdbartwork/banner/" + this._series.Id + ".jpg"} );
             }
             catch ( Exception ex )
             {

@@ -10,7 +10,6 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -21,11 +20,28 @@
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="280"/>
             </Grid.RowDefinitions>
-            <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding Path=Series.SeriesName, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" FontSize="20" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="15,0,0,0"/>
-            <Canvas Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Background="LightGray" Margin="15,2,15,10" Height="2"/>
-            <TextBlock TextWrapping="Wrap" Text="{Binding Path=Series.Overview, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" VerticalAlignment="Center" Margin="25,0,0,0" Grid.Row="2" Grid.Column="0"/>
-            <Border BorderThickness="1" Grid.Column="1" Grid.Row="2" BorderBrush="Black" Margin="10,10,25,10" VerticalAlignment="Top">
-                <Image x:Name="TvseriesImage" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+            <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding Path=Series.SeriesName, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" FontSize="20" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Margin="15,0,0,0" Foreground="#FF111111">
+                <TextBlock.Effect>
+                    <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+                </TextBlock.Effect>
+            </TextBlock>
+            <Canvas Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Background="LightBlue" Margin="15,2,15,10" Height="2"/>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Margin="25,0,0,0" Grid.Row="2" Grid.Column="0">
+                <TextBlock TextWrapping="Wrap" Text="{Binding Path=Series.Overview, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" VerticalAlignment="Center"/>
+            </ScrollViewer>
+            <Border BorderThickness="1" Grid.Column="1" Grid.Row="2" BorderBrush="LightBlue" Margin="10,10,25,10" VerticalAlignment="Top">
+                <Image x:Name="TvseriesImage" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Image.Triggers>
+                        <EventTrigger RoutedEvent="UserControl.Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetName="TvseriesImage" Storyboard.TargetProperty="Opacity" From="1.0" To="0.8" Duration="0:0:3" BeginTime="0:0:0"/>
+                                    <DoubleAnimation Storyboard.TargetName="TvseriesImage" Storyboard.TargetProperty="Opacity" From="0.8" To="1.0" Duration="0:0:3" BeginTime="0:0:4"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Image.Triggers>
+                </Image>
             </Border>
         </Grid>
 
@@ -65,8 +81,12 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Grid.Column="0" Content="Show Info" FontSize="20" Margin="10,0,0,0"/>
-            <Canvas Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Background="LightGray" Margin="15,2,15,10" Height="2"/>
+            <Label Grid.Row="0" Grid.Column="0" Content="Show Info" FontSize="20" Margin="10,0,0,0" Foreground="#FF111111">
+                <Label.Effect>
+                    <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+                </Label.Effect>
+            </Label>
+            <Canvas Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Background="LightBlue" Margin="15,2,15,10" Height="2"/>
             <Label Grid.Row="2" Grid.Column="0" Content="TVDB" FontWeight="Bold"/>
             <Label Grid.Row="3" Grid.Column="0" Content="IMDB" FontWeight="Bold"/>
             <Label Grid.Row="4" Grid.Column="0" Content="Actors" FontWeight="Bold"/>
@@ -79,8 +99,12 @@
             <Label Grid.Row="11" Grid.Column="0" Content="Runtime" FontWeight="Bold"/>
             <Label Grid.Row="12" Grid.Column="0" Content="Status" FontWeight="Bold"/>
             <Label Grid.Row="13" Grid.Column="0" Content="Status" FontWeight="Bold" Visibility="Hidden"/>
-            <Label Grid.Row="14" Grid.Column="0" Content="Torrents" FontSize="20" Margin="10,0,0,0"/>
-            <Canvas Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Background="LightGray" Margin="15,2,15,10" Height="2"/>
+            <Label Grid.Row="14" Grid.Column="0" Content="Torrents" FontSize="20" Margin="10,0,0,0">
+                <Label.Effect>
+                    <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+                </Label.Effect>
+            </Label>
+            <Canvas Grid.Row="15" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Background="LightBlue" Margin="15,2,15,10" Height="2"/>
             
             <Label Grid.Row="2" Grid.Column="1">           
                 <Hyperlink NavigateUri="{Binding Path=Series.TvdbHyperlink, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" RequestNavigate="Hyperlink_RequestNavigate">
@@ -111,7 +135,9 @@
                 <CheckBox VerticalAlignment="Center" Name="CheckBox1080P" Click="CheckBox1080P_OnClick">
                     <TextBlock>Hide 1080</TextBlock>
                 </CheckBox>
-                <Button VerticalAlignment="Center" Name="DownloadAllButton" Click="DownloadAllButton_OnClick" Margin="5,0,0,0">Download All</Button>
+                <Button VerticalAlignment="Center" Name="DownloadAllButton" Click="DownloadAllButton_OnClick" Margin="5,0,0,0" Content="Download All">
+                    <Button.Style><Style></Style></Button.Style>
+                </Button>
             </StackPanel>
             <RichTextBox Grid.Row="17" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="RichTextTorrents" IsDocumentEnabled="True" Margin="15,5,15,5" BorderThickness="0"/>
         </Grid>

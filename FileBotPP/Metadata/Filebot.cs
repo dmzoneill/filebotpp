@@ -13,7 +13,7 @@ using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Metadata
 {
-    public class Filebot : IFilebot, ISupportsStop
+    public class Filebot : IFilebot, ISupportsStop, IDisposable
     {
         private readonly List< IBadNameUpdate > _renameList;
         private int _checkedCount;
@@ -26,6 +26,12 @@ namespace FileBotPP.Metadata
         public Filebot()
         {
             this._renameList = new List< IBadNameUpdate >();
+        }
+
+        public void Dispose()
+        {
+            this.Dispose( true );
+            GC.SuppressFinalize( this );
         }
 
         public void check_series( IDirectoryItem directory )
@@ -147,9 +153,9 @@ namespace FileBotPP.Metadata
 
         private void consume_queue()
         {
-            foreach (var renamefile in this._renameList)
+            foreach ( var renamefile in this._renameList )
             {
-                if (this._stop)
+                if ( this._stop )
                 {
                     break;
                 }
@@ -159,6 +165,14 @@ namespace FileBotPP.Metadata
                 renamefile.File.Update();
                 renamefile.Directory.Update();
                 renamefile.Directory.Parent?.Update();
+            }
+        }
+
+        protected virtual void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                this._worker.Dispose();
             }
         }
     }

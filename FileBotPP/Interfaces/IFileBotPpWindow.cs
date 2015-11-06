@@ -6,7 +6,6 @@ namespace FileBotPP.Interfaces
     public interface IFileBotPpWindow
     {
         Dispatcher Dispatcher { get; }
-        ProgressDialogController FolderScannerToast { get; set; }
         void set_status_text( string text );
         void set_eztv_progress( string text );
         void set_tvdb_progress( string text );

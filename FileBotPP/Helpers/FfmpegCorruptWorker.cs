@@ -8,7 +8,7 @@ using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Helpers
 {
-    public class FfmpegCorruptWorker : ISupportsStop
+    public class FfmpegCorruptWorker : ISupportsStop, IDisposable
     {
         private readonly ConcurrentQueue< IFileItem > _brokenFiles;
         private readonly IDirectoryItem _directory;
@@ -128,12 +128,12 @@ namespace FileBotPP.Helpers
             var mi = Environment.CurrentDirectory + "\\Library\\ffmpeg.exe";
             var arguments = "-y -v info -t 5 -i \"" + fitem.Path.Replace( "\\", "/" ) + "\" -c:a copy -c:s mov_text -c:v mpeg4 -f mp4 test.mp4";
 
-            if ( Utils.write_file(Common.AppDataFolder + "\\ffmpeg.bat", "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
+            if ( Utils.write_file( Common.AppDataFolder + "\\ffmpeg.bat", "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
             {
                 return;
             }
 
-            var output = Utils.run_process_background(Common.AppDataFolder + "\\ffmpeg.bat", "" );
+            var output = Utils.run_process_background( Common.AppDataFolder + "\\ffmpeg.bat", "" );
 
             if ( output > 0 )
             {
@@ -145,6 +145,20 @@ namespace FileBotPP.Helpers
                 Utils.LogLines.Enqueue( "FFmpeg looks ok : " + fitem.Path );
             }
             this._worker.ReportProgress( 1 );
+        }
+
+        protected virtual void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                this._worker.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            this.Dispose( true );
+            GC.SuppressFinalize( this );
         }
     }
 }

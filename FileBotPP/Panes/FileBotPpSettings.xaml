@@ -13,8 +13,12 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Grid.Column="0" Content="Settings" FontSize="20" Margin="15,0,0,0"/>
-        <Canvas Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightGray" Margin="20,2,20,2" Height="2"/>
+        <Label Grid.Row="0" Grid.Column="0" Content="Settings" FontSize="20" Margin="15,0,0,0">
+            <Label.Effect>
+                <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+            </Label.Effect>
+        </Label>
+        <Canvas Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightBlue" Margin="20,2,20,2" Height="2"/>
         <Grid Grid.Row="2" Grid.Column="0" SnapsToDevicePixels="True" Name="GeneralGrid" Margin="10,10,30,10">
             <Grid.Resources>
                 <Style TargetType="{x:Type TextBlock}">

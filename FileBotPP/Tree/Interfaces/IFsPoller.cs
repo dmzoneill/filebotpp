@@ -4,5 +4,6 @@
     {
         void start_poller();
         void stop_poller();
+        void remove_poller();
     }
 }

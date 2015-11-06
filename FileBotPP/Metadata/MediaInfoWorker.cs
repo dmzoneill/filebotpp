@@ -10,7 +10,7 @@ using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Metadata
 {
-    public class MediaInfoWorker : ISupportsStop, IMediaInfoWorker
+    public class MediaInfoWorker : ISupportsStop, IMediaInfoWorker, IDisposable
     {
         private readonly ConcurrentQueue< IFileItem > _brokenFiles;
         private readonly IDirectoryItem _directory;
@@ -163,6 +163,20 @@ namespace FileBotPP.Metadata
         public void stop_worker()
         {
             this._stop = true;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this._worker.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

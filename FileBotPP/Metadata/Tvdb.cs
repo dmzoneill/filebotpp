@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using FileBotPP.Helpers;
@@ -10,9 +12,11 @@ using FileBotPP.Metadata.tvdb.Interfaces;
 
 namespace FileBotPP.Metadata
 {
-    public class Tvdb : ITvdb, ISupportsStop
+    public class Tvdb : ITvdb, ISupportsStop, IDisposable
     {
+        public static ConcurrentQueue< string[] > FileDownloads;
         private static readonly Random Random = new Random();
+        private static BackgroundWorker _artworkWorker;
         private readonly string[] _dirs;
         private readonly List< ISeries > _series;
         private readonly List< ITvdbWorker > _workers;
@@ -21,11 +25,42 @@ namespace FileBotPP.Metadata
         private BackgroundWorker _seriesWorker;
         private bool _stop;
 
+        static Tvdb()
+        {
+            FileDownloads = new ConcurrentQueue< string[] >();
+
+            if ( !Directory.Exists( Common.AppDataFolder + "/tvdbartwork/" ) )
+            {
+                Directory.CreateDirectory( Common.AppDataFolder + "/tvdbartwork" );
+            }
+
+            if ( !Directory.Exists( Common.AppDataFolder + "/tvdbartwork/banner" ) )
+            {
+                Directory.CreateDirectory( Common.AppDataFolder + "/tvdbartwork/banner" );
+            }
+
+            if ( !Directory.Exists( Common.AppDataFolder + "/tvdbartwork/fanart" ) )
+            {
+                Directory.CreateDirectory( Common.AppDataFolder + "/tvdbartwork/fanart" );
+            }
+
+            if ( !Directory.Exists( Common.AppDataFolder + "/tvdbartwork/poster" ) )
+            {
+                Directory.CreateDirectory( Common.AppDataFolder + "/tvdbartwork/poster" );
+            }
+        }
+
         public Tvdb( string[] dirs )
         {
             this._dirs = dirs;
             this._series = new List< ISeries >();
             this._workers = new List< ITvdbWorker >();
+        }
+
+        public void Dispose()
+        {
+            this.Dispose( true );
+            GC.SuppressFinalize( this );
         }
 
         public void downloads_series_data()
@@ -143,6 +178,21 @@ namespace FileBotPP.Metadata
             }
         }
 
+        private static void start_artwork_downloader()
+        {
+            try
+            {
+                _artworkWorker = new BackgroundWorker();
+                _artworkWorker.DoWork += ArtWorkerDoWork;
+                _artworkWorker.RunWorkerAsync();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
         private static void AllSeriesWorkerProgressChanged( object sender, ProgressChangedEventArgs e )
         {
             try
@@ -163,6 +213,7 @@ namespace FileBotPP.Metadata
             {
                 Common.FileBotPp.set_status_text( "Tvdb done..." );
                 Common.MetaDataReady += 1;
+                start_artwork_downloader();
             }
             catch ( Exception ex )
             {
@@ -205,6 +256,31 @@ namespace FileBotPP.Metadata
                 }
 
                 this.get_series_from_workers();
+            }
+            catch ( Exception ex )
+            {
+                Utils.LogLines.Enqueue( ex.Message );
+                Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        private static void ArtWorkerDoWork( object sender, DoWorkEventArgs e )
+        {
+            try
+            {
+                Utils.LogLines.Enqueue( @"Fetching TVDB metadata..." );
+
+                string[] download;
+
+                while ( FileDownloads.TryDequeue( out download ) )
+                {
+                    if ( File.Exists( download[ 1 ] ) )
+                    {
+                        continue;
+                    }
+
+                    Utils.download_file( download[ 0 ], download[ 1 ] );
+                }
             }
             catch ( Exception ex )
             {
@@ -258,6 +334,15 @@ namespace FileBotPP.Metadata
             {
                 Utils.LogLines.Enqueue( ex.Message );
                 Utils.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        protected virtual void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                this._allSeriesWorker.Dispose();
+                this._seriesWorker.Dispose();
             }
         }
     }

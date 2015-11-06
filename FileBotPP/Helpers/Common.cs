@@ -65,7 +65,6 @@ namespace FileBotPP.Helpers
                 if (_metaDataReady == 4)
                 {
                     FsPoller.start_all();
-                    FileBotPp.FolderScannerToast.CloseAsync();
                 }
             }
         }

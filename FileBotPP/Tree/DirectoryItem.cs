@@ -148,6 +148,7 @@ namespace FileBotPP.Tree
                 }
                 else
                 {
+                    this._fsPoller.remove_poller();
                     this._fsPoller.stop_poller();
                     this._fsPoller = null;
                 }
@@ -185,6 +186,8 @@ namespace FileBotPP.Tree
                 this.FullName = newName;
 
                 ItemProvider.move_item( this );
+                this.Polling = false;
+                this.Polling = true;
 
                 foreach ( var child in this.Items )
                 {

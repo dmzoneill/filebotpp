@@ -21,6 +21,7 @@ namespace FileBotPP.Helpers
         {
             LogLines = new ConcurrentQueue< string >();
         }
+
         public static IEnumerable< T > order_by_alpha_numeric<T>( this IEnumerable< T > source, Func< T, string > selector )
         {
             var max =
@@ -29,6 +30,7 @@ namespace FileBotPP.Helpers
 
             return source.OrderBy( i => Regex.Replace( selector( i ), @"\d+", m => m.Value.PadLeft( max, '0' ) ) );
         }
+
         public static string Fetch( string url )
         {
             var data = "";
@@ -64,6 +66,7 @@ namespace FileBotPP.Helpers
 
             return data;
         }
+
         public static bool download_file( string url, string filename )
         {
             try
@@ -90,6 +93,7 @@ namespace FileBotPP.Helpers
                 return false;
             }
         }
+
         public static string read_file_from_zip( string zipfile, string internalfile )
         {
             try
@@ -116,6 +120,7 @@ namespace FileBotPP.Helpers
 
             return "";
         }
+
         public static bool write_file( string filename, string contents )
         {
             try
@@ -130,6 +135,7 @@ namespace FileBotPP.Helpers
                 return false;
             }
         }
+
         public static string get_process_output( string processname, string arguments, int waittime = 3000 )
         {
             try
@@ -181,6 +187,7 @@ namespace FileBotPP.Helpers
                 return "";
             }
         }
+
         public static int run_process_foreground( string processname, string arguments )
         {
             try
@@ -231,6 +238,7 @@ namespace FileBotPP.Helpers
                 return 1;
             }
         }
+
         public static int run_process_background( string processname, string arguments )
         {
             try
@@ -281,18 +289,22 @@ namespace FileBotPP.Helpers
                 return 1;
             }
         }
+
         public static bool check_for_internet_connection()
         {
             return check_for_website( "http://www.google.com" );
         }
+
         public static bool check_for_eztv_connection()
         {
             return check_for_website( "https://eztv.ag" );
         }
+
         public static bool check_for_tvdb_connection()
         {
             return check_for_website( "http://thetvdb.com" );
         }
+
         public static bool check_for_website( string url )
         {
             try
@@ -322,6 +334,7 @@ namespace FileBotPP.Helpers
                 return false;
             }
         }
+
         public static void download_torrent( string magneturl )
         {
             try
@@ -334,6 +347,7 @@ namespace FileBotPP.Helpers
                 LogLines.Enqueue( ex.StackTrace );
             }
         }
+
         public static void open_file( string file )
         {
             try
@@ -346,6 +360,7 @@ namespace FileBotPP.Helpers
                 LogLines.Enqueue( ex.StackTrace );
             }
         }
+
         public static T get_visual_parent<T>( Visual referencedVisual ) where T : Visual
         {
             var parent = referencedVisual;
@@ -357,6 +372,7 @@ namespace FileBotPP.Helpers
 
             return parent as T;
         }
+
         public static T get_visual_child<T>( Visual referencedVisual ) where T : Visual
         {
             var parent = referencedVisual;
@@ -392,6 +408,7 @@ namespace FileBotPP.Helpers
 
             return null;
         }
+
         public static List< Visual > AllChildren( DependencyObject parent )
         {
             var list = new List< Visual >();

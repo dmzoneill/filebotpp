@@ -1,13 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using FileBotPP.Helpers;
-using FileBotPP.Interfaces;
 using FileBotPP.Metadata.tvdb.Interfaces;
 
 namespace FileBotPP.Panes
@@ -17,6 +18,8 @@ namespace FileBotPP.Panes
     /// </summary>
     public partial class SeriesViewer : INotifyPropertyChanged
     {
+        private BitmapImage _seriesImage1;
+
         public SeriesViewer()
         {
             this.DataContext = this.Series;
@@ -41,12 +44,22 @@ namespace FileBotPP.Panes
         {
             try
             {
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.UriSource = new Uri( "http://thetvdb.com/banners/_cache/" + this.Series.Poster );
-                bitmapImage.EndInit();
-
-                this.TvseriesImage.Source = bitmapImage;
+                if ( File.Exists( Common.AppDataFolder + "/tvdbartwork/poster/" + this.Series.Id + ".jpg" ) )
+                {
+                    this._seriesImage1 = new BitmapImage();
+                    this._seriesImage1.BeginInit();
+                    this._seriesImage1.UriSource = new Uri( Common.AppDataFolder + "/tvdbartwork/poster/" + this.Series.Id + ".jpg" );
+                    this._seriesImage1.EndInit();
+                    this.TvseriesImage.Source = this._seriesImage1;
+                }
+                else
+                {
+                    this._seriesImage1 = new BitmapImage();
+                    this._seriesImage1.BeginInit();
+                    this._seriesImage1.UriSource = new Uri( "http://thetvdb.com/banners/_cache/" + this.Series.Poster );
+                    this._seriesImage1.EndInit();
+                    this.TvseriesImage.Source = this._seriesImage1;
+                }
             }
             catch ( Exception ex )
             {
@@ -81,13 +94,8 @@ namespace FileBotPP.Panes
                 var para = new Paragraph();
                 doc.Blocks.Add( para );
 
-                foreach ( var torrent in Common.Eztv.get_torrents() )
+                foreach ( var torrent in Common.Eztv.get_torrents().Where( torrent => String.Compare( torrent.Imbdid, this.Series.ImdbId, StringComparison.Ordinal ) == 0 ) )
                 {
-                    if ( String.Compare( torrent.Imbdid, this.Series.ImdbId, StringComparison.Ordinal ) != 0 )
-                    {
-                        continue;
-                    }
-
                     if ( this.CheckBoxHdtv.IsChecked ?? false )
                     {
                         if ( torrent.Epname.ToLower().Contains( "hdtv" ) && !torrent.Epname.ToLower().Contains( "720" ) && !torrent.Epname.ToLower().Contains( "1080" ) )

@@ -13,7 +13,6 @@ using FileBotPP.Metadata;
 using FileBotPP.Panes;
 using FileBotPP.Tree;
 using FileBotPP.Tree.Interfaces;
-using MahApps.Metro.Controls.Dialogs;
 using Ookii.Dialogs;
 
 namespace FileBotPP
@@ -34,8 +33,6 @@ namespace FileBotPP
             Common.FileBotPp = this;
             this.SettingsScrollViewer.Content = new FileBotPpSettings();
         }
-
-        public ProgressDialogController FolderScannerToast { get; set; }
 
         #region Tree refresh folder
 
@@ -305,7 +302,9 @@ namespace FileBotPP
                     return;
                 }
 
+                FsPoller.stop_all();
                 fileitem.Rename( textbox.Text );
+                FsPoller.start_all();
             }
             catch ( Exception ex )
             {
@@ -322,11 +321,19 @@ namespace FileBotPP
         {
             try
             {
+                var last = "";
                 string value;
+
                 while ( Utils.LogLines.TryDequeue( out value ) )
                 {
+                    if ( String.Compare( last, value, StringComparison.Ordinal ) == 0 )
+                    {
+                        continue;
+                    }
+
                     this.LogTextBox.AppendText( value + Environment.NewLine );
                     this.LogScroller.ScrollToEnd();
+                    last = value;
                 }
             }
             catch ( Exception ex )
@@ -340,10 +347,6 @@ namespace FileBotPP
         {
             try
             {
-                if ( this.FolderScannerToast.IsOpen )
-                {
-                    this.FolderScannerToast.SetMessage( text + "..." );
-                }
                 this.StatusLabel.Visibility = Visibility.Visible;
                 this.Status.Content = text;
             }
@@ -1119,8 +1122,6 @@ namespace FileBotPP
                     return;
                 }
 
-                this.ShowToast();
-
                 this.set_ready( false );
 
                 if ( Common.MetaDataReady >= 3 )
@@ -1132,7 +1133,7 @@ namespace FileBotPP
 
                 Common.ScanLocation = dialog.SelectedPath;
                 this.ScanLocationLabel.Content = dialog.SelectedPath;
-                
+
                 ItemProvider.Items.Clear();
                 this.SeriesTreeView.DataContext = ItemProvider.Items;
                 ItemProvider.scan_series_folder();
@@ -1150,19 +1151,6 @@ namespace FileBotPP
                 Utils.LogLines.Enqueue( ex.Message );
                 Utils.LogLines.Enqueue( ex.StackTrace );
             }
-        }
-
-        private async void ShowToast()
-        {
-            var mySettings = new MetroDialogSettings
-            {
-                ColorScheme = this.MetroDialogOptions.ColorScheme,
-                MaximumBodyHeight = 30,
-                AnimateShow = false,
-                AnimateHide = true
-            };
-
-            this.FolderScannerToast = await this.ShowProgressAsync( "Folder Scanner", "Waiting for disk access...", false, mySettings );
         }
 
         private void fetchMetaDataWorker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
@@ -1268,7 +1256,7 @@ namespace FileBotPP
             }
         }
 
-        private void SettingsTitleButton_OnClick(object sender, RoutedEventArgs e)
+        private void SettingsTitleButton_OnClick( object sender, RoutedEventArgs e )
         {
             this.TabControl.SelectedIndex = 3;
         }

@@ -11,7 +11,7 @@ using FileBotPP.Metadata.Interfaces;
 
 namespace FileBotPP.Metadata
 {
-    public class Eztv : ISupportsStop, IEztv
+    public class Eztv : ISupportsStop, IEztv, IDisposable
     {
         private static readonly Random Random = new Random();
         private readonly List< ITorrent > _torrents;
@@ -23,6 +23,12 @@ namespace FileBotPP.Metadata
         {
             this._torrents = new List< ITorrent >();
             this._workers = new List< IEztvWorker >();
+        }
+
+        public void Dispose()
+        {
+            this.Dispose( true );
+            GC.SuppressFinalize( this );
         }
 
         public void downloads_series_data()
@@ -158,6 +164,14 @@ namespace FileBotPP.Metadata
             }
 
             Thread.Sleep( wait ? Random.Next( 10, 40 ) : 5 );
+        }
+
+        protected virtual void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                this._mainWorker.Dispose();
+            }
         }
     }
 }

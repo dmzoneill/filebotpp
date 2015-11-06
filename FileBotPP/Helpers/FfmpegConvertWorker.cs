@@ -8,15 +8,15 @@ using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Helpers
 {
-    public class FfmpegConvertWorker : ISupportsStop
+    public class FfmpegConvertWorker : ISupportsStop, IDisposable
     {
         private readonly IDirectoryItem _directory;
         private readonly IFileItem _fileitem;
         private readonly ConcurrentQueue< IFileItem > _unconvertedFiles;
         private int _convertedItemsCount;
         private int _convertItemsCount;
-        private BackgroundWorker _worker;
         private bool _stop;
+        private BackgroundWorker _worker;
 
         public FfmpegConvertWorker()
         {
@@ -33,6 +33,17 @@ namespace FileBotPP.Helpers
         {
             this._unconvertedFiles = new ConcurrentQueue< IFileItem >();
             this._directory = directory;
+        }
+
+        public void Dispose()
+        {
+            this.Dispose( true );
+            GC.SuppressFinalize( this );
+        }
+
+        public void stop_worker()
+        {
+            this._stop = true;
         }
 
         public void start_convert()
@@ -102,7 +113,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        private void convert_folder(IItem directory )
+        private void convert_folder( IItem directory )
         {
             foreach ( var item in directory.Items.OfType< IDirectoryItem >() )
             {
@@ -151,9 +162,12 @@ namespace FileBotPP.Helpers
             this._worker.ReportProgress( 1 );
         }
 
-        public void stop_worker()
+        protected virtual void Dispose( bool disposing )
         {
-            this._stop = true;
+            if ( disposing )
+            {
+                this._worker.Dispose();
+            }
         }
     }
 }

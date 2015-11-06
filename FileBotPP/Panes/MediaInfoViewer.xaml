@@ -22,9 +22,17 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <Label Grid.Row="0" Grid.Column="0" Content="" FontSize="25" Margin="10,0,0,0" Name="FileLabel"/>
-        <Label Grid.Row="1" Grid.Column="0" Content="General" FontSize="20" Margin="15,0,0,0"/>
-        <Canvas Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightGray" Margin="20,2,20,2" Height="2"/>
+        <Label Grid.Row="0" Grid.Column="0" Content="" FontSize="25" Margin="10,0,0,0" Name="FileLabel">
+            <Label.Effect>
+                <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+            </Label.Effect>
+        </Label>
+        <Label Grid.Row="1" Grid.Column="0" Content="General" FontSize="20" Margin="15,0,0,0">
+            <Label.Effect>
+                <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+            </Label.Effect>
+        </Label>
+        <Canvas Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightBlue" Margin="20,2,20,2" Height="2"/>
         <Grid Grid.Row="3" Grid.Column="0" SnapsToDevicePixels="True" Name="GeneralGrid" Margin="10">
             <Grid.Resources>
                 <Style TargetType="{x:Type TextBlock}">
@@ -37,8 +45,12 @@
             </Grid.ColumnDefinitions>
         </Grid>
 
-        <Label Grid.Row="4" Grid.Column="0" Content="Video" FontSize="20" Margin="15,0,0,0"/>
-        <Canvas Grid.Row="5" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightGray" Margin="20,2,20,2" Height="2"/>
+        <Label Grid.Row="4" Grid.Column="0" Content="Video" FontSize="20" Margin="15,0,0,0">
+            <Label.Effect>
+                <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+            </Label.Effect>
+        </Label>
+        <Canvas Grid.Row="5" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightBlue" Margin="20,2,20,2" Height="2"/>
         <Grid Grid.Row="6" Grid.Column="0" SnapsToDevicePixels="True" Name="VideoGrid" Margin="10">
             <Grid.Resources>
                 <Style TargetType="{x:Type TextBlock}">
@@ -51,8 +63,12 @@
             </Grid.ColumnDefinitions>
         </Grid>
 
-        <Label Grid.Row="7" Grid.Column="0" Content="Audio" FontSize="20" Margin="15,0,0,0"/>
-        <Canvas Grid.Row="8" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightGray" Margin="20,2,20,2" Height="2"/>
+        <Label Grid.Row="7" Grid.Column="0" Content="Audio" FontSize="20" Margin="15,0,0,0">
+            <Label.Effect>
+                <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+            </Label.Effect>
+        </Label>
+        <Canvas Grid.Row="8" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightBlue" Margin="20,2,20,2" Height="2"/>
         <Grid Grid.Row="9" Grid.Column="0" SnapsToDevicePixels="True" Name="AudioGrid" Margin="10">
             <Grid.Resources>
                 <Style TargetType="{x:Type TextBlock}">
@@ -65,8 +81,12 @@
             </Grid.ColumnDefinitions>
         </Grid>
 
-        <Label Grid.Row="10" Grid.Column="0" Content="Text" FontSize="20" Margin="15,0,0,0"/>
-        <Canvas Grid.Row="11" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightGray" Margin="20,2,20,2" Height="2"/>
+        <Label Grid.Row="10" Grid.Column="0" Content="Text" FontSize="20" Margin="15,0,0,0">
+            <Label.Effect>
+                <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+            </Label.Effect>
+        </Label>
+        <Canvas Grid.Row="11" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightBlue" Margin="20,2,20,2" Height="2"/>
         <Grid Grid.Row="12" Grid.Column="0" SnapsToDevicePixels="True" Name="TextGrid" Margin="10">
             <Grid.Resources>
                 <Style TargetType="{x:Type TextBlock}">
