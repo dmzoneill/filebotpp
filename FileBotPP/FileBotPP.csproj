@@ -73,30 +73,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>library\Ookii.Dialogs.dll</HintPath>
     </Reference>
-    <Reference Include="Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c15020868fd6249, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>library\Ookii.Dialogs.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Collections.Immutable, Version=1.0.30.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>library\System.Collections.Immutable.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
-    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.1.1.2.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -109,95 +90,107 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AddSeriesWindow.xaml.cs">
-      <DependentUpon>AddSeriesWindow.xaml</DependentUpon>
+    <Compile Include="Helpers\IFactory.cs" />
+    <Compile Include="Helpers\IFfmpegConvertWorker.cs" />
+    <Compile Include="Helpers\IFfmpegCorruptWorker.cs" />
+    <Compile Include="Helpers\ISettings.cs" />
+    <Compile Include="Helpers\IUtils.cs" />
+    <Compile Include="WindowAddSeries.xaml.cs">
+      <DependentUpon>WindowAddSeries.xaml</DependentUpon>
     </Compile>
     <Compile Include="Helpers\FfmpegConvertWorker.cs" />
+    <Compile Include="Helpers\ZlibWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Metadata\IKat.cs" />
+    <Compile Include="Metadata\IKatWorker.cs" />
+    <Compile Include="Metadata\Kat.cs" />
+    <Compile Include="Metadata\KatWorker.cs" />
     <Compile Include="Tree\FsPoller.cs" />
-    <Compile Include="Tree\Interfaces\IFsPoller.cs" />
-    <Compile Include="Helpers\Interfaces\ISettings.cs" />
-    <Compile Include="Helpers\Interfaces\ISeriesAnalyzer.cs" />
+    <Compile Include="Tree\IFsPoller.cs" />
+    <Compile Include="Tree\ISeriesAnalyzer.cs" />
     <Compile Include="Helpers\Settings.cs" />
-    <Compile Include="Interfaces\IFileBotPpWindow.cs" />
-    <Compile Include="Interfaces\ISupportsStop.cs" />
-    <Compile Include="Metadata\Interfaces\IEztv.cs" />
-    <Compile Include="Metadata\Interfaces\ITvdb.cs" />
-    <Compile Include="Metadata\tvdb\Interfaces\IEpisode.cs" />
-    <Compile Include="Metadata\tvdb\Interfaces\ISeason.cs" />
-    <Compile Include="Metadata\tvdb\Interfaces\ISeries.cs" />
-    <Compile Include="Metadata\eztv\Interfaces\ITorrent.cs" />
-    <Compile Include="Metadata\Interfaces\IMediaInfo.cs" />
-    <Compile Include="Metadata\Interfaces\ITvdbWorker.cs" />
-    <Compile Include="Metadata\Interfaces\IEztvWorker.cs" />
-    <Compile Include="Metadata\Interfaces\IMediaInfoWorker.cs" />
-    <Compile Include="Metadata\Interfaces\IFilebot.cs" />
-    <Compile Include="Panes\FileBotPpSettings.xaml.cs">
-      <DependentUpon>FileBotPpSettings.xaml</DependentUpon>
+    <Compile Include="IWindowFileBotPp.cs" />
+    <Compile Include="ISupportsStop.cs" />
+    <Compile Include="Metadata\IEztv.cs" />
+    <Compile Include="Metadata\ITvdb.cs" />
+    <Compile Include="Metadata\ITvdbEpisode.cs" />
+    <Compile Include="Metadata\ITvdbSeason.cs" />
+    <Compile Include="Metadata\ITvdbSeries.cs" />
+    <Compile Include="Metadata\ITorrent.cs" />
+    <Compile Include="Metadata\IMediaInfo.cs" />
+    <Compile Include="Metadata\ITvdbWorker.cs" />
+    <Compile Include="Metadata\IEztvWorker.cs" />
+    <Compile Include="Metadata\IMediaInfoWorker.cs" />
+    <Compile Include="Metadata\IFilebot.cs" />
+    <Compile Include="UserControlSettings.cs">
+      <DependentUpon>UserControlSettings.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Panes\MediaInfoViewer.xaml.cs">
-      <DependentUpon>MediaInfoViewer.xaml</DependentUpon>
+    <Compile Include="UserControlMediaInfoViewer.cs">
+      <DependentUpon>UserControlMediaInfoViewer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Panes\Question-Missing.xaml.cs">
-      <DependentUpon>Question-Missing.xaml</DependentUpon>
+    <Compile Include="UserControlTvdbMissing.xaml.cs">
+      <DependentUpon>UserControlTvdbMissing.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Panes\SeriesViewer.xaml.cs">
-      <DependentUpon>SeriesViewer.xaml</DependentUpon>
+    <Compile Include="UserControlSeriesViewer.cs">
+      <DependentUpon>UserControlSeriesViewer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Payloads\BadLocationUpdate.cs" />
-    <Compile Include="Payloads\ExtraFileUpdate.cs" />
-    <Compile Include="Payloads\BadNameUpdate.cs" />
-    <Compile Include="Payloads\DeletionUpdate.cs" />
-    <Compile Include="Payloads\DirectoryInsert.cs" />
+    <Compile Include="Tree\BadLocationUpdate.cs" />
+    <Compile Include="Tree\ExtraFileUpdate.cs" />
+    <Compile Include="Tree\BadNameUpdate.cs" />
+    <Compile Include="Tree\DeletionUpdate.cs" />
+    <Compile Include="Tree\DirectoryInsert.cs" />
     <Compile Include="Tree\DirectoryItem.cs" />
-    <Compile Include="Payloads\DuplicateUpdate.cs" />
-    <Compile Include="Payloads\FileInsert.cs" />
+    <Compile Include="Tree\DuplicateUpdate.cs" />
+    <Compile Include="Tree\FileInsert.cs" />
     <Compile Include="Tree\FileItem.cs" />
-    <Compile Include="Tree\Interfaces\IDirectoryItem.cs" />
-    <Compile Include="Tree\Interfaces\IItem.cs" />
-    <Compile Include="Tree\Interfaces\IFileItem.cs" />
-    <Compile Include="Payloads\Interfaces\IBadLocationUpdate.cs" />
-    <Compile Include="Payloads\Interfaces\IBadNameUpdate.cs" />
-    <Compile Include="Payloads\Interfaces\IDeletionUpdate.cs" />
-    <Compile Include="Payloads\Interfaces\IDirectoryInsert.cs" />
-    <Compile Include="Payloads\Interfaces\IDuplicateUpdate.cs" />
-    <Compile Include="Payloads\Interfaces\IExtraFileUpdate.cs" />
-    <Compile Include="Payloads\Interfaces\IFileInsert.cs" />
+    <Compile Include="Tree\IDirectoryItem.cs" />
+    <Compile Include="Tree\IItem.cs" />
+    <Compile Include="Tree\IFileItem.cs" />
+    <Compile Include="Tree\IBadLocationUpdate.cs" />
+    <Compile Include="Tree\IBadNameUpdate.cs" />
+    <Compile Include="Tree\IDeletionUpdate.cs" />
+    <Compile Include="Tree\IDirectoryInsert.cs" />
+    <Compile Include="Tree\IDuplicateUpdate.cs" />
+    <Compile Include="Tree\IExtraFileUpdate.cs" />
+    <Compile Include="Tree\IFileInsert.cs" />
     <Compile Include="Tree\Item.cs" />
     <Compile Include="Tree\ItemProvider.cs" />
     <Compile Include="Tree\ItemStatus.cs" />
-    <Page Include="AddSeriesWindow.xaml">
+    <Compile Include="Tree\ItemStatusMask.cs" />
+    <Page Include="WindowAddSeries.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="FileBotPPWindow.xaml">
+    <Page Include="WindowFileBotPp.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="App.xaml.cs">
+    <Compile Include="App.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Helpers\Common.cs" />
+    <Compile Include="Helpers\Factory.cs" />
     <Compile Include="Helpers\FfmpegCorruptWorker.cs" />
-    <Compile Include="Helpers\SeriesAnalyzer.cs" />
+    <Compile Include="Tree\SeriesAnalyzer.cs" />
     <Compile Include="Helpers\Utils.cs" />
-    <Compile Include="FileBotPPWindow.xaml.cs">
-      <DependentUpon>FileBotPPWindow.xaml</DependentUpon>
+    <Compile Include="WindowFileBotPp.xaml.cs">
+      <DependentUpon>WindowFileBotPp.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Panes\FileBotPpSettings.xaml">
+    <Page Include="UserControlSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Panes\MediaInfoViewer.xaml">
+    <Page Include="UserControlMediaInfoViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Panes\Question-Missing.xaml">
+    <Page Include="UserControlTvdbMissing.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Panes\SeriesViewer.xaml">
+    <Page Include="UserControlSeriesViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -205,15 +198,15 @@
   <ItemGroup>
     <Compile Include="Metadata\Eztv.cs" />
     <Compile Include="Metadata\EztvWorker.cs" />
-    <Compile Include="Metadata\eztv\Torrent.cs" />
+    <Compile Include="Metadata\Torrent.cs" />
     <Compile Include="Metadata\Filebot.cs" />
     <Compile Include="Metadata\MediaInfo.cs" />
     <Compile Include="Metadata\MediaInfoWorker.cs" />
     <Compile Include="Metadata\Tvdb.cs" />
     <Compile Include="Metadata\TvdbWorker.cs" />
-    <Compile Include="Metadata\tvdb\Episode.cs" />
-    <Compile Include="Metadata\tvdb\Season.cs" />
-    <Compile Include="Metadata\tvdb\Series.cs" />
+    <Compile Include="Metadata\TvdbEpisode.cs" />
+    <Compile Include="Metadata\TvdbSeason.cs" />
+    <Compile Include="Metadata\TvdbTvdbSeries.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -234,16 +227,9 @@
     <None Include="FileBotPP.exe.manifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include="library\filebot.cmd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="library\FileBot.l4j.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="library\filebot.sh">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -5824,12 +5810,6 @@
     <Content Include="library\ffmpeg.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="library\ffplay.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="library\ffprobe.exe">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="library\FileBot.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -5851,9 +5831,6 @@
     <Content Include="library\MediaInfoDotNet.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="library\mingwm10.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="library\Ookii.Dialogs.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -5873,7 +5850,6 @@
     <Resource Include="library\System.Collections.Immutable.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Content Include="library\test.mp4" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">

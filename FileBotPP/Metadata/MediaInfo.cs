@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
-using FileBotPP.Metadata.Interfaces;
-using FileBotPP.Tree.Interfaces;
+using FileBotPP.Tree;
 
 namespace FileBotPP.Metadata
 {

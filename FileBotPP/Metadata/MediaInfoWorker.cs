@@ -3,10 +3,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Linq;
 using FileBotPP.Helpers;
-using FileBotPP.Interfaces;
-using FileBotPP.Metadata.Interfaces;
 using FileBotPP.Tree;
-using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Metadata
 {
@@ -59,7 +56,7 @@ namespace FileBotPP.Metadata
 
         private void consume_queue()
         {
-            Common.FileBotPp.set_status_text( "MetaData check (" + this._scannedItemsCount + "/" + this._scanItemsCount + ")" );
+            Factory.Instance.WindowFileBotPp.set_status_text( "MetaData check (" + this._scannedItemsCount + "/" + this._scanItemsCount + ")" );
 
             IFileItem item;
             while ( this._brokenFiles.TryDequeue( out item ) )
@@ -130,19 +127,19 @@ namespace FileBotPP.Metadata
             this._scannedItemsCount += 1;
             var mibin = Environment.CurrentDirectory + "\\Library\\MediaInfo.exe";
 
-            var output = Utils.get_process_output( mibin, "\"" + fitem.Path + "\"" );
+            var output = Factory.Instance.Utils.get_process_output( mibin, "\"" + fitem.Path + "\"" );
 
             if ( output.Contains( "Duration" ) )
             {
                 // ReSharper disable once ObjectCreationAsStatement
                 new MediaInfo( fitem, output );
-                Utils.LogLines.Enqueue( "Scanned media info successfuly : " + fitem.Path );
+                Factory.Instance.LogLines.Enqueue( "Scanned media info successfuly : " + fitem.Path );
             }
             else
             {
                 this._brokenFiles.Enqueue( fitem );
                 this._worker.ReportProgress( 1 );
-                Utils.LogLines.Enqueue( "Media metadata unreadable : " + fitem.Path );
+                Factory.Instance.LogLines.Enqueue( "Media metadata unreadable : " + fitem.Path );
             }
             this._worker.ReportProgress( 1 );
         }
@@ -151,7 +148,7 @@ namespace FileBotPP.Metadata
         {
             var mibin = Environment.CurrentDirectory + "\\Library\\MediaInfo.exe";
 
-            var output = Utils.get_process_output( mibin, "\"" + fitem.Path + "\"", 5000 );
+            var output = Factory.Instance.Utils.get_process_output( mibin, "\"" + fitem.Path + "\"", 5000 );
 
             if ( output.Contains( "Duration" ) )
             {

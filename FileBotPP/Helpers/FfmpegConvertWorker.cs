@@ -2,13 +2,11 @@
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Linq;
-using FileBotPP.Interfaces;
 using FileBotPP.Tree;
-using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Helpers
 {
-    public class FfmpegConvertWorker : ISupportsStop, IDisposable
+    public class FfmpegConvertWorker : ISupportsStop, IDisposable, IFfmpegConvertWorker
     {
         private readonly IDirectoryItem _directory;
         private readonly IFileItem _fileitem;
@@ -68,12 +66,12 @@ namespace FileBotPP.Helpers
 
         private void consume_queue()
         {
-            Common.FileBotPp.set_status_text( "Converted file (" + this._convertedItemsCount + "/" + this._convertItemsCount + ")" );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Converted file (" + this._convertedItemsCount + "/" + this._convertItemsCount + ")" );
 
             IFileItem item;
             while ( this._unconvertedFiles.TryDequeue( out item ) )
             {
-                Common.FileBotPp.set_status_text( "Problem converting file (" + item.FullName );
+                Factory.Instance.WindowFileBotPp.set_status_text( "Problem converting file (" + item.FullName );
             }
         }
 
@@ -140,23 +138,23 @@ namespace FileBotPP.Helpers
 
             var mi = Environment.CurrentDirectory + "\\Library\\ffmpeg.exe";
             var arguments = "-y -v info -i \"" + fitem.Path.Replace( "\\", "/" ) + "\" -c:a copy -c:s mov_text -c:v mpeg4 -f mp4 \"" + fitem.Parent.Path.Replace( "\\", "/" ) + "/" + fitem.ShortName + ".mp4\"";
-            var objpath = Common.AppDataFolder + "\\ffmpegconvert.bat";
+            var objpath = Factory.Instance.AppDataFolder + "\\ffmpegconvert.bat";
 
-            if ( Utils.write_file( objpath, "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
+            if (Factory.Instance.Utils.write_file( objpath, "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
             {
                 return;
             }
 
-            var returncode = Utils.run_process_foreground( objpath, "" );
+            var returncode = Factory.Instance.Utils.run_process_foreground( objpath, "" );
 
             if ( returncode > 0 )
             {
                 this._unconvertedFiles.Enqueue( fitem );
-                Utils.LogLines.Enqueue( "FFmpeg convert problem : " + fitem.Path );
+                Factory.Instance.LogLines.Enqueue( "FFmpeg convert problem : " + fitem.Path );
             }
             else
             {
-                Utils.LogLines.Enqueue( "FFmpeg convert ok : " + fitem.Path );
+                Factory.Instance.LogLines.Enqueue( "FFmpeg convert ok : " + fitem.Path );
             }
 
             this._worker.ReportProgress( 1 );

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Threading;
 using FileBotPP.Helpers;
-using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Tree
 {
@@ -26,7 +25,7 @@ namespace FileBotPP.Tree
         public FsPoller()
         {
             this._directory = null;
-            this._directoryInfo = new DirectoryInfo( Common.ScanLocation );
+            this._directoryInfo = new DirectoryInfo(Factory.Instance.ScanLocation );
             Fspollers.Add( this );
         }
 
@@ -40,7 +39,7 @@ namespace FileBotPP.Tree
         public void start_poller()
         {
             this._timer = new DispatcherTimer();
-            this._timer.Interval = new TimeSpan( 0, 0, Random.Next( Settings.FilesSystemWatcherMinRefreshTime, Settings.FilesSystemWatcherMaxRefreshTime ) );
+            this._timer.Interval = new TimeSpan( 0, 0, Random.Next(Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) );
             this._timer.Tick += this.TimerOnElapsed;
             this._timer.IsEnabled = true;
             this._timer.Start();
@@ -61,8 +60,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -74,8 +73,8 @@ namespace FileBotPP.Tree
             }
             catch (Exception ex)
             {
-                Utils.LogLines.Enqueue(ex.Message);
-                Utils.LogLines.Enqueue(ex.StackTrace);
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
@@ -83,7 +82,7 @@ namespace FileBotPP.Tree
         {
             try
             {
-                this._timer.Interval = new TimeSpan( 0, 0, Random.Next( Settings.FilesSystemWatcherMinRefreshTime, Settings.FilesSystemWatcherMaxRefreshTime ) );
+                this._timer.Interval = new TimeSpan( 0, 0, Random.Next(Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) );
 
                 lock (Lockobj)
                 {
@@ -93,8 +92,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -150,8 +149,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -222,8 +221,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -238,8 +237,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -247,7 +246,7 @@ namespace FileBotPP.Tree
         {
             try
             {
-                if ( Settings.FilesSystemWatcherEnabled == false )
+                if (Factory.Instance.Settings.FilesSystemWatcherEnabled == false )
                 {
                     return;
                 }
@@ -259,8 +258,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
     }

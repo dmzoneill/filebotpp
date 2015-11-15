@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
 using FileBotPP.Helpers;
-using FileBotPP.Metadata.Interfaces;
-using FileBotPP.Tree.Interfaces;
+using FileBotPP.Metadata;
 
 namespace FileBotPP.Tree
 {
@@ -20,6 +19,7 @@ namespace FileBotPP.Tree
         public override bool NewPathExists { get; set; }
         public override bool Duplicate { get; set; }
         public override string TorrentLink { get; set; }
+
         public override bool AllowedType
         {
             get { return this.Extension == null || AllowedTypes.Contains( this.Extension.ToLower() ); }
@@ -30,6 +30,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "AllowedType" );
             }
         }
+
         public override bool Missing
         {
             get { return this.ItemMissing; }
@@ -40,6 +41,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "Missing" );
             }
         }
+
         public override bool Extra
         {
             get { return this.ItemExtra; }
@@ -50,6 +52,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "Extra" );
             }
         }
+
         public override bool BadLocation
         {
             get { return this.ItemBadLocation; }
@@ -60,6 +63,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "BadLocation" );
             }
         }
+
         public override bool BadName
         {
             get { return this.ItemBadName; }
@@ -70,6 +74,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "BadName" );
             }
         }
+
         public override bool BadQuality
         {
             get
@@ -78,15 +83,15 @@ namespace FileBotPP.Tree
                 {
                     try
                     {
-                        if ( int.Parse( this.Mediainfo.VideoHeight ) < Settings.PoorQualityP )
+                        if ( int.Parse( this.Mediainfo.VideoHeight ) < Factory.Instance.Settings.PoorQualityP )
                         {
                             return true;
                         }
                     }
                     catch ( Exception ex )
                     {
-                        Utils.LogLines.Enqueue( ex.Message );
-                        Utils.LogLines.Enqueue( ex.StackTrace );
+                        Factory.Instance.LogLines.Enqueue( ex.Message );
+                        Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                     }
                 }
                 return this.ItemBadQuality;
@@ -98,6 +103,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "BadQuality" );
             }
         }
+
         public override bool Corrupt
         {
             get { return this.ItemCorrupt; }
@@ -108,6 +114,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "Corrupt" );
             }
         }
+
         public override string SuggestedName
         {
             get { return this.ItemSuggestedName; }
@@ -118,6 +125,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "SuggestedName" );
             }
         }
+
         public override IMediaInfo Mediainfo
         {
             get { return this.ItemMediaInfo; }
@@ -128,6 +136,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "Mediainfo" );
             }
         }
+
         public override bool Torrent
         {
             get { return this.ItemTorrent; }
@@ -138,6 +147,7 @@ namespace FileBotPP.Tree
                 this.OnPropertyChanged( "Torrent" );
             }
         }
+
         public override int Count => this.Missing ? 0 : 1;
 
         public override bool Rename( string newName, IDirectoryItem sender = null )
@@ -148,7 +158,7 @@ namespace FileBotPP.Tree
             {
                 if ( System.IO.Directory.Exists( newpath ) )
                 {
-                    Utils.LogLines.Enqueue( "Unable to rename, new file name exists" );
+                    Factory.Instance.LogLines.Enqueue( "Unable to rename, new file name exists" );
                     return false;
                 }
 
@@ -164,8 +174,8 @@ namespace FileBotPP.Tree
                 }
                 catch ( Exception ex )
                 {
-                    Utils.LogLines.Enqueue( ex.Message );
-                    Utils.LogLines.Enqueue( ex.StackTrace );
+                    Factory.Instance.LogLines.Enqueue( ex.Message );
+                    Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                     return false;
                 }
             }

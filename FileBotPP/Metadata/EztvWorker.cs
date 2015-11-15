@@ -4,9 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using FileBotPP.Helpers;
-using FileBotPP.Metadata.eztv;
-using FileBotPP.Metadata.eztv.Interfaces;
-using FileBotPP.Metadata.Interfaces;
 
 namespace FileBotPP.Metadata
 {
@@ -66,11 +63,11 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                var tempFile = Common.AppDataFolder + "/eztv/" + this._seriesid;
+                var tempFile = Factory.Instance.AppDataFolder + "/eztv/" + this._seriesid;
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         return true;
                     }
@@ -80,10 +77,10 @@ namespace FileBotPP.Metadata
 
                 return false;
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue(ex.Message);
-                Utils.LogLines.Enqueue(ex.StackTrace);
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return false;
             }
         }
@@ -100,16 +97,16 @@ namespace FileBotPP.Metadata
 
         private void get_series_data()
         {
-            if ( !Directory.Exists( Common.AppDataFolder + "/eztv/" ) )
+            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/eztv/" ) )
             {
-                Directory.CreateDirectory( Common.AppDataFolder + "/eztv" );
+                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/eztv" );
             }
 
-            var tempFile = Common.AppDataFolder + "/eztv/" + this._seriesid;
+            var tempFile = Factory.Instance.AppDataFolder + "/eztv/" + this._seriesid;
 
             if ( File.Exists( tempFile ) )
             {
-                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                 {
                     var filehtml = File.ReadAllText( tempFile );
                     this.parse_imdb_id( filehtml );
@@ -121,16 +118,16 @@ namespace FileBotPP.Metadata
                 File.Delete( tempFile );
             }
 
-            Utils.LogLines.Enqueue( @"Dowloading " + this._series + @" metadata..." );
+            Factory.Instance.LogLines.Enqueue( @"Dowloading " + this._series + @" metadata..." );
 
-            var temp = Utils.Fetch( "https://eztv.ag/shows/" + this._seriesid + "/" + this._series );
+            var temp = Factory.Instance.Utils.Fetch( "https://eztv.ag/shows/" + this._seriesid + "/" + this._series );
 
             if ( String.Compare( temp, "", StringComparison.Ordinal ) == 0 )
             {
                 return;
             }
 
-            if ( Utils.write_file( tempFile, temp ) == false )
+            if (Factory.Instance.Utils.write_file( tempFile, temp ) == false )
             {
                 return;
             }
@@ -144,13 +141,13 @@ namespace FileBotPP.Metadata
         {
             string[] parts;
 
-            if ( temp.Contains( "Episode Name" ) )
+            if ( temp.Contains( "TvdbTvdbEpisode Name" ) )
             {
-                parts = temp.Split( new[] {"Episode Name"}, StringSplitOptions.None );
+                parts = temp.Split( new[] {"TvdbTvdbEpisode Name"}, StringSplitOptions.None );
             }
-            else if ( temp.Contains( "Episode FullName" ) )
+            else if ( temp.Contains( "TvdbTvdbEpisode FullName" ) )
             {
-                parts = temp.Split( new[] {"Episode FullName"}, StringSplitOptions.None );
+                parts = temp.Split( new[] {"TvdbTvdbEpisode FullName"}, StringSplitOptions.None );
             }
             else
             {
@@ -174,7 +171,7 @@ namespace FileBotPP.Metadata
 
         private void parse_episodes()
         {
-            Utils.LogLines.Enqueue( @"Parsing " + this._series + @" metadata..." );
+            Factory.Instance.LogLines.Enqueue( @"Parsing " + this._series + @" metadata..." );
 
             foreach ( Match match in Regex.Matches( this._html, "<tr.*?>(.*?)</tr>", RegexOptions.IgnoreCase | RegexOptions.Singleline ) )
             {

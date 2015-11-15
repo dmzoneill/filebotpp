@@ -4,34 +4,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace FileBotPP.Helpers
 {
-    public static class Utils
+    public class Utils : IUtils
     {
-        public static ConcurrentQueue< string > LogLines;
-
-        static Utils()
-        {
-            LogLines = new ConcurrentQueue< string >();
-        }
-
-        public static IEnumerable< T > order_by_alpha_numeric<T>( this IEnumerable< T > source, Func< T, string > selector )
-        {
-            var max =
-                source.SelectMany(
-                    i => Regex.Matches( selector( i ), @"\d+" ).Cast< Match >().Select( m => ( int? ) m.Value.Length ) ).Max() ?? 0;
-
-            return source.OrderBy( i => Regex.Replace( selector( i ), @"\d+", m => m.Value.PadLeft( max, '0' ) ) );
-        }
-
-        public static string Fetch( string url )
+        public string Fetch( string url )
         {
             var data = "";
 
@@ -39,15 +21,14 @@ namespace FileBotPP.Helpers
             {
                 var wrGeturl = WebRequest.Create( url );
 
-                if ( string.Compare( Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
+                if ( string.Compare(Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
                 {
-                    var wp = new WebProxy( Settings.ProxyServerHost + ":" + Settings.ProxyServerPort, true );
+                    var wp = new WebProxy(Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
                     wrGeturl.Proxy = wp;
                 }
                 else
                 {
                     wrGeturl.Proxy = null;
-                    ;
                 }
 
                 var objStream = wrGeturl.GetResponse().GetResponseStream();
@@ -59,23 +40,37 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 data = "";
             }
 
             return data;
         }
 
-        public static bool download_file( string url, string filename )
+        public string FetchDeCompressed( string url )
+        {
+            try
+            {
+                var client = new ZlibWebClient {Proxy = null};
+
+                return client.DownloadString( url );
+            }
+            catch ( Exception )
+            {
+                return null;
+            }
+        }
+
+        public bool download_file( string url, string filename )
         {
             try
             {
                 var client = new WebClient();
 
-                if ( string.Compare( Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
+                if ( string.Compare(Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
                 {
-                    var wp = new WebProxy( Settings.ProxyServerHost + ":" + Settings.ProxyServerPort, true );
+                    var wp = new WebProxy(Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
                     client.Proxy = wp;
                 }
                 else
@@ -88,13 +83,13 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return false;
             }
         }
 
-        public static string read_file_from_zip( string zipfile, string internalfile )
+        public string read_file_from_zip( string zipfile, string internalfile )
         {
             try
             {
@@ -113,15 +108,15 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return "";
             }
 
             return "";
         }
 
-        public static bool write_file( string filename, string contents )
+        public bool write_file( string filename, string contents )
         {
             try
             {
@@ -130,13 +125,13 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return false;
             }
         }
 
-        public static string get_process_output( string processname, string arguments, int waittime = 3000 )
+        public string get_process_output( string processname, string arguments, int waittime = 3000 )
         {
             try
             {
@@ -182,13 +177,13 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return "";
             }
         }
 
-        public static int run_process_foreground( string processname, string arguments )
+        public int run_process_foreground( string processname, string arguments )
         {
             try
             {
@@ -233,13 +228,13 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return 1;
             }
         }
 
-        public static int run_process_background( string processname, string arguments )
+        public int run_process_background( string processname, string arguments )
         {
             try
             {
@@ -284,36 +279,36 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return 1;
             }
         }
 
-        public static bool check_for_internet_connection()
+        public bool check_for_internet_connection()
         {
             return check_for_website( "http://www.google.com" );
         }
 
-        public static bool check_for_eztv_connection()
+        public bool check_for_eztv_connection()
         {
             return check_for_website( "https://eztv.ag" );
         }
 
-        public static bool check_for_tvdb_connection()
+        public bool check_for_tvdb_connection()
         {
             return check_for_website( "http://thetvdb.com" );
         }
 
-        public static bool check_for_website( string url )
+        public bool check_for_website( string url )
         {
             try
             {
                 using ( var client = new WebClient() )
                 {
-                    if ( string.Compare( Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
+                    if ( string.Compare(Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
                     {
-                        var wp = new WebProxy( Settings.ProxyServerHost + ":" + Settings.ProxyServerPort, true );
+                        var wp = new WebProxy(Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
                         client.Proxy = wp;
                     }
                     else
@@ -329,13 +324,13 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return false;
             }
         }
 
-        public static void download_torrent( string magneturl )
+        public void download_torrent( string magneturl )
         {
             try
             {
@@ -343,12 +338,12 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
-        public static void open_file( string file )
+        public void open_file( string file )
         {
             try
             {
@@ -356,12 +351,12 @@ namespace FileBotPP.Helpers
             }
             catch ( Exception ex )
             {
-                LogLines.Enqueue( ex.Message );
-                LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
-        public static T get_visual_parent<T>( Visual referencedVisual ) where T : Visual
+        public T get_visual_parent<T>( Visual referencedVisual ) where T : Visual
         {
             var parent = referencedVisual;
 
@@ -373,7 +368,7 @@ namespace FileBotPP.Helpers
             return parent as T;
         }
 
-        public static T get_visual_child<T>( Visual referencedVisual ) where T : Visual
+        public T get_visual_child<T>( Visual referencedVisual ) where T : Visual
         {
             var parent = referencedVisual;
 
@@ -409,7 +404,7 @@ namespace FileBotPP.Helpers
             return null;
         }
 
-        public static List< Visual > AllChildren( DependencyObject parent )
+        public List< Visual > AllChildren( DependencyObject parent )
         {
             var list = new List< Visual >();
             for ( var i = 0; i < VisualTreeHelper.GetChildrenCount( parent ); i++ )

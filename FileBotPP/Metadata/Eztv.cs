@@ -5,9 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using FileBotPP.Helpers;
-using FileBotPP.Interfaces;
-using FileBotPP.Metadata.eztv.Interfaces;
-using FileBotPP.Metadata.Interfaces;
 
 namespace FileBotPP.Metadata
 {
@@ -78,9 +75,9 @@ namespace FileBotPP.Metadata
 
         private void _mainWorker_DoWork( object sender, DoWorkEventArgs e )
         {
-            Utils.LogLines.Enqueue( @"Fetching EZTV metadata..." );
+            Factory.Instance.LogLines.Enqueue( @"Fetching EZTV metadata..." );
 
-            var data = Utils.Fetch( "https://eztv.ag" );
+            var data = Factory.Instance.Utils.Fetch( "https://eztv.ag" );
 
             var selectMatch = Regex.Match( data, "<select.*?>(.*?)</select>", RegexOptions.IgnoreCase | RegexOptions.Singleline );
             if ( selectMatch.Success == false )
@@ -126,21 +123,21 @@ namespace FileBotPP.Metadata
         private static void _mainWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
         {
             var percent = e.ProgressPercentage/100.0;
-            Common.FileBotPp.set_eztv_progress( percent + "%" );
+            Factory.Instance.WindowFileBotPp.set_eztv_progress( percent + "%" );
         }
 
         private static void _mainWorker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
-            Common.FileBotPp.set_eztv_progress( "100%" );
-            Common.FileBotPp.set_status_text( "Eztv done..." );
-            Common.MetaDataReady += 1;
+            Factory.Instance.WindowFileBotPp.set_eztv_progress( "100%" );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Eztv done..." );
+            Factory.Instance.MetaDataReady += 1;
         }
 
         private void wait_for_workers()
         {
             Thread.Sleep( Random.Next( 10, 40 ) );
 
-            Utils.LogLines.Enqueue( "Waiting for threads" );
+            Factory.Instance.LogLines.Enqueue( "Waiting for threads" );
 
             var count = 2;
 

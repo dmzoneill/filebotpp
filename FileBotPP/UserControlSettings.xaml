@@ -1,0 +1,158 @@
+﻿<UserControl x:Class="FileBotPP.UserControlSettings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:helpers="clr-namespace:FileBotPP.Helpers"
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+          d:DesignHeight="800" d:DesignWidth="500" Background="White" Loaded="FileBotPpSettings_OnLoaded">
+    <Grid Margin="5,15,5,15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Content="Settings" FontSize="20" Margin="15,0,0,0">
+            <Label.Effect>
+                <DropShadowEffect ShadowDepth="1" Direction="330" Color="Gray" Opacity="0.5" BlurRadius="1"/>
+            </Label.Effect>
+        </Label>
+        <Canvas Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" Background="LightBlue" Margin="20,2,20,2" Height="2"/>
+        <Grid Grid.Row="2" Grid.Column="0" SnapsToDevicePixels="True" Name="GeneralGrid" Margin="10,10,30,10">
+            <Grid.Resources>
+                <Style TargetType="{x:Type TextBlock}">
+                    <Setter Property="Margin" Value="20,2,0,2" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="{x:Type ComboBox}">
+                    <Setter Property="Margin" Value="20,2,0,10" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="Height" Value="32" />
+                </Style>
+                <Style TargetType="{x:Type TextBox}">
+                    <Setter Property="Margin" Value="20,2,0,10" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="Padding" Value="10,2,10,2" />
+                    <Setter Property="Height" Value="35" />
+                    <Setter Property="FontSize" Value="12" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="{x:Type StackPanel}">
+                    <Setter Property="Margin" Value="20,2,0,10" />
+                    <Setter Property="Height" Value="35" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="Margin" Value="20,2,0,10" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="Padding" Value="10,5,5,5" />
+                    <Setter Property="Height" Value="35" />
+                    <Setter Property="FontSize" Value="14" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="FQDN or ip address"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Proxy Host" FontWeight="Bold" Margin="20,10,0,10" VerticalAlignment="Top"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Name="ProxyHostTextBox" Text=""/>
+
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="Port number"/>
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Proxy Port" FontWeight="Bold" Margin="20,10,0,10" VerticalAlignment="Top"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Name="ProxyPortTextBox" Text="" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
+
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="Comma separated list of allowed types"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Allowed Types" FontWeight="Bold" Margin="20,10,0,10" VerticalAlignment="Top"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Name="AllowedtypesTextBox" Text=""/>
+
+            <TextBlock Grid.Row="6" Grid.Column="1" Text="Your tvdb api key"/>
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="Tvdb Api Key" FontWeight="Bold" Margin="20,10,0,10" VerticalAlignment="Top"/>
+            <TextBox Grid.Row="7" Grid.Column="1" Name="TvdbApiKeyTextBox" Text=""/>
+
+            <TextBlock Grid.Row="8" Grid.Column="1" Text="How long the tvdb and eztv cache is valid"/>
+            <TextBlock Grid.Row="9" Grid.Column="0" Text="Cache Lifetime" FontWeight="Bold" Margin="20,10,0,10" VerticalAlignment="Top"/>
+            <TextBox Grid.Row="9" Grid.Column="1" Name="CacheTimeoutTextBox" Text="" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
+
+            <TextBlock Grid.Row="10" Grid.Column="1" Text="Poorest Height accepted 720, 1080, etc"/>
+            <TextBlock Grid.Row="11" Grid.Column="0" Text="Poor Quality" FontWeight="Bold" Margin="20,10,0,10" VerticalAlignment="Top"/>
+            <ComboBox Grid.Row="11" Grid.Column="1" Name="PoorQualityComboBox">
+                <ComboBox.ItemContainerStyle>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Padding" Value="5"/>
+                    </Style>
+                </ComboBox.ItemContainerStyle>
+                <ComboBoxItem Name="Pq320">320p</ComboBoxItem>
+                <ComboBoxItem Name="Pq480">480p</ComboBoxItem>
+                <ComboBoxItem Name="Pq640">640p</ComboBoxItem>
+                <ComboBoxItem Name="Pq720">720p</ComboBoxItem>
+                <ComboBoxItem Name="Pq1080">1080p</ComboBoxItem>
+            </ComboBox>
+
+            <TextBlock Grid.Row="12" Grid.Column="1" Text="Torrest preferred 720, 1080, etc"/>
+            <TextBlock Grid.Row="13" Grid.Column="0" Text="Torrent Quality" FontWeight="Bold" Margin="20,10,0,10" VerticalAlignment="Top"/>
+            <ComboBox Grid.Row="13" Grid.Column="1" Name="TorrentQualityComboBox">
+                <ComboBox.ItemContainerStyle>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Padding" Value="5"/>
+                    </Style>
+                </ComboBox.ItemContainerStyle>
+                <ComboBoxItem Name="TqNormal">Normal</ComboBoxItem>
+                <ComboBoxItem Name="Tq720">720p</ComboBoxItem>
+                <ComboBoxItem Name="Tq1080">1080p</ComboBoxItem>
+            </ComboBox>
+
+            <TextBlock Grid.Row="14" Grid.Column="1" Text="Ffmpeg convert options"/>
+            <TextBlock Grid.Row="15" Grid.Column="0" Text="FFmpeg Convert" FontWeight="Bold" Margin="20,10,0,10" VerticalAlignment="Top"/>
+            <TextBox Grid.Row="15" Grid.Column="1" Name="FFmpegConvertTextBox" Text=""/>
+
+            <TextBlock Grid.Row="16" Grid.Column="1" Text="Folder watcher enabled"/>
+            <TextBlock Grid.Row="17" Grid.Column="0" Text="Folder watcher" FontWeight="Bold" Margin="20,10,0,10" VerticalAlignment="Top"/>
+            <controls:ToggleSwitch Grid.Row="17" Grid.Column="1" HorizontalAlignment="Left" Margin="20,0,0,10" Name="ToggleSwitch"/>
+
+            <TextBlock Grid.Row="18" Grid.Column="1" Text="Folder watcher refresh interval seconds"/>
+            <TextBlock Grid.Row="19" Grid.Column="0" Text="Folder watcher refresh" FontWeight="Bold" Margin="20,0,0,15"/>
+            <Grid Grid.Row="19" Grid.Column="1" HorizontalAlignment="Stretch" Margin="20,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="35"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="0" VerticalAlignment="Center" HorizontalAlignment="Left" Name="LabelLowerText" Margin="0,0,0,0"/>
+                <controls:RangeSlider Grid.Column="1" AutoToolTipPrecision="2" MoveWholeRange="True" IsSnapToTickEnabled="True" ExtendedMode="True" Minimum="2" Maximum="120" VerticalAlignment="Center" Name="RangeSlider" HorizontalAlignment="Stretch" LowerValueChanged="RangeSlider_OnLowerValueChanged" UpperValueChanged="RangeSlider_OnUpperValueChanged"/>
+                <TextBlock Grid.Column="2" Text="0" VerticalAlignment="Center" HorizontalAlignment="Right" Name="LabelUpperText" Margin="0,0,0,0"/>
+            </Grid>
+
+            <TextBlock Grid.Row="20" Grid.Column="1" Text="save spacer" HorizontalAlignment="Right" Visibility="Hidden"/>
+            <Button Grid.Row="21" Grid.Column="1" Name="SaveButton" Click="SaveButton_OnClick" Content="Save Settings" Width="120" HorizontalAlignment="Left"/>
+        </Grid>
+    </Grid>
+</UserControl>

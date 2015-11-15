@@ -9,8 +9,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using FileBotPP.Helpers;
-using FileBotPP.Payloads.Interfaces;
-using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Tree
 {
@@ -28,7 +26,7 @@ namespace FileBotPP.Tree
         public static ConcurrentQueue< IBadLocationUpdate > BadLocationFiles;
         public static ConcurrentQueue< IDeletionUpdate > DirectoryDeletions;
         private static BackgroundWorker _folderScanner;
-        private static IFsPoller fsPoller;
+        private static IFsPoller _fsPoller;
 
         static ItemProvider()
         {
@@ -42,6 +40,15 @@ namespace FileBotPP.Tree
             DirectoryDeletions = new ConcurrentQueue< IDeletionUpdate >();
             ExtraFiles = new ConcurrentQueue< IExtraFileUpdate >();
             Items = new ObservableCollection< IItem >();
+        }
+
+        public static IEnumerable< T > order_by_alpha_numeric<T>( this IEnumerable< T > source, Func< T, string > selector )
+        {
+            var max =
+                source.SelectMany(
+                    i => Regex.Matches( selector( i ), @"\d+" ).Cast< Match >().Select( m => ( int? ) m.Value.Length ) ).Max() ?? 0;
+
+            return source.OrderBy( i => Regex.Replace( selector( i ), @"\d+", m => m.Value.PadLeft( max, '0' ) ) );
         }
 
         public static string get_last_scanned_folder()
@@ -136,7 +143,7 @@ namespace FileBotPP.Tree
             else
             {
                 item.BadLocation = true;
-                var checkdir = item.Parent.Path + "\\Season " + epseasonnum;
+                var checkdir = item.Parent.Path + "\\TvdbTvdbSeason " + epseasonnum;
                 item.NewPath = checkdir + "\\" + item.FullName;
                 return;
             }
@@ -144,13 +151,13 @@ namespace FileBotPP.Tree
             if ( item.Parent.Parent == null && epseasonnum != sseasonnum )
             {
                 item.BadLocation = true;
-                var checkdir = item.Parent.Path + "\\Season " + epseasonnum;
+                var checkdir = item.Parent.Path + "\\TvdbTvdbSeason " + epseasonnum;
                 item.NewPath = checkdir + "\\" + item.FullName;
             }
             if ( item.Parent.Parent != null && epseasonnum != sseasonnum )
             {
                 item.BadLocation = true;
-                var checkdir = item.Parent.Parent.Path + "\\Season " + epseasonnum;
+                var checkdir = item.Parent.Parent.Path + "\\TvdbTvdbSeason " + epseasonnum;
                 item.NewPath = checkdir + "\\" + item.FullName;
             }
         }
@@ -169,8 +176,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
 
             if ( fileitem.Parent == null )
@@ -267,8 +274,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
 
             if ( parent == null )
@@ -364,7 +371,7 @@ namespace FileBotPP.Tree
 
         public static void insert_item_ordered_threadsafe( IItem item )
         {
-            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate { insert_item_ordered( item ); } );
+            Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate { insert_item_ordered( item ); } );
         }
 
         public static void insert_item_ordered( IDirectoryItem parent, IDirectoryItem child, int seasonnum )
@@ -400,8 +407,8 @@ namespace FileBotPP.Tree
                 }
                 catch ( Exception ex )
                 {
-                    Utils.LogLines.Enqueue( ex.Message );
-                    Utils.LogLines.Enqueue( ex.StackTrace );
+                    Factory.Instance.LogLines.Enqueue( ex.Message );
+                    Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                     parent.Items.Insert( addpoint, child );
                     return;
                 }
@@ -515,8 +522,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -571,8 +578,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -701,7 +708,7 @@ namespace FileBotPP.Tree
                 extrafile.Directory.Parent?.Update();
             }
 
-            Common.MetaDataReady += 1;
+            Factory.Instance.MetaDataReady += 1;
         }
 
         public static void move_files_to_valid_folders( IDirectoryItem directory )
@@ -775,8 +782,8 @@ namespace FileBotPP.Tree
                     fitem.Update();
                     season.Update();
 
-                    Common.FileBotPp.set_status_text( "Moved file: " + fitem.FullName + " to " + fitem.Path );
-                    Utils.LogLines.Enqueue( "Moved file: " + fitem.FullName + " to " + fitem.Path );
+                    Factory.Instance.WindowFileBotPp.set_status_text( "Moved file: " + fitem.FullName + " to " + fitem.Path );
+                    Factory.Instance.LogLines.Enqueue( "Moved file: " + fitem.FullName + " to " + fitem.Path );
                     break;
                 }
             }
@@ -807,8 +814,8 @@ namespace FileBotPP.Tree
                 fitem.Update();
                 season.Update();
 
-                Common.FileBotPp.set_status_text( "Moved file: " + fitem.FullName + " to " + fitem.Path );
-                Utils.LogLines.Enqueue( "Moved file: " + fitem.FullName + " to " + fitem.Path );
+                Factory.Instance.WindowFileBotPp.set_status_text( "Moved file: " + fitem.FullName + " to " + fitem.Path );
+                Factory.Instance.LogLines.Enqueue( "Moved file: " + fitem.FullName + " to " + fitem.Path );
                 break;
             }
         }
@@ -870,14 +877,14 @@ namespace FileBotPP.Tree
         {
             try
             {
-                Utils.LogLines.Enqueue( "Deleting folder " + directory.Path );
+                Factory.Instance.LogLines.Enqueue( "Deleting folder " + directory.Path );
 
                 Directory.Delete( directory.Path, true );
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -893,7 +900,7 @@ namespace FileBotPP.Tree
 
         public static void delete_file_in_memory( IFileItem file )
         {
-            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
+            Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
             {
                 file.Parent?.Items.Remove( file );
                 file.Parent?.Update();
@@ -902,7 +909,7 @@ namespace FileBotPP.Tree
 
         public static void delete_folder( IDirectoryItem directory )
         {
-            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
+            Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
             {
                 if ( directory.Parent == null )
                 {
@@ -920,7 +927,7 @@ namespace FileBotPP.Tree
 
         public static void delete_folder_in_memory( IDirectoryItem directory )
         {
-            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
+            Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
             {
                 if ( directory.Parent == null )
                 {
@@ -954,13 +961,13 @@ namespace FileBotPP.Tree
         {
             try
             {
-                Utils.LogLines.Enqueue( "Deleting file " + file.Path );
+                Factory.Instance.LogLines.Enqueue( "Deleting file " + file.Path );
                 File.Delete( file.Path );
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -971,7 +978,7 @@ namespace FileBotPP.Tree
 
         public static void folder_scan_update()
         {
-            Common.FileBotPp.set_status_text( get_last_scanned_folder() );
+            Factory.Instance.WindowFileBotPp.set_status_text( get_last_scanned_folder() );
 
             IDirectoryItem ditem;
 
@@ -1009,38 +1016,38 @@ namespace FileBotPP.Tree
                 fitem.Parent?.Parent?.Update();
             }
 
-            Common.FileBotPp.set_series_count( Items.OfType< IDirectoryItem >().Count().ToString() );
-            Common.FileBotPp.set_season_count( Items.OfType< IDirectoryItem >().ToList().Sum( series => series.Items.OfType< IDirectoryItem >().Count( item => item.Empty != true ) ).ToString() );
-            Common.FileBotPp.set_episode_count( Items.OfType< IDirectoryItem >().Sum( item => item.Count ).ToString() );
+            Factory.Instance.WindowFileBotPp.set_series_count( Items.OfType< IDirectoryItem >().Count().ToString() );
+            Factory.Instance.WindowFileBotPp.set_season_count( Items.OfType< IDirectoryItem >().ToList().Sum( series => series.Items.OfType< IDirectoryItem >().Count( item => item.Empty != true ) ).ToString() );
+            Factory.Instance.WindowFileBotPp.set_episode_count( Items.OfType< IDirectoryItem >().Sum( item => item.Count ).ToString() );
         }
 
         public static void folder_scan_update_threadsafe()
         {
-            Common.FileBotPp.Dispatcher.Invoke( ( MethodInvoker ) folder_scan_update );
+            Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) folder_scan_update );
         }
 
         private static void FolderScanner_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
-            Common.FileBotPp.set_status_text( "Series tree populated..." );
-            Common.MetaDataReady += 1;
-            Common.FileBotPp.set_ready( true );
+            Factory.Instance.WindowFileBotPp.set_status_text( "TvdbTvdbSeries tree populated..." );
+            Factory.Instance.MetaDataReady += 1;
+            Factory.Instance.WindowFileBotPp.set_ready( true );
         }
 
         private static void FolderScanner_DoWork( object sender, DoWorkEventArgs e )
         {
-            if ( fsPoller != null )
+            if ( _fsPoller != null )
             {
                 FsPoller.stop_all();
-                fsPoller = null;
+                _fsPoller = null;
             }
 
-            create_collection_tree( null, Common.ScanLocation );
-            fsPoller = new FsPoller();
+            create_collection_tree( null, Factory.Instance.ScanLocation );
+            _fsPoller = new FsPoller();
         }
 
         public static void scan_series_folder()
         {
-            Common.FileBotPp.set_status_text( "Scanning..." );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Scanning..." );
             _folderScanner = new BackgroundWorker {WorkerReportsProgress = true};
             _folderScanner.DoWork += FolderScanner_DoWork;
             _folderScanner.RunWorkerCompleted += FolderScanner_RunWorkerCompleted;

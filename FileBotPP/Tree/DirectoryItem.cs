@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using FileBotPP.Helpers;
-using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Tree
 {
@@ -175,7 +174,7 @@ namespace FileBotPP.Tree
 
             if ( System.IO.Directory.Exists( newpath ) )
             {
-                Utils.LogLines.Enqueue( "Unable to rename, new directory name exists" );
+                Factory.Instance.LogLines.Enqueue( "Unable to rename, new directory name exists" );
                 return false;
             }
 
@@ -198,8 +197,8 @@ namespace FileBotPP.Tree
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return false;
             }
         }

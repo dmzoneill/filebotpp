@@ -6,9 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using FileBotPP.Helpers;
-using FileBotPP.Interfaces;
-using FileBotPP.Metadata.Interfaces;
-using FileBotPP.Metadata.tvdb.Interfaces;
 
 namespace FileBotPP.Metadata
 {
@@ -18,7 +15,7 @@ namespace FileBotPP.Metadata
         private static readonly Random Random = new Random();
         private static BackgroundWorker _artworkWorker;
         private readonly string[] _dirs;
-        private readonly List< ISeries > _series;
+        private readonly List< ITvdbSeries > _series;
         private readonly List< ITvdbWorker > _workers;
         private BackgroundWorker _allSeriesWorker;
         private string _seriesName;
@@ -29,31 +26,31 @@ namespace FileBotPP.Metadata
         {
             FileDownloads = new ConcurrentQueue< string[] >();
 
-            if ( !Directory.Exists( Common.AppDataFolder + "/tvdbartwork/" ) )
+            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/" ) )
             {
-                Directory.CreateDirectory( Common.AppDataFolder + "/tvdbartwork" );
+                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork" );
             }
 
-            if ( !Directory.Exists( Common.AppDataFolder + "/tvdbartwork/banner" ) )
+            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/banner" ) )
             {
-                Directory.CreateDirectory( Common.AppDataFolder + "/tvdbartwork/banner" );
+                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork/banner" );
             }
 
-            if ( !Directory.Exists( Common.AppDataFolder + "/tvdbartwork/fanart" ) )
+            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" ) )
             {
-                Directory.CreateDirectory( Common.AppDataFolder + "/tvdbartwork/fanart" );
+                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" );
             }
 
-            if ( !Directory.Exists( Common.AppDataFolder + "/tvdbartwork/poster" ) )
+            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/poster" ) )
             {
-                Directory.CreateDirectory( Common.AppDataFolder + "/tvdbartwork/poster" );
+                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork/poster" );
             }
         }
 
         public Tvdb( string[] dirs )
         {
             this._dirs = dirs;
-            this._series = new List< ISeries >();
+            this._series = new List< ITvdbSeries >();
             this._workers = new List< ITvdbWorker >();
         }
 
@@ -76,8 +73,8 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -94,17 +91,17 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
-        public List< ISeries > get_series()
+        public List< ITvdbSeries > get_series()
         {
             return this._series;
         }
 
-        public ISeries get_series_by_name( string name )
+        public ITvdbSeries get_series_by_name( string name )
         {
             try
             {
@@ -112,8 +109,8 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return null;
             }
         }
@@ -126,8 +123,8 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -148,8 +145,8 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -157,7 +154,7 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                Utils.LogLines.Enqueue( @"Fetching TVDB metadata for " + this._seriesName + "..." );
+                Factory.Instance.LogLines.Enqueue( @"Fetching TVDB metadata for " + this._seriesName + "..." );
 
                 var tvdbwoker = new TvdbWorker( this._seriesName );
                 tvdbwoker.Run();
@@ -173,8 +170,8 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -188,8 +185,8 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -198,12 +195,12 @@ namespace FileBotPP.Metadata
             try
             {
                 var percent = e.ProgressPercentage/100.0;
-                Common.FileBotPp.set_tvdb_progress( percent + "%" );
+                Factory.Instance.WindowFileBotPp.set_tvdb_progress( percent + "%" );
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -211,14 +208,14 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                Common.FileBotPp.set_status_text( "Tvdb done..." );
-                Common.MetaDataReady += 1;
+                Factory.Instance.WindowFileBotPp.set_status_text( "Tvdb done..." );
+                Factory.Instance.MetaDataReady += 1;
                 start_artwork_downloader();
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -226,7 +223,7 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                Utils.LogLines.Enqueue( @"Fetching TVDB metadata..." );
+                Factory.Instance.LogLines.Enqueue( @"Fetching TVDB metadata..." );
 
                 var wait = true;
 
@@ -259,8 +256,8 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -268,7 +265,7 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                Utils.LogLines.Enqueue( @"Fetching TVDB metadata..." );
+                Factory.Instance.LogLines.Enqueue( @"Fetching TVDB metadata..." );
 
                 string[] download;
 
@@ -279,13 +276,13 @@ namespace FileBotPP.Metadata
                         continue;
                     }
 
-                    Utils.download_file( download[ 0 ], download[ 1 ] );
+                    Factory.Instance.Utils.download_file( download[ 0 ], download[ 1 ] );
                 }
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -295,7 +292,7 @@ namespace FileBotPP.Metadata
             {
                 Thread.Sleep( 50 );
 
-                Utils.LogLines.Enqueue( @"Waiting for threads" );
+                Factory.Instance.LogLines.Enqueue( @"Waiting for threads" );
 
                 var count = 2;
 
@@ -310,8 +307,8 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -332,8 +329,8 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Utils.LogLines.Enqueue( ex.Message );
-                Utils.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 

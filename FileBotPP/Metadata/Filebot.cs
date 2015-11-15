@@ -4,12 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FileBotPP.Helpers;
-using FileBotPP.Interfaces;
-using FileBotPP.Metadata.Interfaces;
-using FileBotPP.Payloads;
-using FileBotPP.Payloads.Interfaces;
 using FileBotPP.Tree;
-using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Metadata
 {
@@ -36,7 +31,7 @@ namespace FileBotPP.Metadata
 
         public void check_series( IDirectoryItem directory )
         {
-            Common.FileBotPp.set_status_text( "Checking names in series: " + directory.FullName );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Checking names in tvdbSeries: " + directory.FullName );
             this._checkSeasonDirectory = directory;
             this._worker = new BackgroundWorker();
             this._worker.RunWorkerCompleted += this._worker_RunWorkerCompleted;
@@ -53,7 +48,7 @@ namespace FileBotPP.Metadata
 
         public void check_series_all()
         {
-            Common.FileBotPp.set_status_text( "Checking all series names" );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Checking all tvdbSeries names" );
             this._worker = new BackgroundWorker();
             this._worker.RunWorkerCompleted += this._worker_RunWorkerCompleted;
             this._worker.ProgressChanged += this._worker_ProgressChanged;
@@ -64,7 +59,7 @@ namespace FileBotPP.Metadata
 
         private void _worker_ProgressChanged( object sender, ProgressChangedEventArgs e )
         {
-            Common.FileBotPp.set_status_text( "Checked (" + this._checkedCount + "/" + this._toCheckCount + ") " + this._lastChecked?.FullName );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Checked (" + this._checkedCount + "/" + this._toCheckCount + ") " + this._lastChecked?.FullName );
             this.consume_queue();
         }
 
@@ -123,7 +118,7 @@ namespace FileBotPP.Metadata
         private void check_series_names( IItem directory )
         {
             var fbdirectory = directory.Path.Replace( '\\', '/' );
-            var output = Utils.get_process_output( "filebot", "-r --db TheTVDB --action test -rename \"" + fbdirectory + "\" -non-strict 2> nul", 25000 );
+            var output = Factory.Instance.Utils.get_process_output( "filebot", "-r --db TheTVDB --action test -rename \"" + fbdirectory + "\" -non-strict 2> nul", 25000 );
 
             var renameMatches = Regex.Matches( output, @"\[TEST\] Rename \[(.*?)] to \[(.*)\]", RegexOptions.IgnoreCase );
 
@@ -148,7 +143,7 @@ namespace FileBotPP.Metadata
         {
             this.consume_queue();
 
-            Common.FileBotPp.set_status_text( "Series name check completed" );
+            Factory.Instance.WindowFileBotPp.set_status_text( "TvdbTvdbSeries name check completed" );
         }
 
         private void consume_queue()

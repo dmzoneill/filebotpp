@@ -2,13 +2,11 @@
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Linq;
-using FileBotPP.Interfaces;
 using FileBotPP.Tree;
-using FileBotPP.Tree.Interfaces;
 
 namespace FileBotPP.Helpers
 {
-    public class FfmpegCorruptWorker : ISupportsStop, IDisposable
+    public class FfmpegCorruptWorker : ISupportsStop, IDisposable, IFfmpegCorruptWorker
     {
         private readonly ConcurrentQueue< IFileItem > _brokenFiles;
         private readonly IDirectoryItem _directory;
@@ -63,7 +61,7 @@ namespace FileBotPP.Helpers
 
         private void consume_queue()
         {
-            Common.FileBotPp.set_status_text( "File video stream check (" + this._scannedItemsCount + "/" + this._scanItemsCount + ")" );
+            Factory.Instance.WindowFileBotPp.set_status_text( "File video stream check (" + this._scannedItemsCount + "/" + this._scanItemsCount + ")" );
 
             IFileItem item;
             while ( this._brokenFiles.TryDequeue( out item ) )
@@ -128,21 +126,21 @@ namespace FileBotPP.Helpers
             var mi = Environment.CurrentDirectory + "\\Library\\ffmpeg.exe";
             var arguments = "-y -v info -t 5 -i \"" + fitem.Path.Replace( "\\", "/" ) + "\" -c:a copy -c:s mov_text -c:v mpeg4 -f mp4 test.mp4";
 
-            if ( Utils.write_file( Common.AppDataFolder + "\\ffmpeg.bat", "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
+            if (Factory.Instance.Utils.write_file(Factory.Instance.AppDataFolder + "\\ffmpeg.bat", "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
             {
                 return;
             }
 
-            var output = Utils.run_process_background( Common.AppDataFolder + "\\ffmpeg.bat", "" );
+            var output = Factory.Instance.Utils.run_process_background(Factory.Instance.AppDataFolder + "\\ffmpeg.bat", "" );
 
             if ( output > 0 )
             {
                 this._brokenFiles.Enqueue( fitem );
-                Utils.LogLines.Enqueue( "FFmpeg problem : " + fitem.Path );
+                Factory.Instance.LogLines.Enqueue( "FFmpeg problem : " + fitem.Path );
             }
             else
             {
-                Utils.LogLines.Enqueue( "FFmpeg looks ok : " + fitem.Path );
+                Factory.Instance.LogLines.Enqueue( "FFmpeg looks ok : " + fitem.Path );
             }
             this._worker.ReportProgress( 1 );
         }

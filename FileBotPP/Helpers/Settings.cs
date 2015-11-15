@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace FileBotPP.Helpers
 {
-    public static class Settings
+    public class Settings : ISettings
     {
-        public static string ProxyServerHost
+        public string ProxyServerHost
         {
             get { return Properties.Settings.Default.ProxyServerHost; }
             set
@@ -16,7 +16,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static int ProxyServerPort
+        public int ProxyServerPort
         {
             get { return Properties.Settings.Default.ProxyServerPort; }
             set
@@ -26,7 +26,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static List< string > AllowedTypes
+        public List< string > AllowedTypes
         {
             get
             {
@@ -45,7 +45,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static string TvdbApiKey
+        public string TvdbApiKey
         {
             get { return Properties.Settings.Default.TvdbApiKey; }
             set
@@ -55,7 +55,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static int CacheTimeout
+        public int CacheTimeout
         {
             get { return Properties.Settings.Default.CacheTimeout; }
             set
@@ -65,7 +65,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static int PoorQualityP
+        public int PoorQualityP
         {
             get { return Properties.Settings.Default.PoorQualityP; }
             set
@@ -75,7 +75,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static string TorrentPreferredQuality
+        public string TorrentPreferredQuality
         {
             get { return Properties.Settings.Default.TorrentPreferredQuality; }
             set
@@ -85,7 +85,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static string FFmpegConvert
+        public string FFmpegConvert
         {
             get { return Properties.Settings.Default.FFmpegConvert; }
             set
@@ -95,7 +95,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static int FilesSystemWatcherMinRefreshTime
+        public int FilesSystemWatcherMinRefreshTime
         {
             get { return Properties.Settings.Default.FsWatcherMinRefresh; }
             set
@@ -105,7 +105,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static int FilesSystemWatcherMaxRefreshTime
+        public int FilesSystemWatcherMaxRefreshTime
         {
             get { return Properties.Settings.Default.FsWatcherMaxRefresh; }
             set
@@ -115,7 +115,7 @@ namespace FileBotPP.Helpers
             }
         }
 
-        public static bool FilesSystemWatcherEnabled
+        public bool FilesSystemWatcherEnabled
         {
             get { return Properties.Settings.Default.FsWatcherEnabled; }
             set
