@@ -314,7 +314,7 @@ namespace FileBotPP.Tree
 
                 if ( epname.Contains( "s" + String.Format( "{0:00}", seasonnum ) + "e" + string.Format( "{0:00}", epnum ) ) )
                 {
-                    if ( epname.Contains(Factory.Instance.Settings.TorrentPreferredQuality ) )
+                    if ( epname.Contains( Factory.Instance.Settings.TorrentPreferredQuality ) )
                     {
                         preferred = torrent;
                         continue;

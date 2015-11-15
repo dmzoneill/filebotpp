@@ -9,8 +9,8 @@ namespace FileBotPP.Metadata
     internal class TvdbWorker : ITvdbWorker
     {
         private readonly string _seriesName;
-        private ITvdbSeries _tvdbSeries;
         private int _seriesid = -1;
+        private ITvdbSeries _tvdbSeries;
         private bool _working;
         private string _xml;
 
@@ -124,9 +124,9 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbids/" ) )
+                if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbids/" ) )
                 {
-                    Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbids" );
+                    Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbids" );
                 }
 
                 var tempFile = Factory.Instance.AppDataFolder + "/tvdbids/" + this._seriesName;
@@ -135,7 +135,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         xml = File.ReadAllText( tempFile );
                     }
@@ -165,9 +165,9 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbids/" ) )
+                if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbids/" ) )
                 {
-                    Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbids" );
+                    Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbids" );
                 }
 
                 var tempFile = Factory.Instance.AppDataFolder + "/tvdbids/" + this._seriesName;
@@ -176,7 +176,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         xml = File.ReadAllText( tempFile );
                     }
@@ -360,16 +360,16 @@ namespace FileBotPP.Metadata
             {
                 Factory.Instance.LogLines.Enqueue( @"Download " + this._seriesName + @" metadata..." );
 
-                if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdb/" ) )
+                if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdb/" ) )
                 {
-                    Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdb" );
+                    Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdb" );
                 }
 
                 var tempFile = Factory.Instance.AppDataFolder + "/tvdb/" + this._seriesid;
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         this._xml = Factory.Instance.Utils.read_file_from_zip( tempFile, "en.xml" );
                         return;

@@ -44,11 +44,11 @@ namespace FileBotPP
         {
             try
             {
-                if ( File.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/poster/" + this.TvdbSeries.Id + ".jpg" ) )
+                if ( File.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/poster/" + this.TvdbSeries.Id + ".jpg" ) )
                 {
                     this._seriesImage1 = new BitmapImage();
                     this._seriesImage1.BeginInit();
-                    this._seriesImage1.UriSource = new Uri(Factory.Instance.AppDataFolder + "/tvdbartwork/poster/" + this.TvdbSeries.Id + ".jpg" );
+                    this._seriesImage1.UriSource = new Uri( Factory.Instance.AppDataFolder + "/tvdbartwork/poster/" + this.TvdbSeries.Id + ".jpg" );
                     this._seriesImage1.EndInit();
                     this.TvseriesImage.Source = this._seriesImage1;
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -225,7 +226,7 @@ namespace FileBotPP
         {
             try
             {
-                this.LabelLowerText.Text = this.RangeSlider.LowerValue.ToString();
+                this.LabelLowerText.Text = this.RangeSlider.LowerValue.ToString( CultureInfo.CurrentCulture );
             }
             catch
             {
@@ -237,7 +238,7 @@ namespace FileBotPP
         {
             try
             {
-                this.LabelUpperText.Text = this.RangeSlider.UpperValue.ToString();
+                this.LabelUpperText.Text = this.RangeSlider.UpperValue.ToString( CultureInfo.CurrentCulture );
             }
             catch
             {

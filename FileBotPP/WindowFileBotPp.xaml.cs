@@ -76,14 +76,14 @@ namespace FileBotPP
                 var asw = new WindowAddSeries {Top = this.Top + ( this.Height/2 ) - 30, Left = this.Left + ( this.Width/2 ) - 225};
                 asw.ShowDialog();
 
-                if (Factory.Instance.AddSeriesName == null )
+                if ( Factory.Instance.AddSeriesName == null )
                 {
                     return;
                 }
 
-                Directory.CreateDirectory(Factory.Instance.ScanLocation + "\\" + Factory.Instance.AddSeriesName );
+                Directory.CreateDirectory( Factory.Instance.ScanLocation + "\\" + Factory.Instance.AddSeriesName );
 
-                Factory.Instance.Tvdb.downloads_series_data(Factory.Instance.AddSeriesName );
+                Factory.Instance.Tvdb.downloads_series_data( Factory.Instance.AddSeriesName );
 
                 Thread.Sleep( 100 );
 
@@ -368,17 +368,17 @@ namespace FileBotPP
             }
         }
 
-        public void set_kat_progress(string text)
+        public void set_kat_progress( string text )
         {
             try
             {
                 this.KatLabel.Visibility = Visibility.Visible;
                 this.Katprogress.Content = text;
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
-                Factory.Instance.LogLines.Enqueue(ex.Message);
-                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -1136,7 +1136,7 @@ namespace FileBotPP
 
                 this.set_ready( false );
 
-                if (Factory.Instance.MetaDataReady >= 3 )
+                if ( Factory.Instance.MetaDataReady >= 3 )
                 {
                     Factory.Instance.MetaDataReady = 1;
                 }

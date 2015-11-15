@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -21,9 +20,9 @@ namespace FileBotPP.Helpers
             {
                 var wrGeturl = WebRequest.Create( url );
 
-                if ( string.Compare(Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
+                if ( string.Compare( Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
                 {
-                    var wp = new WebProxy(Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
+                    var wp = new WebProxy( Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
                     wrGeturl.Proxy = wp;
                 }
                 else
@@ -68,9 +67,9 @@ namespace FileBotPP.Helpers
             {
                 var client = new WebClient();
 
-                if ( string.Compare(Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
+                if ( string.Compare( Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
                 {
-                    var wp = new WebProxy(Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
+                    var wp = new WebProxy( Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
                     client.Proxy = wp;
                 }
                 else
@@ -287,17 +286,17 @@ namespace FileBotPP.Helpers
 
         public bool check_for_internet_connection()
         {
-            return check_for_website( "http://www.google.com" );
+            return this.check_for_website( "http://www.google.com" );
         }
 
         public bool check_for_eztv_connection()
         {
-            return check_for_website( "https://eztv.ag" );
+            return this.check_for_website( "https://eztv.ag" );
         }
 
         public bool check_for_tvdb_connection()
         {
-            return check_for_website( "http://thetvdb.com" );
+            return this.check_for_website( "http://thetvdb.com" );
         }
 
         public bool check_for_website( string url )
@@ -306,9 +305,9 @@ namespace FileBotPP.Helpers
             {
                 using ( var client = new WebClient() )
                 {
-                    if ( string.Compare(Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
+                    if ( string.Compare( Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
                     {
-                        var wp = new WebProxy(Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
+                        var wp = new WebProxy( Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
                         client.Proxy = wp;
                     }
                     else
@@ -392,7 +391,7 @@ namespace FileBotPP.Helpers
 
                     foreach ( var spchild in sp.Children )
                     {
-                        return get_visual_child< T >( spchild as Visual );
+                        return this.get_visual_child< T >( spchild as Visual );
                     }
                 }
                 else if ( ReferenceEquals( child.GetType(), typeof (T) ) )
@@ -414,7 +413,7 @@ namespace FileBotPP.Helpers
                 {
                     list.Add( child as Visual );
                 }
-                list.AddRange( AllChildren( child ) );
+                list.AddRange( this.AllChildren( child ) );
             }
             return list;
         }

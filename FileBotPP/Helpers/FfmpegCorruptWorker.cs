@@ -33,9 +33,10 @@ namespace FileBotPP.Helpers
             this._directory = directory;
         }
 
-        public void stop_worker()
+        public void Dispose()
         {
-            this._stop = true;
+            this.Dispose( true );
+            GC.SuppressFinalize( this );
         }
 
         public void start_scan()
@@ -47,6 +48,11 @@ namespace FileBotPP.Helpers
             this._worker.RunWorkerCompleted += this._worker_RunWorkerCompleted;
             this._worker.WorkerSupportsCancellation = true;
             this._worker.RunWorkerAsync();
+        }
+
+        public void stop_worker()
+        {
+            this._stop = true;
         }
 
         private void _worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
@@ -126,12 +132,12 @@ namespace FileBotPP.Helpers
             var mi = Environment.CurrentDirectory + "\\Library\\ffmpeg.exe";
             var arguments = "-y -v info -t 5 -i \"" + fitem.Path.Replace( "\\", "/" ) + "\" -c:a copy -c:s mov_text -c:v mpeg4 -f mp4 test.mp4";
 
-            if (Factory.Instance.Utils.write_file(Factory.Instance.AppDataFolder + "\\ffmpeg.bat", "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
+            if ( Factory.Instance.Utils.write_file( Factory.Instance.AppDataFolder + "\\ffmpeg.bat", "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
             {
                 return;
             }
 
-            var output = Factory.Instance.Utils.run_process_background(Factory.Instance.AppDataFolder + "\\ffmpeg.bat", "" );
+            var output = Factory.Instance.Utils.run_process_background( Factory.Instance.AppDataFolder + "\\ffmpeg.bat", "" );
 
             if ( output > 0 )
             {
@@ -151,12 +157,6 @@ namespace FileBotPP.Helpers
             {
                 this._worker.Dispose();
             }
-        }
-
-        public void Dispose()
-        {
-            this.Dispose( true );
-            GC.SuppressFinalize( this );
         }
     }
 }

@@ -13,7 +13,6 @@ namespace FileBotPP.Metadata
         private readonly string _seriesname;
         private readonly List< ITorrent > _torrents;
         private string _imdbid;
-        private bool _processed;
         private bool _working;
 
         public KatWorker( string link, string seriesname )
@@ -42,11 +41,6 @@ namespace FileBotPP.Metadata
             return this._seriesname;
         }
 
-        public bool is_processed()
-        {
-            return this._processed;
-        }
-
         public List< ITorrent > get_torrents()
         {
             return this._torrents;
@@ -60,7 +54,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         return true;
                     }
@@ -90,16 +84,16 @@ namespace FileBotPP.Metadata
 
         private void get_series_data()
         {
-            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/kat/" ) )
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/kat/" ) )
             {
-                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/kat" );
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/kat" );
             }
 
             var tempFile = Factory.Instance.AppDataFolder + "/kat/" + this._seriesname;
 
             if ( File.Exists( tempFile ) )
             {
-                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                 {
                     var filehtml = File.ReadAllText( tempFile );
                     this.parse_imdb_id( filehtml );
@@ -119,7 +113,7 @@ namespace FileBotPP.Metadata
                 return;
             }
 
-            if (Factory.Instance.Utils.write_file( tempFile, temp ) == false )
+            if ( Factory.Instance.Utils.write_file( tempFile, temp ) == false )
             {
                 return;
             }
@@ -145,9 +139,9 @@ namespace FileBotPP.Metadata
 
             Factory.Instance.LogLines.Enqueue( @"Parsing " + this._seriesname + @" metadata..." );
 
-            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/kat/" + this._seriesname ) )
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/kat/" + this._seriesname ) )
             {
-                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/kat" + this._seriesname );
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/kat" + this._seriesname );
             }
 
             for ( var x = 1; x < this.get_series_torrents_pages_count(); x++ )
@@ -191,7 +185,7 @@ namespace FileBotPP.Metadata
                 return torrentPage;
             }
 
-            if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+            if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
             {
                 torrentPage = File.ReadAllText( tempFile );
             }
@@ -218,7 +212,7 @@ namespace FileBotPP.Metadata
 
                 var torrent = new Torrent {Epname = epname.Groups[ 1 ].Value.Trim(), Magnetlink = epmagnet.Groups[ 1 ].Value.Trim(), Series = this._seriesname, Imbdid = this._imdbid};
                 this._torrents.Add( torrent );
-                Console.WriteLine( "    " + torrent.Imbdid + " - " + torrent.Epname + " - " + torrent.Magnetlink );
+                //Console.WriteLine( "    " + torrent.Imbdid + " - " + torrent.Epname + " - " + torrent.Magnetlink );
             }
         }
     }

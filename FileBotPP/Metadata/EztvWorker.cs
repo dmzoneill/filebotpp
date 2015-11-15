@@ -67,7 +67,7 @@ namespace FileBotPP.Metadata
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                     {
                         return true;
                     }
@@ -97,16 +97,16 @@ namespace FileBotPP.Metadata
 
         private void get_series_data()
         {
-            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/eztv/" ) )
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/eztv/" ) )
             {
-                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/eztv" );
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/eztv" );
             }
 
             var tempFile = Factory.Instance.AppDataFolder + "/eztv/" + this._seriesid;
 
             if ( File.Exists( tempFile ) )
             {
-                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + (Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
                 {
                     var filehtml = File.ReadAllText( tempFile );
                     this.parse_imdb_id( filehtml );
@@ -127,7 +127,7 @@ namespace FileBotPP.Metadata
                 return;
             }
 
-            if (Factory.Instance.Utils.write_file( tempFile, temp ) == false )
+            if ( Factory.Instance.Utils.write_file( tempFile, temp ) == false )
             {
                 return;
             }

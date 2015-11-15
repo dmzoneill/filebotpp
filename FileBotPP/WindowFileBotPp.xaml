@@ -1,811 +1,906 @@
 ﻿<controls:MetroWindow x:Class="FileBotPP.WindowFileBotPp"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:tree="clr-namespace:FileBotPP.Tree"
-        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        mc:Ignorable="d"
-        Title="Filebot++" Height="650" Width="1000" MinWidth="1000" MinHeight="600" Loaded="Window_Loaded" Closing="Window_Closing" ResizeMode="CanResizeWithGrip" WindowStartupLocation="CenterScreen"
-        BorderThickness="1" 
-        GlowBrush="Black"
-        TitleForeground="Black"              
-        WindowTransitionsEnabled="False" 
-        WindowTitleBrush="{DynamicResource TitleGraient}">
-    <controls:MetroWindow.RightWindowCommands>
-        <controls:WindowCommands>
-            <Button Name="StopThreadButton" Click="StopThreadsMenuItem_OnClick" ToolTip="Stop All Threads">
-                <Image Source="Images/16/Transport/stop_sign-16.png" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Button>
-            <Button Name="SettingsTitleButton" Content="Settings" Click="SettingsTitleButton_OnClick">
-                <Button.Style>
-                    <Style>
-                        <Setter Property="Button.Foreground" Value="Black"/>
-                        <Setter Property="Button.Background" Value="Transparent"/>
-                        <Setter Property="Button.BorderThickness" Value="0"/>
-                     </Style>
-                </Button.Style>    
-            </Button>
-        </controls:WindowCommands>
-    </controls:MetroWindow.RightWindowCommands>
-    <controls:MetroWindow.IconTemplate>
-        <DataTemplate>
-            <Image Stretch="Uniform" Source="Images/filebot/icon-32-26.png" />
-        </DataTemplate>
-    </controls:MetroWindow.IconTemplate>
-    <controls:MetroWindow.Resources>
-        <Style TargetType="{x:Type controls:WindowButtonCommands}">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding ShowTitleBar, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:MetroWindow}}}" Value="True">
-                    <Setter Property="Foreground" Value="Black" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        <LinearGradientBrush x:Key="TitleGraient" StartPoint="0,2" EndPoint="0,0">
-            <GradientStop Color="LightBlue" Offset="1" />
-            <GradientStop Color="White" Offset="0.75" />
-        </LinearGradientBrush>
-        <Style x:Key="GridSplitterVerticalGripStyle" TargetType="{x:Type GridSplitter}">
-            <Setter Property="VerticalAlignment" Value="Stretch" />
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="Cursor" Value="SizeWE" />
-            <Setter Property="Background" Value="White" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type GridSplitter}">
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
-                                Background="{TemplateBinding Background}" Width="{TemplateBinding Width}">
-                            <Border Height="50" Width="4" VerticalAlignment="Center" HorizontalAlignment="Center" BorderThickness="1 0" Background="White" BorderBrush="#999999"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style TargetType="{x:Type Window}">
-            <Setter Property="FontFamily" Value="Tahoma" />
-        </Style>
-        <Style x:Key="VerticalGridSplitter" TargetType="{x:Type GridSplitter}" BasedOn="{StaticResource GridSplitterVerticalGripStyle}">
-            <Setter Property="Width" Value="6" />
-            <Setter Property="Margin" Value="15 0" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-        </Style>
-        <HierarchicalDataTemplate DataType="{x:Type tree:DirectoryItem}" ItemsSource="{Binding Items}">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="1">
-                <Border BorderBrush="Black" BorderThickness="1" Height="12" Margin="0,0,5,0" MinWidth="12">
-                    <UniformGrid Rows="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="18" Margin="0" >
-                        <Rectangle Fill="{x:Static tree:ItemStatus.EmptyColour}" ToolTip="{x:Static tree:ItemStatus.EmptyTooltip}" MinWidth="4" Name="EmptyRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.CorruptedColour}" ToolTip="{x:Static tree:ItemStatus.CorruptedTooltip}"  MinWidth="4" Name="CorruptedRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.BadLocationColour}" ToolTip="{x:Static tree:ItemStatus.BadLocationTooltip}" MinWidth="4" Name="BadLocationRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.MissingColour}" ToolTip="{x:Static tree:ItemStatus.MissingTooltip}" MinWidth="4" Name="MissingRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.QualityColour}" ToolTip="{x:Static tree:ItemStatus.QualityTooltip}" MinWidth="4" Name="BadQualityRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.DisallowedTypeColour}" ToolTip="{x:Static tree:ItemStatus.DisallowedTypeTooltip}" MinWidth="4" Name="DisallowedTypeRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.BadNameColour}" ToolTip="{x:Static tree:ItemStatus.BadNameTooltip}" MinWidth="4" Name="BadNameRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.ExtraColour}" ToolTip="{x:Static tree:ItemStatus.ExtraTooltip}" MinWidth="4" Name="ExtraRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.TorrentColour}" ToolTip="{x:Static tree:ItemStatus.TorrentTooltip}" MinWidth="4" Name="TorrentRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.OkColour}" ToolTip="{x:Static tree:ItemStatus.OkTooltip}" MinWidth="4" Name="OkRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                    </UniformGrid>
-                </Border>
-                <Button ToolTip="Rename all files" Width="16" Height="16" Margin="0,1,5,1" Name="RenameAllFilesButton" Click="RenameFilesButton_Click" >
-                    <Image Source="Images/16/Editing/rename-16.png"/>
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Path=SuggestedName}" Value="">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="DirectoryNameTextBlock" VerticalAlignment="Center" MouseDown="DirectoryNameTextBlock_MouseDown">
-                    <TextBlock.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Refresh" Name="RefreshMenuItem" Click="RefreshMenuItem_OnClick">
-                                <MenuItem.Style>
-                                    <Style></Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Very_Basic/refresh-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator HorizontalAlignment="Stretch" Height="2" Margin="2">
-                                <Separator.Style>
-                                    <Style></Style>
-                                </Separator.Style>
-                            </Separator>
-                            <MenuItem Header="Open containing folder" Name="OpenFolderMenuItem" Click="OpenFolderMenuItem_OnClick">
-                                <MenuItem.Style>
-                                    <Style></Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Very_Basic/opened_folder-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator HorizontalAlignment="Stretch" Height="2">
-                                <Separator.Style>
-                                    <Style></Style>
-                                </Separator.Style>
-                            </Separator>
-                            <MenuItem Header="Check filename tvdbEpisode name(s)" Name="CheckFilenamesMenuItem" Click="CheckNamesMenuItem_OnClick">
-                                <MenuItem.Style>
-                                    <Style></Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Editing/rename-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Move file(s) to correct season folder(s)" IsEnabled="{Binding Path=BadLocation}" Name="MoveItemsMenuIem" Click="MoveItemsMenuIem_OnClick">
-                                <MenuItem.Style>
-                                    <Style TargetType="MenuItem">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=BadLocation}" Value="True">
-                                                <Setter Property="IsEnabled" Value="false" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Ecommerce/move_stock-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Delete empty/invalid type/corrupt item(s)" Name="DeleteMenuItem" Click="DeleteMenuItem_OnClick">
-                                <MenuItem.Style>
-                                    <Style TargetType="MenuItem">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=Dirty}" Value="False">
-                                                <Setter Property="IsEnabled" Value="false" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Editing/delete-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Check files(s) for corruption" Name="CheckCorruptMenuItem" Click="CheckCorruptMenuItem_OnClick">
-                                <MenuItem.Style>
-                                    <Style></Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Files/check_file-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Convert file(s)" Name="ConvertFilesMenuItem" Click="ConvertFilesMenuItem_OnClick">
-                                <MenuItem.Style>
-                                    <Style></Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Industry/ac_dc_converter-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Download torrent(s)" IsEnabled="{Binding Path=Torrent}" Name="DownloadTorrentMenuItem" Click="DownloadTorrentMenuItem_OnClick">
-                                <MenuItem.Style>
-                                    <Style></Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Very_Basic/document-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator HorizontalAlignment="Stretch" Height="2">
-                                <Separator.Style>
-                                    <Style></Style>
-                                </Separator.Style>
-                            </Separator>
-                            <MenuItem Header="Rename folder" Name="RenameDirectoryMenuItem" Click="RenameDirectoryMenuItem_OnClick">
-                                <MenuItem.Style>
-                                    <Style></Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Editing/rename-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator HorizontalAlignment="Stretch" Height="2">
-                                <Separator.Style>
-                                    <Style></Style>
-                                </Separator.Style>
-                            </Separator>
-                            <MenuItem Header="Delete folder" Foreground="DarkRed" Name="DeleteFileMenuItem" Click="DeleteFolderMenuItem_OnClick">
-                                <MenuItem.Style>
-                                    <Style></Style>
-                                </MenuItem.Style>
-                                <MenuItem.Icon>
-                                    <Image Source="Images/16/Editing/delete-16.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </ContextMenu>
-                    </TextBlock.ContextMenu>
-                </TextBlock>
-                <TextBox BorderThickness="1" Padding="1" Name="FolderRenameTextBox" VerticalAlignment="Center" Text="{Binding Path=FullName}" HorizontalAlignment="Stretch" PreviewKeyDown="FolderRenameTextBox_PreviewKeyDown">
-                    <TextBox.Style>
-                        <Style TargetType="{x:Type TextBox}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=DirectoryNameTextBlock, Path=Visibility}" Value="Visible">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBox.Style>
-                </TextBox>
-            </StackPanel>
-            <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding Path=Empty}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="EmptyRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=Missing}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="MissingRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=BadLocation}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="BadLocationRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=BadName}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="BadNameRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=BadQuality}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="BadQualityRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=Corrupt}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="CorruptedRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=Torrent}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="TorrentRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=AllowedType}">
-                    <DataTrigger.Value>false</DataTrigger.Value>
-                    <Setter TargetName="DisallowedTypeRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=Extra}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="ExtraRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-            </DataTemplate.Triggers>
-        </HierarchicalDataTemplate>
-        <DataTemplate DataType="{x:Type tree:FileItem}">
-            <StackPanel Orientation="Horizontal">
-                <Border BorderBrush="Black" BorderThickness="1" Margin="0,2,5,2" MinWidth="12" Height="12" VerticalAlignment="Top">
-                    <UniformGrid Rows="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="18" Margin="0" >
-                        <Rectangle Fill="{x:Static tree:ItemStatus.CorruptedColour}" ToolTip="{x:Static tree:ItemStatus.CorruptedTooltip}"  MinWidth="4" Name="CorruptedRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.BadLocationColour}" ToolTip="{x:Static tree:ItemStatus.BadLocationTooltip}" MinWidth="4" Name="BadLocationRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.MissingColour}" ToolTip="{x:Static tree:ItemStatus.MissingTooltip}" MinWidth="4" Name="MissingRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.QualityColour}" ToolTip="{x:Static tree:ItemStatus.QualityTooltip}" MinWidth="4" Name="BadQualityRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.DisallowedTypeColour}" ToolTip="{x:Static tree:ItemStatus.DisallowedTypeTooltip}" MinWidth="4" Name="DisallowedTypeRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.BadNameColour}" ToolTip="{x:Static tree:ItemStatus.BadNameTooltip}" MinWidth="4" Name="BadNameRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.ExtraColour}" ToolTip="{x:Static tree:ItemStatus.ExtraTooltip}" MinWidth="4" Name="ExtraRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.TorrentColour}" ToolTip="{x:Static tree:ItemStatus.TorrentTooltip}" MinWidth="4" Name="TorrentRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                        <Rectangle Fill="{x:Static tree:ItemStatus.OkColour}" ToolTip="{x:Static tree:ItemStatus.OkTooltip}" MinWidth="4" Name="OkRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed"/>
-                    </UniformGrid>
-                </Border>
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                    <TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="FileNameTextBlock" VerticalAlignment="Center"  MouseDown="FileNameTextBlock_OnMouseDown">
-                        <TextBlock.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Play Video" Name="PlayFileMenuItem" Click="PlayFileMenuItem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style></Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Photo_Video/film_reel-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Open containing folder" Name="OpenFolderFileMenuItem" Click="OpenFolderMenuItem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style></Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Very_Basic/opened_folder-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <Separator HorizontalAlignment="Stretch" Height="2">
-                                    <Separator.Style>
-                                        <Style></Style>
-                                    </Separator.Style>
-                                </Separator>
-                                <MenuItem Header="Check tvdbEpisode name" Name="CheckFilenamesMenuItem" Click="CheckNamesMenuItem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style TargetType="MenuItem">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=Missing}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="false" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Editing/rename-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Move to correct season folder" Name="MoveItemsMenuIem" Click="MoveItemsMenuIem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style TargetType="MenuItem">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=BadLocation}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="false" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Ecommerce/move_stock-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Check for corruption" Name="CheckCorruptMenuItem" Click="CheckCorruptMenuItem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style TargetType="MenuItem">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=Missing}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="false" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Files/check_file-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Convert file" Name="ConvertFilesMenuItem" Click="ConvertFilesMenuItem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style TargetType="MenuItem">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=Missing}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="false" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Industry/ac_dc_converter-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Download torrent" IsEnabled="{Binding Path=Torrent}" Name="DownloadTorrentMenuItem" Click="DownloadTorrentMenuItem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style></Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Very_Basic/document-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <Separator HorizontalAlignment="Stretch" Height="2">
-                                    <Separator.Style>
-                                        <Style></Style>
-                                    </Separator.Style>
-                                </Separator>
-                                <MenuItem Header="Delete (empty/invalid type/corrupt)" Foreground="DarkRed" Name="DeleteMenuItem" Click="DeleteMenuItem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style TargetType="MenuItem">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=Dirty}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="false" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Editing/delete-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <Separator HorizontalAlignment="Stretch" Height="2">
-                                    <Separator.Style>
-                                        <Style></Style>
-                                    </Separator.Style>
-                                </Separator>
-                                <MenuItem Header="Rename file" Name="RenameFileMenuItem" Click="RenameFileMenuItem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style></Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Editing/rename-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <Separator HorizontalAlignment="Stretch" Height="2">
-                                    <Separator.Style>
-                                        <Style></Style>
-                                    </Separator.Style>
-                                </Separator>
-                                <MenuItem Header="Delete file" Foreground="DarkRed" Name="DeleteFileMenuItem" Click="DeleteFileMenuItem_OnClick">
-                                    <MenuItem.Style>
-                                        <Style TargetType="MenuItem">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=Missing}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="false" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </MenuItem.Style>
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Editing/delete-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
-                        </TextBlock.ContextMenu>
-                    </TextBlock>
-                    <TextBox BorderThickness="1" Padding="1" Name="FileRenameTextBox" VerticalAlignment="Center" Text="{Binding Path=FullName}" HorizontalAlignment="Stretch" PreviewKeyDown="FileRenameTextBox_PreviewKeyDown">
-                        <TextBox.Style>
-                            <Style TargetType="{x:Type TextBox}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=FileNameTextBlock, Path=Visibility}" Value="Visible">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Visibility="Visible">
-                        <Button ToolTip="Rename file" Width="16" Height="16" Margin="0,0,5,0" Name="RenameFileButton" Click="RenameFilesButton_Click">
-                            <Image Source="Images/16/Editing/rename-16.png" />
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=SuggestedName}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
-                        <TextBlock Text="{Binding Path=SuggestedName}" Name="SuggestedTextBlock" VerticalAlignment="Center" Margin="0,0,0,0">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Path=SuggestedName}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                        </StackPanel>
-                </StackPanel>
-            </StackPanel>
-            <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding Path=Missing}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="MissingRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=BadLocation}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="BadLocationRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=BadName}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="BadNameRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=BadQuality}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="BadQualityRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=Corrupt}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="CorruptedRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=Torrent}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="TorrentRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=AllowedType}">
-                    <DataTrigger.Value>false</DataTrigger.Value>
-                    <Setter TargetName="DisallowedTypeRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding Path=Extra}">
-                    <DataTrigger.Value>true</DataTrigger.Value>
-                    <Setter TargetName="ExtraRectangle" Property="Visibility" Value="Visible"/>
-                </DataTrigger>
-            </DataTemplate.Triggers>
-        </DataTemplate>
-    </controls:MetroWindow.Resources>
-    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="32"/>
-        </Grid.RowDefinitions>
-        <Grid Margin="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="400*" MinWidth="400"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="400*" MinWidth="500"/>
-            </Grid.ColumnDefinitions>
-            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Column="0" Margin="0,0,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="30"/>
-                    <RowDefinition Height="180"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="215"/>
-                </Grid.RowDefinitions>
-                <TextBlock Text="Selected Item Actions" Grid.Row="2" VerticalAlignment="Center" FontWeight="Bold">
-                    <TextBlock.LayoutTransform>
-                        <RotateTransform Angle="270" />
-                    </TextBlock.LayoutTransform>
-                </TextBlock>
-                <TextBlock Text="Legend" Grid.Row="4" VerticalAlignment="Center" FontWeight="Bold">
-                    <TextBlock.LayoutTransform>
-                        <RotateTransform Angle="270" />
-                    </TextBlock.LayoutTransform>
-                </TextBlock>
-            </Grid>
-            <Grid HorizontalAlignment="Stretch" Margin="5,0,5,0" VerticalAlignment="Stretch" Grid.Column="1">
-                <DockPanel Background="Transparent">
-                    <Grid DockPanel.Dock="Top" HorizontalAlignment="Stretch" Margin="0" Background="Transparent">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="20"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="35"/>
-                            <ColumnDefinition Width="15*"/>
-                            <ColumnDefinition Width="155"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Tree Actions" Grid.Row="0" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Center" FontWeight="Bold"/>
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:tree="clr-namespace:FileBotPP.Tree"
+                      xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      mc:Ignorable="d"
+                      Title="Filebot++" Height="650" Width="1000" MinWidth="1000" MinHeight="600"
+                      Loaded="Window_Loaded" Closing="Window_Closing" ResizeMode="CanResizeWithGrip"
+                      WindowStartupLocation="CenterScreen"
+                      BorderThickness="1"
+                      GlowBrush="Black"
+                      TitleForeground="Black"
+                      WindowTransitionsEnabled="False"
+                      WindowTitleBrush="{DynamicResource TitleGraient}">
+	<controls:MetroWindow.RightWindowCommands>
+		<controls:WindowCommands>
+			<Button Name="StopThreadButton" Click="StopThreadsMenuItem_OnClick" ToolTip="Stop All Threads">
+				<Image Source="Images/16/Transport/stop_sign-16.png" Width="16" Height="16" HorizontalAlignment="Center"
+				       VerticalAlignment="Center" />
+			</Button>
+			<Button Name="SettingsTitleButton" Content="Settings" Click="SettingsTitleButton_OnClick">
+				<Button.Style>
+					<Style>
+						<Setter Property="Button.Foreground" Value="Black" />
+						<Setter Property="Button.Background" Value="Transparent" />
+						<Setter Property="Button.BorderThickness" Value="0" />
+					</Style>
+				</Button.Style>
+			</Button>
+		</controls:WindowCommands>
+	</controls:MetroWindow.RightWindowCommands>
+	<controls:MetroWindow.IconTemplate>
+		<DataTemplate>
+			<Image Stretch="Uniform" Source="Images/filebot/icon-32-26.png" />
+		</DataTemplate>
+	</controls:MetroWindow.IconTemplate>
+	<controls:MetroWindow.Resources>
+		<Style TargetType="{x:Type controls:WindowButtonCommands}">
+			<Style.Triggers>
+				<DataTrigger
+					Binding="{Binding ShowTitleBar, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:MetroWindow}}}"
+					Value="True">
+					<Setter Property="Foreground" Value="Black" />
+				</DataTrigger>
+			</Style.Triggers>
+		</Style>
+		<LinearGradientBrush x:Key="TitleGraient" StartPoint="0,2" EndPoint="0,0">
+			<GradientStop Color="LightBlue" Offset="1" />
+			<GradientStop Color="White" Offset="0.75" />
+		</LinearGradientBrush>
+		<Style x:Key="GridSplitterVerticalGripStyle" TargetType="{x:Type GridSplitter}">
+			<Setter Property="VerticalAlignment" Value="Stretch" />
+			<Setter Property="FocusVisualStyle" Value="{x:Null}" />
+			<Setter Property="Cursor" Value="SizeWE" />
+			<Setter Property="Background" Value="White" />
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type GridSplitter}">
+						<Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+						        Background="{TemplateBinding Background}" Width="{TemplateBinding Width}">
+							<Border Height="50" Width="4" VerticalAlignment="Center" HorizontalAlignment="Center" BorderThickness="1 0"
+							        Background="White" BorderBrush="#999999" />
+						</Border>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style TargetType="{x:Type Window}">
+			<Setter Property="FontFamily" Value="Tahoma" />
+		</Style>
+		<Style x:Key="VerticalGridSplitter" TargetType="{x:Type GridSplitter}"
+		       BasedOn="{StaticResource GridSplitterVerticalGripStyle}">
+			<Setter Property="Width" Value="6" />
+			<Setter Property="Margin" Value="15 0" />
+			<Setter Property="HorizontalAlignment" Value="Center" />
+		</Style>
+		<HierarchicalDataTemplate DataType="{x:Type tree:DirectoryItem}" ItemsSource="{Binding Items}">
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="1">
+				<Border BorderBrush="Black" BorderThickness="1" Height="12" Margin="0,0,5,0" MinWidth="12">
+					<UniformGrid Rows="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="18" Margin="0">
+						<Rectangle Fill="{x:Static tree:ItemStatus.EmptyColour}" ToolTip="{x:Static tree:ItemStatus.EmptyTooltip}"
+						           MinWidth="4" Name="EmptyRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.CorruptedColour}"
+						           ToolTip="{x:Static tree:ItemStatus.CorruptedTooltip}" MinWidth="4" Name="CorruptedRectangle"
+						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.BadLocationColour}"
+						           ToolTip="{x:Static tree:ItemStatus.BadLocationTooltip}" MinWidth="4" Name="BadLocationRectangle"
+						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.MissingColour}" ToolTip="{x:Static tree:ItemStatus.MissingTooltip}"
+						           MinWidth="4" Name="MissingRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.QualityColour}" ToolTip="{x:Static tree:ItemStatus.QualityTooltip}"
+						           MinWidth="4" Name="BadQualityRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.DisallowedTypeColour}"
+						           ToolTip="{x:Static tree:ItemStatus.DisallowedTypeTooltip}" MinWidth="4" Name="DisallowedTypeRectangle"
+						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.BadNameColour}" ToolTip="{x:Static tree:ItemStatus.BadNameTooltip}"
+						           MinWidth="4" Name="BadNameRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.ExtraColour}" ToolTip="{x:Static tree:ItemStatus.ExtraTooltip}"
+						           MinWidth="4" Name="ExtraRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.TorrentColour}" ToolTip="{x:Static tree:ItemStatus.TorrentTooltip}"
+						           MinWidth="4" Name="TorrentRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.OkColour}" ToolTip="{x:Static tree:ItemStatus.OkTooltip}" MinWidth="4"
+						           Name="OkRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0"
+						           Visibility="Collapsed" />
+					</UniformGrid>
+				</Border>
+				<Button ToolTip="Rename all files" Width="16" Height="16" Margin="0,1,5,1" Name="RenameAllFilesButton"
+				        Click="RenameFilesButton_Click">
+					<Image Source="Images/16/Editing/rename-16.png" />
+					<Button.Style>
+						<Style TargetType="Button">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding Path=SuggestedName}" Value="">
+									<Setter Property="Visibility" Value="Collapsed" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</Button.Style>
+				</Button>
+				<TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="DirectoryNameTextBlock"
+				           VerticalAlignment="Center" MouseDown="DirectoryNameTextBlock_MouseDown">
+					<TextBlock.ContextMenu>
+						<ContextMenu>
+							<MenuItem Header="Refresh" Name="RefreshMenuItem" Click="RefreshMenuItem_OnClick">
+								<MenuItem.Style>
+									<Style />
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Very_Basic/refresh-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+							<Separator HorizontalAlignment="Stretch" Height="2" Margin="2">
+								<Separator.Style>
+									<Style />
+								</Separator.Style>
+							</Separator>
+							<MenuItem Header="Open containing folder" Name="OpenFolderMenuItem" Click="OpenFolderMenuItem_OnClick">
+								<MenuItem.Style>
+									<Style />
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Very_Basic/opened_folder-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+							<Separator HorizontalAlignment="Stretch" Height="2">
+								<Separator.Style>
+									<Style />
+								</Separator.Style>
+							</Separator>
+							<MenuItem Header="Check filename tvdbEpisode name(s)" Name="CheckFilenamesMenuItem"
+							          Click="CheckNamesMenuItem_OnClick">
+								<MenuItem.Style>
+									<Style />
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Editing/rename-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+							<MenuItem Header="Move file(s) to correct season folder(s)" IsEnabled="{Binding Path=BadLocation}"
+							          Name="MoveItemsMenuIem" Click="MoveItemsMenuIem_OnClick">
+								<MenuItem.Style>
+									<Style TargetType="MenuItem">
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding Path=BadLocation}" Value="True">
+												<Setter Property="IsEnabled" Value="false" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Ecommerce/move_stock-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+							<MenuItem Header="Delete empty/invalid type/corrupt item(s)" Name="DeleteMenuItem"
+							          Click="DeleteMenuItem_OnClick">
+								<MenuItem.Style>
+									<Style TargetType="MenuItem">
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding Path=Dirty}" Value="False">
+												<Setter Property="IsEnabled" Value="false" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Editing/delete-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+							<MenuItem Header="Check files(s) for corruption" Name="CheckCorruptMenuItem"
+							          Click="CheckCorruptMenuItem_OnClick">
+								<MenuItem.Style>
+									<Style />
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Files/check_file-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+							<MenuItem Header="Convert file(s)" Name="ConvertFilesMenuItem" Click="ConvertFilesMenuItem_OnClick">
+								<MenuItem.Style>
+									<Style />
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Industry/ac_dc_converter-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+							<MenuItem Header="Download torrent(s)" IsEnabled="{Binding Path=Torrent}" Name="DownloadTorrentMenuItem"
+							          Click="DownloadTorrentMenuItem_OnClick">
+								<MenuItem.Style>
+									<Style />
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Very_Basic/document-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+							<Separator HorizontalAlignment="Stretch" Height="2">
+								<Separator.Style>
+									<Style />
+								</Separator.Style>
+							</Separator>
+							<MenuItem Header="Rename folder" Name="RenameDirectoryMenuItem" Click="RenameDirectoryMenuItem_OnClick">
+								<MenuItem.Style>
+									<Style />
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Editing/rename-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+							<Separator HorizontalAlignment="Stretch" Height="2">
+								<Separator.Style>
+									<Style />
+								</Separator.Style>
+							</Separator>
+							<MenuItem Header="Delete folder" Foreground="DarkRed" Name="DeleteFileMenuItem"
+							          Click="DeleteFolderMenuItem_OnClick">
+								<MenuItem.Style>
+									<Style />
+								</MenuItem.Style>
+								<MenuItem.Icon>
+									<Image Source="Images/16/Editing/delete-16.png" />
+								</MenuItem.Icon>
+							</MenuItem>
+						</ContextMenu>
+					</TextBlock.ContextMenu>
+				</TextBlock>
+				<TextBox BorderThickness="1" Padding="1" Name="FolderRenameTextBox" VerticalAlignment="Center"
+				         Text="{Binding Path=FullName}" HorizontalAlignment="Stretch"
+				         PreviewKeyDown="FolderRenameTextBox_PreviewKeyDown">
+					<TextBox.Style>
+						<Style TargetType="{x:Type TextBox}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding ElementName=DirectoryNameTextBlock, Path=Visibility}" Value="Visible">
+									<Setter Property="Visibility" Value="Collapsed" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</TextBox.Style>
+				</TextBox>
+			</StackPanel>
+			<DataTemplate.Triggers>
+				<DataTrigger Binding="{Binding Path=Empty}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="EmptyRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=Missing}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="MissingRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=BadLocation}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="BadLocationRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=BadName}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="BadNameRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=BadQuality}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="BadQualityRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=Corrupt}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="CorruptedRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=Torrent}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="TorrentRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=AllowedType}">
+					<DataTrigger.Value>false</DataTrigger.Value>
+					<Setter TargetName="DisallowedTypeRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=Extra}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="ExtraRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+			</DataTemplate.Triggers>
+		</HierarchicalDataTemplate>
+		<DataTemplate DataType="{x:Type tree:FileItem}">
+			<StackPanel Orientation="Horizontal">
+				<Border BorderBrush="Black" BorderThickness="1" Margin="0,2,5,2" MinWidth="12" Height="12" VerticalAlignment="Top">
+					<UniformGrid Rows="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="18" Margin="0">
+						<Rectangle Fill="{x:Static tree:ItemStatus.CorruptedColour}"
+						           ToolTip="{x:Static tree:ItemStatus.CorruptedTooltip}" MinWidth="4" Name="CorruptedRectangle"
+						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.BadLocationColour}"
+						           ToolTip="{x:Static tree:ItemStatus.BadLocationTooltip}" MinWidth="4" Name="BadLocationRectangle"
+						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.MissingColour}" ToolTip="{x:Static tree:ItemStatus.MissingTooltip}"
+						           MinWidth="4" Name="MissingRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.QualityColour}" ToolTip="{x:Static tree:ItemStatus.QualityTooltip}"
+						           MinWidth="4" Name="BadQualityRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.DisallowedTypeColour}"
+						           ToolTip="{x:Static tree:ItemStatus.DisallowedTypeTooltip}" MinWidth="4" Name="DisallowedTypeRectangle"
+						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.BadNameColour}" ToolTip="{x:Static tree:ItemStatus.BadNameTooltip}"
+						           MinWidth="4" Name="BadNameRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.ExtraColour}" ToolTip="{x:Static tree:ItemStatus.ExtraTooltip}"
+						           MinWidth="4" Name="ExtraRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.TorrentColour}" ToolTip="{x:Static tree:ItemStatus.TorrentTooltip}"
+						           MinWidth="4" Name="TorrentRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						           Margin="0" Visibility="Collapsed" />
+						<Rectangle Fill="{x:Static tree:ItemStatus.OkColour}" ToolTip="{x:Static tree:ItemStatus.OkTooltip}" MinWidth="4"
+						           Name="OkRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0"
+						           Visibility="Collapsed" />
+					</UniformGrid>
+				</Border>
+				<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+					<TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="FileNameTextBlock"
+					           VerticalAlignment="Center" MouseDown="FileNameTextBlock_OnMouseDown">
+						<TextBlock.ContextMenu>
+							<ContextMenu>
+								<MenuItem Header="Play Video" Name="PlayFileMenuItem" Click="PlayFileMenuItem_OnClick">
+									<MenuItem.Style>
+										<Style />
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Photo_Video/film_reel-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+								<MenuItem Header="Open containing folder" Name="OpenFolderFileMenuItem" Click="OpenFolderMenuItem_OnClick">
+									<MenuItem.Style>
+										<Style />
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Very_Basic/opened_folder-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+								<Separator HorizontalAlignment="Stretch" Height="2">
+									<Separator.Style>
+										<Style />
+									</Separator.Style>
+								</Separator>
+								<MenuItem Header="Check tvdbEpisode name" Name="CheckFilenamesMenuItem" Click="CheckNamesMenuItem_OnClick">
+									<MenuItem.Style>
+										<Style TargetType="MenuItem">
+											<Style.Triggers>
+												<DataTrigger Binding="{Binding Path=Missing}" Value="True">
+													<Setter Property="IsEnabled" Value="false" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Editing/rename-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+								<MenuItem Header="Move to correct season folder" Name="MoveItemsMenuIem" Click="MoveItemsMenuIem_OnClick">
+									<MenuItem.Style>
+										<Style TargetType="MenuItem">
+											<Style.Triggers>
+												<DataTrigger Binding="{Binding Path=BadLocation}" Value="True">
+													<Setter Property="IsEnabled" Value="false" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Ecommerce/move_stock-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+								<MenuItem Header="Check for corruption" Name="CheckCorruptMenuItem" Click="CheckCorruptMenuItem_OnClick">
+									<MenuItem.Style>
+										<Style TargetType="MenuItem">
+											<Style.Triggers>
+												<DataTrigger Binding="{Binding Path=Missing}" Value="True">
+													<Setter Property="IsEnabled" Value="false" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Files/check_file-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+								<MenuItem Header="Convert file" Name="ConvertFilesMenuItem" Click="ConvertFilesMenuItem_OnClick">
+									<MenuItem.Style>
+										<Style TargetType="MenuItem">
+											<Style.Triggers>
+												<DataTrigger Binding="{Binding Path=Missing}" Value="True">
+													<Setter Property="IsEnabled" Value="false" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Industry/ac_dc_converter-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+								<MenuItem Header="Download torrent" IsEnabled="{Binding Path=Torrent}" Name="DownloadTorrentMenuItem"
+								          Click="DownloadTorrentMenuItem_OnClick">
+									<MenuItem.Style>
+										<Style />
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Very_Basic/document-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+								<Separator HorizontalAlignment="Stretch" Height="2">
+									<Separator.Style>
+										<Style />
+									</Separator.Style>
+								</Separator>
+								<MenuItem Header="Delete (empty/invalid type/corrupt)" Foreground="DarkRed" Name="DeleteMenuItem"
+								          Click="DeleteMenuItem_OnClick">
+									<MenuItem.Style>
+										<Style TargetType="MenuItem">
+											<Style.Triggers>
+												<DataTrigger Binding="{Binding Path=Dirty}" Value="True">
+													<Setter Property="IsEnabled" Value="false" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Editing/delete-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+								<Separator HorizontalAlignment="Stretch" Height="2">
+									<Separator.Style>
+										<Style />
+									</Separator.Style>
+								</Separator>
+								<MenuItem Header="Rename file" Name="RenameFileMenuItem" Click="RenameFileMenuItem_OnClick">
+									<MenuItem.Style>
+										<Style />
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Editing/rename-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+								<Separator HorizontalAlignment="Stretch" Height="2">
+									<Separator.Style>
+										<Style />
+									</Separator.Style>
+								</Separator>
+								<MenuItem Header="Delete file" Foreground="DarkRed" Name="DeleteFileMenuItem"
+								          Click="DeleteFileMenuItem_OnClick">
+									<MenuItem.Style>
+										<Style TargetType="MenuItem">
+											<Style.Triggers>
+												<DataTrigger Binding="{Binding Path=Missing}" Value="True">
+													<Setter Property="IsEnabled" Value="false" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</MenuItem.Style>
+									<MenuItem.Icon>
+										<Image Source="Images/16/Editing/delete-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+							</ContextMenu>
+						</TextBlock.ContextMenu>
+					</TextBlock>
+					<TextBox BorderThickness="1" Padding="1" Name="FileRenameTextBox" VerticalAlignment="Center"
+					         Text="{Binding Path=FullName}" HorizontalAlignment="Stretch"
+					         PreviewKeyDown="FileRenameTextBox_PreviewKeyDown">
+						<TextBox.Style>
+							<Style TargetType="{x:Type TextBox}">
+								<Style.Triggers>
+									<DataTrigger Binding="{Binding ElementName=FileNameTextBlock, Path=Visibility}" Value="Visible">
+										<Setter Property="Visibility" Value="Collapsed" />
+									</DataTrigger>
+								</Style.Triggers>
+							</Style>
+						</TextBox.Style>
+					</TextBox>
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Visibility="Visible">
+						<Button ToolTip="Rename file" Width="16" Height="16" Margin="0,0,5,0" Name="RenameFileButton"
+						        Click="RenameFilesButton_Click">
+							<Image Source="Images/16/Editing/rename-16.png" />
+							<Button.Style>
+								<Style TargetType="Button">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding Path=SuggestedName}" Value="">
+											<Setter Property="Visibility" Value="Collapsed" />
+										</DataTrigger>
+									</Style.Triggers>
+								</Style>
+							</Button.Style>
+						</Button>
+						<TextBlock Text="{Binding Path=SuggestedName}" Name="SuggestedTextBlock" VerticalAlignment="Center"
+						           Margin="0,0,0,0">
+							<TextBlock.Style>
+								<Style TargetType="TextBlock">
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding Path=SuggestedName}" Value="">
+											<Setter Property="Visibility" Value="Collapsed" />
+										</DataTrigger>
+									</Style.Triggers>
+								</Style>
+							</TextBlock.Style>
+						</TextBlock>
+					</StackPanel>
+				</StackPanel>
+			</StackPanel>
+			<DataTemplate.Triggers>
+				<DataTrigger Binding="{Binding Path=Missing}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="MissingRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=BadLocation}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="BadLocationRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=BadName}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="BadNameRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=BadQuality}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="BadQualityRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=Corrupt}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="CorruptedRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=Torrent}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="TorrentRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=AllowedType}">
+					<DataTrigger.Value>false</DataTrigger.Value>
+					<Setter TargetName="DisallowedTypeRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+				<DataTrigger Binding="{Binding Path=Extra}">
+					<DataTrigger.Value>true</DataTrigger.Value>
+					<Setter TargetName="ExtraRectangle" Property="Visibility" Value="Visible" />
+				</DataTrigger>
+			</DataTemplate.Triggers>
+		</DataTemplate>
+	</controls:MetroWindow.Resources>
+	<Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*" />
+			<RowDefinition Height="32" />
+		</Grid.RowDefinitions>
+		<Grid Margin="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="20" />
+				<ColumnDefinition Width="400*" MinWidth="400" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="400*" MinWidth="500" />
+			</Grid.ColumnDefinitions>
+			<Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Column="0" Margin="0,0,0,0">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="20" />
+					<RowDefinition Height="30" />
+					<RowDefinition Height="180" />
+					<RowDefinition Height="*" />
+					<RowDefinition Height="215" />
+				</Grid.RowDefinitions>
+				<TextBlock Text="Selected Item Actions" Grid.Row="2" VerticalAlignment="Center" FontWeight="Bold">
+					<TextBlock.LayoutTransform>
+						<RotateTransform Angle="270" />
+					</TextBlock.LayoutTransform>
+				</TextBlock>
+				<TextBlock Text="Legend" Grid.Row="4" VerticalAlignment="Center" FontWeight="Bold">
+					<TextBlock.LayoutTransform>
+						<RotateTransform Angle="270" />
+					</TextBlock.LayoutTransform>
+				</TextBlock>
+			</Grid>
+			<Grid HorizontalAlignment="Stretch" Margin="5,0,5,0" VerticalAlignment="Stretch" Grid.Column="1">
+				<DockPanel Background="Transparent">
+					<Grid DockPanel.Dock="Top" HorizontalAlignment="Stretch" Margin="0" Background="Transparent">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="20" />
+							<RowDefinition Height="*" />
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="35" />
+							<ColumnDefinition Width="15*" />
+							<ColumnDefinition Width="155" />
+						</Grid.ColumnDefinitions>
+						<TextBlock Text="Tree Actions" Grid.Row="0" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Center"
+						           FontWeight="Bold" />
 
-                        <Label Content="Path" Name="PathLabel" Grid.Column="0" FontSize="10.667" HorizontalAlignment="Right" FontWeight="Bold" Grid.Row="1" Visibility="Collapsed"/>
-                        <Label Name="ScanLocationLabel" HorizontalAlignment="Left" Content="" Grid.Column="1" FontSize="12" Grid.Row="1" />
+						<Label Content="Path" Name="PathLabel" Grid.Column="0" FontSize="10.667" HorizontalAlignment="Right"
+						       FontWeight="Bold" Grid.Row="1" Visibility="Collapsed" />
+						<Label Name="ScanLocationLabel" HorizontalAlignment="Left" Content="" Grid.Column="1" FontSize="12" Grid.Row="1" />
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,5" Background="Transparent" Grid.Column="2" Grid.Row="1" >
-                            <Button ToolTip="Select directory for scanning" Name="SelectFolderButton" Click="SelectFolderButton_Click" BorderBrush="Black" BorderThickness="2" IsEnabled="False">
-                                <Button.Triggers>
-                                    <EventTrigger RoutedEvent="Border.Loaded">
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ColorAnimation FillBehavior="Stop" Duration="0:0:1" To="Red" Storyboard.TargetProperty="BorderBrush.Color" AutoReverse="True" RepeatBehavior="Forever" />
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </EventTrigger>
-                                </Button.Triggers>
-                                <Button.Style>
-                                    <Style>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Very_Basic/opened_folder-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                            <Separator Width="5" Visibility="Hidden"/>
-                            <Button IsEnabled="False" ToolTip="Check all filename tvdbEpisode name(s)" Name="CheckNamesAllButton" Click="CheckNamesAllButton_OnClick" HorizontalAlignment="Left">
-                                <Button.Style>
-                                    <Style>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Editing/rename-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                            <Separator Width="5" Visibility="Hidden"/>
-                            <Button IsEnabled="False" ToolTip="Check all files for corruption" Name="CheckAllFilesButton" Click="CheckAllFilesButton_Click">
-                                <Button.Style>
-                                    <Style>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Files/check_file-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                            <Separator Width="5" Visibility="Hidden"/>
-                            <Button IsEnabled="False" ToolTip="Download all torrent(s)" Name="DownloadAllButton" Click="DownloadAllButton_OnClick">
-                                <Button.Style>
-                                    <Style>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Gaming/magnet-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                            <Separator Width="5" Visibility="Hidden"/>
-                            <Button IsEnabled="False" ToolTip="Add tvdbSeries" Name="AddSeriesButton" Click="AddSeriesButton_OnClick">
-                                <Button.Style>
-                                    <Style>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Files/add_file-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" DockPanel.Dock="Left">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="230"/>
-                        </Grid.RowDefinitions>
-                        <StackPanel  Orientation="Vertical" Width="30" Background="White" Margin="0,0,5,0" Grid.Row="0">
-                            <Button ToolTip="Check filename tvdbEpisode name(s)" Name="CheckNamesButton" Click="CheckNamesButton_Click" HorizontalAlignment="Left" Width="30">
-                                <Button.Style>
-                                    <Style>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding ="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
-                                                <Setter Property="Button.IsEnabled" Value="False"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Editing/rename-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                            <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Move file(s) to correct season folder(s)" Name="MoveButton" Click="MoveButton_Click">
-                                <Button.Style>
-                                    <Style>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding ="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
-                                                <Setter Property="Button.IsEnabled" Value="False"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Ecommerce/move_stock-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                            <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Delete empty/invalid type/corrupt item(s)" Name="DeleteButton" Click="DeleteButton_Click">
-                                <Button.Style>
-                                    <Style>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding ="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
-                                                <Setter Property="Button.IsEnabled" Value="False"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Editing/delete-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                            <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Check files(s) for corruption" Name="CheckButton" Click="CheckButton_Click">
-                                <Button.Style>
-                                    <Style>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding ="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
-                                                <Setter Property="Button.IsEnabled" Value="False"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Files/check_file-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                            <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Convert file(s)" Name="ConvertButton" Click="ConvertButton_OnClick">
-                                <Button.Style>
-                                    <Style>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding ="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
-                                                <Setter Property="Button.IsEnabled" Value="False"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Industry/ac_dc_converter-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                            <Separator Width="5" Visibility="Hidden"/>
-                            <Button ToolTip="Download torrent(s)" Name="DownloadButton" Click="DownloadButton_Click">
-                                <Button.Style>
-                                    <Style>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding ="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
-                                                <Setter Property="Button.IsEnabled" Value="False"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <Image Source="Images/16/Gaming/magnet-16.png" Width="16" Height="16" Margin="3"/>
-                            </Button>
-                        </StackPanel>
-                        <StackPanel  Orientation="Vertical" Width="30" Background="White" Margin="0,0,5,0" Grid.Row="1" VerticalAlignment="Bottom">
-                            <Border BorderThickness="1" BorderBrush="Gray" Margin="0,20,0,0" VerticalAlignment="Bottom">
-                                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Background="White" Margin="0">
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.EmptyColour}" Margin="5,5,5,0" ToolTip="{x:Static tree:ItemStatus.EmptyTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.CorruptedColour}" Margin="5,5,5,0" ToolTip="{x:Static tree:ItemStatus.CorruptedTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.BadLocationColour}" Margin="5,5,5,0" ToolTip="{x:Static tree:ItemStatus.BadLocationTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.MissingColour}" Margin="5,5,5,0" ToolTip="{x:Static tree:ItemStatus.MissingTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.QualityColour}" Margin="5,5,5,0" ToolTip="{x:Static tree:ItemStatus.QualityTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.DisallowedTypeColour}" Margin="5,5,5,0" ToolTip="{x:Static tree:ItemStatus.DisallowedTypeTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.BadNameColour}" Margin="5,5,5,0" ToolTip="{x:Static tree:ItemStatus.BadNameTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.ExtraColour}" Margin="5,5,5,0" ToolTip="{x:Static tree:ItemStatus.ExtraTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.TorrentColour}" Margin="5,5,5,0" ToolTip="{x:Static tree:ItemStatus.TorrentTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                    <Rectangle Fill="{x:Static tree:ItemStatus.OkColour}" Margin="5,5,5,5" ToolTip="{x:Static tree:ItemStatus.OkTooltip}" Stroke="Black" StrokeThickness="1" Width="16" Height="16"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                    <TreeView IsEnabled="False" Margin="0" x:Name="SeriesTreeView" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  ItemsSource="{Binding}" SelectedItemChanged="SeriesTreeView_SelectedItemChanged" TreeViewItem.Selected="SeriesTreeView_OnSelected">
-                        <TreeView.Style>
-                            <Style TargetType="{x:Type TreeView}">
-                                
-                            </Style>
-                        </TreeView.Style>
-                        <TreeView.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Add TvdbTvdbSeries" Name="AddSeriesMenuItem" Click="AddSeriesMenuItem_OnClick">
-                                    <MenuItem.Icon>
-                                        <Image Source="Images/16/Folders/add_folder-16.png" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
-                        </TreeView.ContextMenu>
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <EventSetter Event="MouseRightButtonDown" Handler="SeriesTreeView_MouseRightButtonDown"/>
-                                <Setter Property="BorderThickness" Value="1.5"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="BorderBrush" Value="#adc6e5"/>
-                                    </Trigger>
-                                    <MultiTrigger>
-                                        <MultiTrigger.Conditions>
-                                            <Condition Property="IsSelected" Value="True"/>
-                                            <Condition Property="IsSelectionActive" Value="False"/>
-                                        </MultiTrigger.Conditions>
-                                        <Setter Property="BorderBrush" Value="LightGray"/>
-                                    </MultiTrigger>
-                                </Style.Triggers>
-                                <Style.Resources>
-                                    <Style TargetType="Border">
-                                        <Setter Property="CornerRadius" Value="2"/>
-                                    </Style>
-                                </Style.Resources>
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-                    </TreeView>
-                </DockPanel>
-            </Grid>
-            <GridSplitter Grid.Column="2" Grid.Row="0" Margin="1" Style="{StaticResource VerticalGridSplitter}"/>
-            <Grid Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="LeftContentPane">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"></RowDefinition>
-                </Grid.RowDefinitions>
-                <TabControl x:Name="TabControl" HorizontalAlignment="Stretch" Margin="5,0,5,0" VerticalAlignment="Stretch">
-                    <TabControl.Style>
-                        <Style TargetType="{x:Type TabControl}">
-
-                        </Style>
-                    </TabControl.Style>
-                    <TabItem Header="Show Info" Name="ShowInfoTab">
-                        <ScrollViewer Name="TvdbTab" Margin="0"/>
-                    </TabItem>
-                    <TabItem Header="Media Info">
-                        <ScrollViewer Name="MediaTab" Margin="0"/>
-                    </TabItem>
-                    <TabItem Header="Log">
-                        <ScrollViewer Margin="0" Name="LogScroller" HorizontalScrollBarVisibility="Auto">
-                            <TextBox TextWrapping="NoWrap" AcceptsReturn="True" Name="LogTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
-                        </ScrollViewer>
-                    </TabItem>
-                    <TabItem Header="Settings">
-                        <ScrollViewer Margin="0" Name="SettingsScrollViewer"/>
-                    </TabItem>
-                </TabControl>
-            </Grid>
-        </Grid>
-        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" Margin="0">
-            <Grid.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="White" Offset="0.75" />
-                    <GradientStop Color="LightBlue" Offset="1.0" />
-                </LinearGradientBrush>
-            </Grid.Background>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="55"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="48"/>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="65"/>
-                <ColumnDefinition Width="45"/>
-                <ColumnDefinition Width="45"/>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="30"/>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="10"/>
-            </Grid.ColumnDefinitions>
-            <Label Content="Status" x:Name="StatusLabel" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" FontWeight="Bold" Visibility="Collapsed"/>
-            <Label x:Name="Status" Content="" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
-            <Label Content="TvdbTvdbSeries" x:Name="SeriesCountLabel" FontWeight="Bold" VerticalAlignment="Top" HorizontalContentAlignment="Right" Grid.Column="3" Visibility="Collapsed"/>
-            <Label x:Name="SeriesCount" Grid.Column="4" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
-            <Label Content="TvdbSeasons" Name="SeasonCountLabel" FontWeight="Bold" VerticalAlignment="Top" HorizontalContentAlignment="Right" Grid.Column="5" Visibility="Collapsed"/>
-            <Label x:Name="SeasonCount" Grid.Column="6" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
-            <Label Content="TvDBEpisodes" Name="EpisodeCountLabel" FontWeight="Bold" VerticalAlignment="Top" HorizontalContentAlignment="Right" Grid.Column="7" Visibility="Collapsed"/>
-            <Label x:Name="EpisodeCount" Grid.Column="8" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
-            <Label Content="TvDB" Name="TvDbLabel" Grid.Column="9" VerticalAlignment="Top" HorizontalAlignment="Right" FontWeight="Bold" Visibility="Collapsed"/>
-            <Label x:Name="TvDbProgress" Content="" Grid.Column="10" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
-            <Label Content="EzTV" Name="EzTvLabel"  Grid.Column="11" VerticalAlignment="Top" HorizontalAlignment="Right" FontWeight="Bold" Visibility="Collapsed"/>
-            <Label x:Name="EzTvProgress" Content="" Grid.Column="12" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
-            <Label Content="Kat" Name="KatLabel"  Grid.Column="13" VerticalAlignment="Top" HorizontalAlignment="Right" FontWeight="Bold" Visibility="Collapsed"/>
-            <Label x:Name="Katprogress" Content="" Grid.Column="14" VerticalAlignment="Top" HorizontalContentAlignment="Left"/>
-        </Grid>
-    </Grid>
+						<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,5" Background="Transparent"
+						            Grid.Column="2" Grid.Row="1">
+							<Button ToolTip="Select directory for scanning" Name="SelectFolderButton" Click="SelectFolderButton_Click"
+							        BorderBrush="Black" BorderThickness="2" IsEnabled="False">
+								<Button.Triggers>
+									<EventTrigger RoutedEvent="Border.Loaded">
+										<BeginStoryboard>
+											<Storyboard>
+												<ColorAnimation FillBehavior="Stop" Duration="0:0:1" To="Red" Storyboard.TargetProperty="BorderBrush.Color"
+												                AutoReverse="True" RepeatBehavior="Forever" />
+											</Storyboard>
+										</BeginStoryboard>
+									</EventTrigger>
+								</Button.Triggers>
+								<Button.Style>
+									<Style />
+								</Button.Style>
+								<Image Source="Images/16/Very_Basic/opened_folder-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+							<Separator Width="5" Visibility="Hidden" />
+							<Button IsEnabled="False" ToolTip="Check all filename tvdbEpisode name(s)" Name="CheckNamesAllButton"
+							        Click="CheckNamesAllButton_OnClick" HorizontalAlignment="Left">
+								<Button.Style>
+									<Style />
+								</Button.Style>
+								<Image Source="Images/16/Editing/rename-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+							<Separator Width="5" Visibility="Hidden" />
+							<Button IsEnabled="False" ToolTip="Check all files for corruption" Name="CheckAllFilesButton"
+							        Click="CheckAllFilesButton_Click">
+								<Button.Style>
+									<Style />
+								</Button.Style>
+								<Image Source="Images/16/Files/check_file-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+							<Separator Width="5" Visibility="Hidden" />
+							<Button IsEnabled="False" ToolTip="Download all torrent(s)" Name="DownloadAllButton"
+							        Click="DownloadAllButton_OnClick">
+								<Button.Style>
+									<Style />
+								</Button.Style>
+								<Image Source="Images/16/Gaming/magnet-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+							<Separator Width="5" Visibility="Hidden" />
+							<Button IsEnabled="False" ToolTip="Add tvdbSeries" Name="AddSeriesButton" Click="AddSeriesButton_OnClick">
+								<Button.Style>
+									<Style />
+								</Button.Style>
+								<Image Source="Images/16/Files/add_file-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+						</StackPanel>
+					</Grid>
+					<Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" DockPanel.Dock="Left">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="*" />
+							<RowDefinition Height="230" />
+						</Grid.RowDefinitions>
+						<StackPanel Orientation="Vertical" Width="30" Background="White" Margin="0,0,5,0" Grid.Row="0">
+							<Button ToolTip="Check filename tvdbEpisode name(s)" Name="CheckNamesButton" Click="CheckNamesButton_Click"
+							        HorizontalAlignment="Left" Width="30">
+								<Button.Style>
+									<Style>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
+												<Setter Property="Button.IsEnabled" Value="False" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Style>
+								<Image Source="Images/16/Editing/rename-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+							<Separator Width="5" Visibility="Hidden" />
+							<Button ToolTip="Move file(s) to correct season folder(s)" Name="MoveButton" Click="MoveButton_Click">
+								<Button.Style>
+									<Style>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
+												<Setter Property="Button.IsEnabled" Value="False" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Style>
+								<Image Source="Images/16/Ecommerce/move_stock-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+							<Separator Width="5" Visibility="Hidden" />
+							<Button ToolTip="Delete empty/invalid type/corrupt item(s)" Name="DeleteButton" Click="DeleteButton_Click">
+								<Button.Style>
+									<Style>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
+												<Setter Property="Button.IsEnabled" Value="False" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Style>
+								<Image Source="Images/16/Editing/delete-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+							<Separator Width="5" Visibility="Hidden" />
+							<Button ToolTip="Check files(s) for corruption" Name="CheckButton" Click="CheckButton_Click">
+								<Button.Style>
+									<Style>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
+												<Setter Property="Button.IsEnabled" Value="False" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Style>
+								<Image Source="Images/16/Files/check_file-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+							<Separator Width="5" Visibility="Hidden" />
+							<Button ToolTip="Convert file(s)" Name="ConvertButton" Click="ConvertButton_OnClick">
+								<Button.Style>
+									<Style>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
+												<Setter Property="Button.IsEnabled" Value="False" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Style>
+								<Image Source="Images/16/Industry/ac_dc_converter-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+							<Separator Width="5" Visibility="Hidden" />
+							<Button ToolTip="Download torrent(s)" Name="DownloadButton" Click="DownloadButton_Click">
+								<Button.Style>
+									<Style>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding ElementName=SeriesTreeView, Path=SelectedItem}" Value="{x:Null}">
+												<Setter Property="Button.IsEnabled" Value="False" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Style>
+								<Image Source="Images/16/Gaming/magnet-16.png" Width="16" Height="16" Margin="3" />
+							</Button>
+						</StackPanel>
+						<StackPanel Orientation="Vertical" Width="30" Background="White" Margin="0,0,5,0" Grid.Row="1"
+						            VerticalAlignment="Bottom">
+							<Border BorderThickness="1" BorderBrush="Gray" Margin="0,20,0,0" VerticalAlignment="Bottom">
+								<StackPanel Orientation="Vertical" HorizontalAlignment="Center" Background="White" Margin="0">
+									<Rectangle Fill="{x:Static tree:ItemStatus.EmptyColour}" Margin="5,5,5,0"
+									           ToolTip="{x:Static tree:ItemStatus.EmptyTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+									           Height="16" />
+									<Rectangle Fill="{x:Static tree:ItemStatus.CorruptedColour}" Margin="5,5,5,0"
+									           ToolTip="{x:Static tree:ItemStatus.CorruptedTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+									           Height="16" />
+									<Rectangle Fill="{x:Static tree:ItemStatus.BadLocationColour}" Margin="5,5,5,0"
+									           ToolTip="{x:Static tree:ItemStatus.BadLocationTooltip}" Stroke="Black" StrokeThickness="1"
+									           Width="16" Height="16" />
+									<Rectangle Fill="{x:Static tree:ItemStatus.MissingColour}" Margin="5,5,5,0"
+									           ToolTip="{x:Static tree:ItemStatus.MissingTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+									           Height="16" />
+									<Rectangle Fill="{x:Static tree:ItemStatus.QualityColour}" Margin="5,5,5,0"
+									           ToolTip="{x:Static tree:ItemStatus.QualityTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+									           Height="16" />
+									<Rectangle Fill="{x:Static tree:ItemStatus.DisallowedTypeColour}" Margin="5,5,5,0"
+									           ToolTip="{x:Static tree:ItemStatus.DisallowedTypeTooltip}" Stroke="Black" StrokeThickness="1"
+									           Width="16" Height="16" />
+									<Rectangle Fill="{x:Static tree:ItemStatus.BadNameColour}" Margin="5,5,5,0"
+									           ToolTip="{x:Static tree:ItemStatus.BadNameTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+									           Height="16" />
+									<Rectangle Fill="{x:Static tree:ItemStatus.ExtraColour}" Margin="5,5,5,0"
+									           ToolTip="{x:Static tree:ItemStatus.ExtraTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+									           Height="16" />
+									<Rectangle Fill="{x:Static tree:ItemStatus.TorrentColour}" Margin="5,5,5,0"
+									           ToolTip="{x:Static tree:ItemStatus.TorrentTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+									           Height="16" />
+									<Rectangle Fill="{x:Static tree:ItemStatus.OkColour}" Margin="5,5,5,5"
+									           ToolTip="{x:Static tree:ItemStatus.OkTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+									           Height="16" />
+								</StackPanel>
+							</Border>
+						</StackPanel>
+					</Grid>
+					<TreeView IsEnabled="False" Margin="0" x:Name="SeriesTreeView" HorizontalAlignment="Stretch"
+					          VerticalAlignment="Stretch" ItemsSource="{Binding}"
+					          SelectedItemChanged="SeriesTreeView_SelectedItemChanged"
+					          TreeViewItem.Selected="SeriesTreeView_OnSelected">
+						<TreeView.Style>
+							<Style TargetType="{x:Type TreeView}" />
+						</TreeView.Style>
+						<TreeView.ContextMenu>
+							<ContextMenu>
+								<MenuItem Header="Add TvdbTvdbSeries" Name="AddSeriesMenuItem" Click="AddSeriesMenuItem_OnClick">
+									<MenuItem.Icon>
+										<Image Source="Images/16/Folders/add_folder-16.png" />
+									</MenuItem.Icon>
+								</MenuItem>
+							</ContextMenu>
+						</TreeView.ContextMenu>
+						<TreeView.ItemContainerStyle>
+							<Style TargetType="{x:Type TreeViewItem}">
+								<EventSetter Event="MouseRightButtonDown" Handler="SeriesTreeView_MouseRightButtonDown" />
+								<Setter Property="BorderThickness" Value="1.5" />
+								<Style.Triggers>
+									<Trigger Property="IsSelected" Value="True">
+										<Setter Property="BorderBrush" Value="#adc6e5" />
+									</Trigger>
+									<MultiTrigger>
+										<MultiTrigger.Conditions>
+											<Condition Property="IsSelected" Value="True" />
+											<Condition Property="IsSelectionActive" Value="False" />
+										</MultiTrigger.Conditions>
+										<Setter Property="BorderBrush" Value="LightGray" />
+									</MultiTrigger>
+								</Style.Triggers>
+								<Style.Resources>
+									<Style TargetType="Border">
+										<Setter Property="CornerRadius" Value="2" />
+									</Style>
+								</Style.Resources>
+							</Style>
+						</TreeView.ItemContainerStyle>
+					</TreeView>
+				</DockPanel>
+			</Grid>
+			<GridSplitter Grid.Column="2" Grid.Row="0" Margin="1" Style="{StaticResource VerticalGridSplitter}" />
+			<Grid Grid.Column="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="LeftContentPane">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<TabControl x:Name="TabControl" HorizontalAlignment="Stretch" Margin="5,0,5,0" VerticalAlignment="Stretch">
+					<TabControl.Style>
+						<Style TargetType="{x:Type TabControl}" />
+					</TabControl.Style>
+					<TabItem Header="Show Info" Name="ShowInfoTab">
+						<ScrollViewer Name="TvdbTab" Margin="0" />
+					</TabItem>
+					<TabItem Header="Media Info">
+						<ScrollViewer Name="MediaTab" Margin="0" />
+					</TabItem>
+					<TabItem Header="Log">
+						<ScrollViewer Margin="0" Name="LogScroller" HorizontalScrollBarVisibility="Auto">
+							<TextBox TextWrapping="NoWrap" AcceptsReturn="True" Name="LogTextBox" HorizontalAlignment="Stretch"
+							         VerticalAlignment="Stretch" BorderThickness="0" />
+						</ScrollViewer>
+					</TabItem>
+					<TabItem Header="Settings">
+						<ScrollViewer Margin="0" Name="SettingsScrollViewer" />
+					</TabItem>
+				</TabControl>
+			</Grid>
+		</Grid>
+		<Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" Margin="0">
+			<Grid.Background>
+				<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+					<GradientStop Color="White" Offset="0.75" />
+					<GradientStop Color="LightBlue" Offset="1.0" />
+				</LinearGradientBrush>
+			</Grid.Background>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="10" />
+				<ColumnDefinition Width="55" />
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="48" />
+				<ColumnDefinition Width="40" />
+				<ColumnDefinition Width="60" />
+				<ColumnDefinition Width="40" />
+				<ColumnDefinition Width="65" />
+				<ColumnDefinition Width="45" />
+				<ColumnDefinition Width="45" />
+				<ColumnDefinition Width="50" />
+				<ColumnDefinition Width="40" />
+				<ColumnDefinition Width="50" />
+				<ColumnDefinition Width="30" />
+				<ColumnDefinition Width="50" />
+				<ColumnDefinition Width="10" />
+			</Grid.ColumnDefinitions>
+			<Label Content="Status" x:Name="StatusLabel" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right"
+			       FontWeight="Bold" Visibility="Collapsed" />
+			<Label x:Name="Status" Content="" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+			<Label Content="TvdbTvdbSeries" x:Name="SeriesCountLabel" FontWeight="Bold" VerticalAlignment="Top"
+			       HorizontalContentAlignment="Right" Grid.Column="3" Visibility="Collapsed" />
+			<Label x:Name="SeriesCount" Grid.Column="4" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
+			<Label Content="TvdbSeasons" Name="SeasonCountLabel" FontWeight="Bold" VerticalAlignment="Top"
+			       HorizontalContentAlignment="Right" Grid.Column="5" Visibility="Collapsed" />
+			<Label x:Name="SeasonCount" Grid.Column="6" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
+			<Label Content="TvDBEpisodes" Name="EpisodeCountLabel" FontWeight="Bold" VerticalAlignment="Top"
+			       HorizontalContentAlignment="Right" Grid.Column="7" Visibility="Collapsed" />
+			<Label x:Name="EpisodeCount" Grid.Column="8" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
+			<Label Content="TvDB" Name="TvDbLabel" Grid.Column="9" VerticalAlignment="Top" HorizontalAlignment="Right"
+			       FontWeight="Bold" Visibility="Collapsed" />
+			<Label x:Name="TvDbProgress" Content="" Grid.Column="10" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
+			<Label Content="EzTV" Name="EzTvLabel" Grid.Column="11" VerticalAlignment="Top" HorizontalAlignment="Right"
+			       FontWeight="Bold" Visibility="Collapsed" />
+			<Label x:Name="EzTvProgress" Content="" Grid.Column="12" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
+			<Label Content="Kat" Name="KatLabel" Grid.Column="13" VerticalAlignment="Top" HorizontalAlignment="Right"
+			       FontWeight="Bold" Visibility="Collapsed" />
+			<Label x:Name="Katprogress" Content="" Grid.Column="14" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
+		</Grid>
+	</Grid>
 </controls:MetroWindow>

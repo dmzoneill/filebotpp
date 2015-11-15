@@ -26,24 +26,24 @@ namespace FileBotPP.Metadata
         {
             FileDownloads = new ConcurrentQueue< string[] >();
 
-            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/" ) )
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/" ) )
             {
-                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork" );
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork" );
             }
 
-            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/banner" ) )
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/banner" ) )
             {
-                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork/banner" );
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/banner" );
             }
 
-            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" ) )
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" ) )
             {
-                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" );
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" );
             }
 
-            if ( !Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/poster" ) )
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/poster" ) )
             {
-                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork/poster" );
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/poster" );
             }
         }
 

@@ -25,7 +25,7 @@ namespace FileBotPP.Tree
         public FsPoller()
         {
             this._directory = null;
-            this._directoryInfo = new DirectoryInfo(Factory.Instance.ScanLocation );
+            this._directoryInfo = new DirectoryInfo( Factory.Instance.ScanLocation );
             Fspollers.Add( this );
         }
 
@@ -38,10 +38,12 @@ namespace FileBotPP.Tree
 
         public void start_poller()
         {
-            this._timer = new DispatcherTimer();
-            this._timer.Interval = new TimeSpan( 0, 0, Random.Next(Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) );
+            this._timer = new DispatcherTimer
+            {
+                Interval = new TimeSpan( 0, 0, Random.Next( Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) ),
+                IsEnabled = true
+            };
             this._timer.Tick += this.TimerOnElapsed;
-            this._timer.IsEnabled = true;
             this._timer.Start();
         }
 
@@ -71,10 +73,10 @@ namespace FileBotPP.Tree
             {
                 Fspollers.Remove( this );
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
-                Factory.Instance.LogLines.Enqueue(ex.Message);
-                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
         }
 
@@ -82,7 +84,7 @@ namespace FileBotPP.Tree
         {
             try
             {
-                this._timer.Interval = new TimeSpan( 0, 0, Random.Next(Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) );
+                this._timer.Interval = new TimeSpan( 0, 0, Random.Next( Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) );
 
                 lock (Lockobj)
                 {
@@ -246,7 +248,7 @@ namespace FileBotPP.Tree
         {
             try
             {
-                if (Factory.Instance.Settings.FilesSystemWatcherEnabled == false )
+                if ( Factory.Instance.Settings.FilesSystemWatcherEnabled == false )
                 {
                     return;
                 }

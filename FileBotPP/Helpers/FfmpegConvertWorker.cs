@@ -39,11 +39,6 @@ namespace FileBotPP.Helpers
             GC.SuppressFinalize( this );
         }
 
-        public void stop_worker()
-        {
-            this._stop = true;
-        }
-
         public void start_convert()
         {
             this._worker = new BackgroundWorker();
@@ -52,6 +47,11 @@ namespace FileBotPP.Helpers
             this._worker.ProgressChanged += this._worker_ProgressChanged;
             this._worker.RunWorkerCompleted += this._worker_RunWorkerCompleted;
             this._worker.RunWorkerAsync();
+        }
+
+        public void stop_worker()
+        {
+            this._stop = true;
         }
 
         private void _worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
@@ -140,7 +140,7 @@ namespace FileBotPP.Helpers
             var arguments = "-y -v info -i \"" + fitem.Path.Replace( "\\", "/" ) + "\" -c:a copy -c:s mov_text -c:v mpeg4 -f mp4 \"" + fitem.Parent.Path.Replace( "\\", "/" ) + "/" + fitem.ShortName + ".mp4\"";
             var objpath = Factory.Instance.AppDataFolder + "\\ffmpegconvert.bat";
 
-            if (Factory.Instance.Utils.write_file( objpath, "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
+            if ( Factory.Instance.Utils.write_file( objpath, "@echo off" + Environment.NewLine + "\"" + mi + "\" " + arguments + Environment.NewLine + "EXIT /B %errorlevel%" ) == false )
             {
                 return;
             }

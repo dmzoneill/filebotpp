@@ -124,6 +124,5 @@ namespace FileBotPP.Helpers
                 Properties.Settings.Default.Save();
             }
         }
-        
     }
 }

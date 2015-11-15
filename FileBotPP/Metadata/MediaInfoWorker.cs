@@ -162,9 +162,9 @@ namespace FileBotPP.Metadata
             this._stop = true;
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual void Dispose( bool disposing )
         {
-            if (disposing)
+            if ( disposing )
             {
                 this._worker.Dispose();
             }
@@ -172,8 +172,8 @@ namespace FileBotPP.Metadata
 
         public void Dispose()
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
+            this.Dispose( true );
+            GC.SuppressFinalize( this );
         }
     }
 }

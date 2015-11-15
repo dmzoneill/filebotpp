@@ -331,19 +331,7 @@ namespace FileBotPP.Tree
         public static void insert_item_ordered( IItem item )
         {
             var whichitems = item.Parent == null ? Items : item.Parent.Items;
-            var point = 0;
-
-            for ( var x = 0; x < whichitems.Count; x++ )
-            {
-                var entryname = whichitems[ x ].FullName;
-
-                if ( String.Compare( entryname, item.FullName, StringComparison.Ordinal ) > 0 )
-                {
-                    break;
-                }
-
-                point++;
-            }
+            var point = whichitems.Select( t => t.FullName ).TakeWhile( entryname => String.Compare( entryname, item.FullName, StringComparison.Ordinal ) <= 0 ).Count();
 
             if ( point == 0 )
             {
@@ -588,16 +576,7 @@ namespace FileBotPP.Tree
             IDirectoryInsert dinsert;
             while ( NewDirectoryUpdates.TryDequeue( out dinsert ) )
             {
-                var exists = false;
-
-                foreach ( var item in dinsert.Directory.Items )
-                {
-                    if ( String.CompareOrdinal( item.FullName, dinsert.SubDirectory.FullName ) == 0 )
-                    {
-                        exists = true;
-                        break;
-                    }
-                }
+                var exists = dinsert.Directory.Items.Any( item => String.CompareOrdinal( item.FullName, dinsert.SubDirectory.FullName ) == 0 );
 
                 if ( exists )
                 {
@@ -613,16 +592,7 @@ namespace FileBotPP.Tree
             IFileInsert finsert;
             while ( NewFilesUpdates.TryDequeue( out finsert ) )
             {
-                var exists = false;
-
-                foreach ( var fitem in finsert.Directory.Items.OfType< IFileItem >() )
-                {
-                    if ( String.CompareOrdinal( fitem.FullName, finsert.File.FullName ) == 0 )
-                    {
-                        exists = true;
-                        break;
-                    }
-                }
+                var exists = finsert.Directory.Items.OfType< IFileItem >().Any( fitem => String.CompareOrdinal( fitem.FullName, finsert.File.FullName ) == 0 );
 
                 if ( exists )
                 {
@@ -1087,15 +1057,7 @@ namespace FileBotPP.Tree
 
         public static IDirectoryItem ContainsDirectory( string name )
         {
-            foreach ( var item in Items.OfType< IDirectoryItem >() )
-            {
-                if ( String.Compare( item.FullName, name, StringComparison.Ordinal ) == 0 )
-                {
-                    return item;
-                }
-            }
-
-            return null;
+            return Items.OfType< IDirectoryItem >().FirstOrDefault( item => String.Compare( item.FullName, name, StringComparison.Ordinal ) == 0 );
         }
     }
 }

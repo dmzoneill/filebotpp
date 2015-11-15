@@ -7,7 +7,7 @@ namespace FileBotPP.Helpers
 {
     public interface IFactory
     {
-        ConcurrentQueue<string> LogLines { get; }
+        ConcurrentQueue< string > LogLines { get; }
         string[] LocationParts { get; set; }
         string AddSeriesName { get; set; }
         IWindowFileBotPp WindowFileBotPp { get; set; }

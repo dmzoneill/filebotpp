@@ -11,10 +11,10 @@ namespace FileBotPP
         protected override void OnStartup( StartupEventArgs e )
         {
             // get the theme from the current application
-            var theme = ThemeManager.DetectAppStyle( Current );
+            ThemeManager.DetectAppStyle( Current );
 
             // now set the Green accent and dark theme
-            ThemeManager.ChangeAppStyle( Current, ThemeManager.GetAccent("Steel"), ThemeManager.GetAppTheme( "BaseLight" ) );
+            ThemeManager.ChangeAppStyle( Current, ThemeManager.GetAccent( "Steel" ), ThemeManager.GetAppTheme( "BaseLight" ) );
 
             base.OnStartup( e );
         }

@@ -76,15 +76,7 @@ namespace FileBotPP.Metadata
                 }
             }
 
-            foreach ( var fileitem in directory.Items.OfType< IFileItem >() )
-            {
-                if ( String.Compare( fileitem.Path, oldpath, StringComparison.Ordinal ) == 0 )
-                {
-                    return fileitem;
-                }
-            }
-
-            return null;
+            return directory.Items.OfType< IFileItem >().FirstOrDefault( fileitem => String.Compare( fileitem.Path, oldpath, StringComparison.Ordinal ) == 0 );
         }
 
         private void _worker_DoWork( object sender, DoWorkEventArgs e )
