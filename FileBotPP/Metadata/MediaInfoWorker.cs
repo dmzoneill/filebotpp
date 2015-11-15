@@ -69,8 +69,8 @@ namespace FileBotPP.Metadata
         {
             if ( this._directory == null && this._fileitem == null )
             {
-                this._scanItemsCount = ItemProvider.Count();
-                foreach ( var dir in ItemProvider.Items.OfType< IDirectoryItem >().ToArray() )
+                this._scanItemsCount = Factory.Instance.ItemProvider.Count();
+                foreach ( var dir in Factory.Instance.ItemProvider.Items.OfType< IDirectoryItem >().ToArray() )
                 {
                     if ( this._stop )
                     {
@@ -144,7 +144,7 @@ namespace FileBotPP.Metadata
             this._worker.ReportProgress( 1 );
         }
 
-        public static void scan_file_one_time( IFileItem fitem )
+        public void scan_file_one_time( IFileItem fitem )
         {
             var mibin = Environment.CurrentDirectory + "\\Library\\MediaInfo.exe";
 

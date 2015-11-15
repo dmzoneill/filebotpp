@@ -31,8 +31,8 @@ namespace FileBotPP.Metadata
         public void downloads_series_data()
         {
             this._mainWorker = new BackgroundWorker();
-            this._mainWorker.RunWorkerCompleted += _mainWorker_RunWorkerCompleted;
-            this._mainWorker.ProgressChanged += _mainWorker_ProgressChanged;
+            this._mainWorker.RunWorkerCompleted += this._mainWorker_RunWorkerCompleted;
+            this._mainWorker.ProgressChanged += this._mainWorker_ProgressChanged;
             this._mainWorker.DoWork += this._mainWorker_DoWork;
             this._mainWorker.WorkerReportsProgress = true;
             this._mainWorker.RunWorkerAsync();
@@ -120,13 +120,13 @@ namespace FileBotPP.Metadata
             this.get_series_from_workers();
         }
 
-        private static void _mainWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
+        private void _mainWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
         {
             var percent = e.ProgressPercentage/100.0;
             Factory.Instance.WindowFileBotPp.set_eztv_progress( percent + "%" );
         }
 
-        private static void _mainWorker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        private void _mainWorker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
             Factory.Instance.WindowFileBotPp.set_eztv_progress( "100%" );
             Factory.Instance.WindowFileBotPp.set_status_text( "Eztv done..." );

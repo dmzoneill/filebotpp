@@ -105,7 +105,7 @@ namespace FileBotPP.Tree
             {
                 foreach ( var dir in this._directoryInfo.GetDirectories() )
                 {
-                    var exists = this._directory == null ? ItemProvider.ContainsDirectory( dir.Name ) : this._directory.ContainsDirectory( dir.Name );
+                    var exists = this._directory == null ? Factory.Instance.ItemProvider.ContainsDirectory( dir.Name ) : this._directory.ContainsDirectory( dir.Name );
 
                     if ( exists != null )
                     {
@@ -113,14 +113,14 @@ namespace FileBotPP.Tree
                     }
 
                     var item = new DirectoryItem {FullName = dir.Name, Path = dir.FullName, Parent = this._directory, Polling = true};
-                    ItemProvider.insert_item_ordered_threadsafe( item );
-                    ItemProvider.refresh_tree_directory( item, item.Path );
-                    ItemProvider.folder_scan_update_threadsafe();
+                    Factory.Instance.ItemProvider.insert_item_ordered_threadsafe( item );
+                    Factory.Instance.ItemProvider.refresh_tree_directory( item, item.Path );
+                    Factory.Instance.ItemProvider.folder_scan_update_threadsafe();
                 }
 
                 foreach ( var file in this._directoryInfo.GetFiles() )
                 {
-                    var exists = this._directory == null ? ItemProvider.ContainsFile( file.Name ) : this._directory.ContainsFile( file.Name );
+                    var exists = this._directory == null ? Factory.Instance.ItemProvider.ContainsFile( file.Name ) : this._directory.ContainsFile( file.Name );
 
                     if ( exists != null )
                     {
@@ -145,8 +145,8 @@ namespace FileBotPP.Tree
                         Parent = this._directory
                     };
 
-                    ItemProvider.insert_item_ordered_threadsafe( item );
-                    ItemProvider.folder_scan_update_threadsafe();
+                    Factory.Instance.ItemProvider.insert_item_ordered_threadsafe( item );
+                    Factory.Instance.ItemProvider.folder_scan_update_threadsafe();
                 }
             }
             catch ( Exception ex )
@@ -185,9 +185,8 @@ namespace FileBotPP.Tree
             try
             {
                 var removedirs = new List< IDirectoryItem >();
-                var removefiles = new List< IFileItem >();
 
-                var diritems = this._directory == null ? ItemProvider.Items : this._directory.Items;
+                var diritems = this._directory == null ? Factory.Instance.ItemProvider.Items : this._directory.Items;
 
                 foreach ( var dir in diritems.OfType< IDirectoryItem >().Where( directory => directory.Missing == false ) )
                 {
@@ -199,26 +198,18 @@ namespace FileBotPP.Tree
                     }
                 }
 
-                var fileitems = this._directory == null ? ItemProvider.Items : this._directory.Items;
+                var fileitems = this._directory == null ? Factory.Instance.ItemProvider.Items : this._directory.Items;
 
-                foreach ( var file in fileitems.OfType< IFileItem >().Where( file => file.Missing == false ) )
-                {
-                    var exists = this.fs_contains_file( file.FullName );
-
-                    if ( exists == false )
-                    {
-                        removefiles.Add( file );
-                    }
-                }
+                var removefiles = ( from file in fileitems.OfType< IFileItem >().Where( file => file.Missing == false ) let exists = this.fs_contains_file( file.FullName ) where exists == false select file ).ToList();
 
                 foreach ( var removedir in removedirs )
                 {
-                    ItemProvider.delete_folder_in_memory( removedir );
+                    Factory.Instance.ItemProvider.delete_folder_in_memory( removedir );
                 }
 
                 foreach ( var removefile in removefiles )
                 {
-                    ItemProvider.delete_file_in_memory( removefile );
+                    Factory.Instance.ItemProvider.delete_file_in_memory( removefile );
                 }
             }
             catch ( Exception ex )

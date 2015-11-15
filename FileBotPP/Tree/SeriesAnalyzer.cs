@@ -21,8 +21,8 @@ namespace FileBotPP.Tree
             Factory.Instance.WindowFileBotPp.set_status_text( "Analysing..." );
 
             this._scanAllSeriesAnalyzer = new BackgroundWorker {WorkerReportsProgress = true};
-            this._scanAllSeriesAnalyzer.DoWork += ScanAllSeriesAnalyzerDoWork;
-            this._scanAllSeriesAnalyzer.RunWorkerCompleted += ScanAllSeriesAnalyzerRunWorkerCompleted;
+            this._scanAllSeriesAnalyzer.DoWork += this.ScanAllSeriesAnalyzerDoWork;
+            this._scanAllSeriesAnalyzer.RunWorkerCompleted += this.ScanAllSeriesAnalyzerRunWorkerCompleted;
             this._scanAllSeriesAnalyzer.RunWorkerAsync();
         }
 
@@ -33,11 +33,11 @@ namespace FileBotPP.Tree
 
             this._scanSeriesAnalyzer = new BackgroundWorker {WorkerReportsProgress = true};
             this._scanSeriesAnalyzer.DoWork += this.ScanSeriesAnalyzerDoWork;
-            this._scanSeriesAnalyzer.RunWorkerCompleted += ScanSeriesAnalyzerRunWorkerCompleted;
+            this._scanSeriesAnalyzer.RunWorkerCompleted += this.ScanSeriesAnalyzerRunWorkerCompleted;
             this._scanSeriesAnalyzer.RunWorkerAsync();
         }
 
-        private static void clean_series_season_duplicates( IDirectoryItem directory )
+        private void clean_series_season_duplicates( IDirectoryItem directory )
         {
             var checklist = new List< IFileItem >();
 
@@ -50,14 +50,14 @@ namespace FileBotPP.Tree
                         continue;
                     }
 
-                    ItemProvider.DuplicateFiles.Enqueue( new DuplicateUpdate {Directory = directory, FileA = checkitem, FileB = fileitem} );
+                    Factory.Instance.ItemProvider.DuplicateFiles.Enqueue( new DuplicateUpdate {Directory = directory, FileA = checkitem, FileB = fileitem} );
                 }
 
                 checklist.Add( fileitem );
             }
         }
 
-        private static void clean_series_season_files( IDirectoryItem directory )
+        private void clean_series_season_files( IDirectoryItem directory )
         {
             foreach ( var subdirectory in directory.Items.OfType< IDirectoryItem >() )
             {
@@ -71,7 +71,7 @@ namespace FileBotPP.Tree
                 {
                     Factory.Instance.LogLines.Enqueue( ex.Message );
                     Factory.Instance.LogLines.Enqueue( ex.StackTrace );
-                    ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = subdirectory, File = null, SuggestName = ""} );
+                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = subdirectory, File = null, SuggestName = ""} );
                     seasonNum = "99";
                 }
 
@@ -79,7 +79,7 @@ namespace FileBotPP.Tree
                 {
                     if ( String.Compare( file.FullName, "Thumbs.db", StringComparison.Ordinal ) == 0 )
                     {
-                        ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = subdirectory, File = file} );
+                        Factory.Instance.ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = subdirectory, File = file} );
                         continue;
                     }
 
@@ -88,8 +88,8 @@ namespace FileBotPP.Tree
 
                     if ( Regex.IsMatch( file.FullName, test1, RegexOptions.IgnoreCase ) || Regex.IsMatch( file.FullName, test2, RegexOptions.IgnoreCase ) )
                     {
-                        clean_series_season_files_check_episode_name( directory, subdirectory, file );
-                        clean_series_season_file_check_extra( directory, subdirectory, file );
+                        this.clean_series_season_files_check_episode_name( directory, subdirectory, file );
+                        this.clean_series_season_file_check_extra( directory, subdirectory, file );
                         continue;
                     }
                     if ( Regex.IsMatch( file.FullName, @"^" + Regex.Escape( directory.FullName ) + @"\.? - (\[(.*?)\]).*?(\[(.*)\])", RegexOptions.IgnoreCase ) )
@@ -99,7 +99,7 @@ namespace FileBotPP.Tree
 
                     if ( Regex.IsMatch( file.FullName, @"^" + Regex.Escape( directory.FullName ) + @".*" ) == false )
                     {
-                        ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = file, SuggestName = ""} );
+                        Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = file, SuggestName = ""} );
                     }
                     else if ( Regex.IsMatch( file.FullName, @".*?(" + seasonNum + @")x([0-9]{2}|(" + seasonNum + @")xSpecial\s+?[0-9]+)" ) == false )
                     {
@@ -111,7 +111,7 @@ namespace FileBotPP.Tree
 
                         if ( !match1.Success && !match2.Success )
                         {
-                            ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = file, SuggestName = ""} );
+                            Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = file, SuggestName = ""} );
                             continue;
                         }
 
@@ -120,7 +120,7 @@ namespace FileBotPP.Tree
                         var newdirectory = directory.Path + "\\Season " + seasonint;
                         var newfilelocation = directory.Path + "\\Season " + seasonint + "\\" + file.FullName;
 
-                        ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = subdirectory, File = file, NewPath = newfilelocation} );
+                        Factory.Instance.ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = subdirectory, File = file, NewPath = newfilelocation} );
 
                         if ( Directory.Exists( newdirectory ) )
                         {
@@ -129,16 +129,16 @@ namespace FileBotPP.Tree
 
                         var missingdirectory = new DirectoryItem {Parent = directory, FullName = "Season " + seasonint, Path = newdirectory};
                         var di = new DirectoryInsert {Directory = directory, SubDirectory = missingdirectory, Seasonnum = int.Parse( seasonint )};
-                        ItemProvider.NewDirectoryUpdates.Enqueue( di );
+                        Factory.Instance.ItemProvider.NewDirectoryUpdates.Enqueue( di );
                     }
                 }
 
-                clean_series_season_files_find_missing( directory, subdirectory );
-                clean_series_season_duplicates( directory );
+                this.clean_series_season_files_find_missing( directory, subdirectory );
+                this.clean_series_season_duplicates( directory );
             }
         }
 
-        private static void clean_series_season_files_check_episode_name( IDirectoryItem directory, IItem subdirectory, IFileItem item )
+        private void clean_series_season_files_check_episode_name( IDirectoryItem directory, IItem subdirectory, IFileItem item )
         {
             if ( Factory.Instance.Tvdb == null )
             {
@@ -180,11 +180,11 @@ namespace FileBotPP.Tree
 
             if ( clean == false )
             {
-                ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = item, SuggestName = ""} );
+                Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = item, SuggestName = ""} );
             }
         }
 
-        private static void clean_series_season_file_check_extra( IDirectoryItem directory, IItem subdirectory, IFileItem item )
+        private void clean_series_season_file_check_extra( IDirectoryItem directory, IItem subdirectory, IFileItem item )
         {
             if ( Factory.Instance.Tvdb == null )
             {
@@ -218,10 +218,10 @@ namespace FileBotPP.Tree
                 return;
             }
 
-            ItemProvider.ExtraFiles.Enqueue( new ExtraFileUpdate {Directory = directory, File = item} );
+            Factory.Instance.ItemProvider.ExtraFiles.Enqueue( new ExtraFileUpdate {Directory = directory, File = item} );
         }
 
-        private static void clean_series_season_files_find_missing( IDirectoryItem directory, IDirectoryItem subdirectory )
+        private void clean_series_season_files_find_missing( IDirectoryItem directory, IDirectoryItem subdirectory )
         {
             if ( Factory.Instance.Tvdb == null )
             {
@@ -235,13 +235,13 @@ namespace FileBotPP.Tree
                 if ( subdirectory.FullName.ToLower().Contains( "season " ) == false )
                 {
                     Factory.Instance.LogLines.Enqueue( "Unable to determine season number: " + subdirectory.Path );
-                    ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
+                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
                     return;
                 }
 
                 if ( Regex.IsMatch( subdirectory.FullName.Substring( 7 ).Trim(), @"^\d+$", RegexOptions.IgnoreCase ) == false )
                 {
-                    ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
+                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
                     return;
                 }
 
@@ -252,7 +252,7 @@ namespace FileBotPP.Tree
                 Factory.Instance.LogLines.Enqueue( ex.Message );
                 Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 Factory.Instance.LogLines.Enqueue( "Unable to determine season number: " + subdirectory.Path );
-                ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
+                Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
                 return;
             }
 
@@ -284,7 +284,7 @@ namespace FileBotPP.Tree
 
                 var fi = new FileInsert {Directory = subdirectory, File = newfile, EpisodeNum = episode.get_episode_num()};
 
-                var torrent = clean_series_season_files_find_torrent( series.ImdbId, episode.get_episode_num(), cSeasonNum );
+                var torrent = this.clean_series_season_files_find_torrent( series.ImdbId, episode.get_episode_num(), cSeasonNum );
 
                 if ( torrent.Epname != null && String.CompareOrdinal( torrent.Epname, "" ) != 0 )
                 {
@@ -292,11 +292,11 @@ namespace FileBotPP.Tree
                     newfile.TorrentLink = torrent.Magnetlink;
                 }
 
-                ItemProvider.NewFilesUpdates.Enqueue( fi );
+                Factory.Instance.ItemProvider.NewFilesUpdates.Enqueue( fi );
             }
         }
 
-        private static ITorrent clean_series_season_files_find_torrent( string imdbid, int epnum, int seasonnum )
+        private ITorrent clean_series_season_files_find_torrent( string imdbid, int epnum, int seasonnum )
         {
             ITorrent preferred = null;
             ITorrent t720 = null;
@@ -357,25 +357,25 @@ namespace FileBotPP.Tree
             return new Torrent();
         }
 
-        private static void clean_series_season_directories( IItem directory )
+        private void clean_series_season_directories( IItem directory )
         {
             foreach ( var seasondirectory in directory.Items.OfType< IDirectoryItem >() )
             {
                 foreach ( var subdirectory in seasondirectory.Items.OfType< IDirectoryItem >() )
                 {
-                    ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = subdirectory, File = null, NewPath = ""} );
+                    Factory.Instance.ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = subdirectory, File = null, NewPath = ""} );
 
                     if ( subdirectory.Items.Count != 0 )
                     {
                         continue;
                     }
 
-                    ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = subdirectory} );
+                    Factory.Instance.ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = subdirectory} );
                 }
             }
         }
 
-        private static void clean_series_top_level_files( IDirectoryItem directory )
+        private void clean_series_top_level_files( IDirectoryItem directory )
         {
             foreach ( var item in directory.Items.OfType< IFileItem >() )
             {
@@ -383,7 +383,7 @@ namespace FileBotPP.Tree
 
                 if ( String.Compare( item.FullName, "Thumbs.db", StringComparison.Ordinal ) == 0 )
                 {
-                    ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = directory, File = item} );
+                    Factory.Instance.ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = directory, File = item} );
                     continue;
                 }
 
@@ -406,16 +406,16 @@ namespace FileBotPP.Tree
                         item.NewPathExists = true;
                     }
 
-                    ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = directory, File = item, NewPath = checkdir + "\\" + item.FullName} );
+                    Factory.Instance.ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = directory, File = item, NewPath = checkdir + "\\" + item.FullName} );
                 }
                 else
                 {
-                    ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = item, SuggestName = ""} );
+                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = item, SuggestName = ""} );
                 }
             }
         }
 
-        private static void clean_series_top_level_directories( IDirectoryItem directory )
+        private void clean_series_top_level_directories( IDirectoryItem directory )
         {
             if ( directory?.Items == null )
             {
@@ -430,7 +430,7 @@ namespace FileBotPP.Tree
                 }
 
                 Factory.Instance.LogLines.Enqueue( @"Dirty directory name : " + inode.Path );
-                ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = inode, File = null, SuggestName = ""} );
+                Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = inode, File = null, SuggestName = ""} );
             }
 
             if ( Factory.Instance.Tvdb == null )
@@ -449,7 +449,7 @@ namespace FileBotPP.Tree
                 {
                     var check = @"Season " + season.get_season_num();
 
-                    if ( ItemProvider.contains_child( directory, check ) )
+                    if ( Factory.Instance.ItemProvider.contains_child( directory, check ) )
                     {
                         continue;
                     }
@@ -462,7 +462,7 @@ namespace FileBotPP.Tree
                         var fileitem = new FileItem {FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Missing = true, Parent = missingseason, Path = directory.Path + "\\" + check + "\\" + directory.FullName + " - " + epnum + " - " + episode.get_episode_name()};
                         missingseason.Items.Add( fileitem );
 
-                        var torrent = clean_series_season_files_find_torrent( series.ImdbId, episode.get_episode_num(), season.get_season_num() );
+                        var torrent = this.clean_series_season_files_find_torrent( series.ImdbId, episode.get_episode_num(), season.get_season_num() );
 
                         if ( torrent.Epname != null && String.CompareOrdinal( torrent.Epname, "" ) != 0 )
                         {
@@ -472,38 +472,38 @@ namespace FileBotPP.Tree
                     }
 
                     var di = new DirectoryInsert {Directory = directory, SubDirectory = missingseason, Seasonnum = season.get_season_num()};
-                    ItemProvider.NewDirectoryUpdates.Enqueue( di );
+                    Factory.Instance.ItemProvider.NewDirectoryUpdates.Enqueue( di );
                 }
 
                 break;
             }
         }
 
-        private static void ScanAllSeriesAnalyzerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        private void ScanAllSeriesAnalyzerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
-            ItemProvider.update_model();
+            Factory.Instance.ItemProvider.update_model();
             Factory.Instance.WindowFileBotPp.set_status_text( "Analysis complete" );
             Factory.Instance.MetaDataReady += 1;
         }
 
-        private static void ScanSeriesAnalyzerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        private void ScanSeriesAnalyzerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
-            ItemProvider.update_model();
+            Factory.Instance.ItemProvider.update_model();
         }
 
-        private static void ScanAllSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
+        private void ScanAllSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
         {
-            foreach ( var inode in ItemProvider.Items.OfType< IFileItem >() )
+            foreach ( var inode in Factory.Instance.ItemProvider.Items.OfType< IFileItem >() )
             {
                 Factory.Instance.LogLines.Enqueue( @"File found outside tvdbSeries directory: " + inode.Path );
             }
 
-            foreach ( var inode in ItemProvider.Items.OfType< IDirectoryItem >() )
+            foreach ( var inode in Factory.Instance.ItemProvider.Items.OfType< IDirectoryItem >() )
             {
-                clean_series_top_level_directories( inode );
-                clean_series_top_level_files( inode );
-                clean_series_season_directories( inode );
-                clean_series_season_files( inode );
+                this.clean_series_top_level_directories( inode );
+                this.clean_series_top_level_files( inode );
+                this.clean_series_season_directories( inode );
+                this.clean_series_season_files( inode );
             }
 
             // here
@@ -512,10 +512,10 @@ namespace FileBotPP.Tree
         private void ScanSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
         {
             Thread.Sleep( 500 );
-            clean_series_top_level_directories( this._seriesFolder );
-            clean_series_top_level_files( this._seriesFolder );
-            clean_series_season_directories( this._seriesFolder );
-            clean_series_season_files( this._seriesFolder );
+            this.clean_series_top_level_directories( this._seriesFolder );
+            this.clean_series_top_level_files( this._seriesFolder );
+            this.clean_series_season_directories( this._seriesFolder );
+            this.clean_series_season_files( this._seriesFolder );
         }
     }
 }

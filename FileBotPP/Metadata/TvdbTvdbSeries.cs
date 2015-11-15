@@ -28,7 +28,7 @@ namespace FileBotPP.Metadata
                 }
 
                 var actorrarr = this._actors.Split( '|' ).ToList();
-                actorrarr.RemoveAll( is_blank );
+                actorrarr.RemoveAll( this.is_blank );
                 return String.Join( Environment.NewLine, actorrarr );
             }
             set { this._actors = value; }
@@ -49,7 +49,7 @@ namespace FileBotPP.Metadata
                 }
 
                 var actorrarr = this._genre.Split( '|' ).ToList();
-                actorrarr.RemoveAll( is_blank );
+                actorrarr.RemoveAll( this.is_blank );
                 return String.Join( Environment.NewLine, actorrarr );
             }
             set { this._genre = value; }
@@ -119,7 +119,7 @@ namespace FileBotPP.Metadata
             return this.SeriesName;
         }
 
-        private static bool is_blank( String s )
+        private bool is_blank( String s )
         {
             return String.Compare( s.Trim(), "", StringComparison.Ordinal ) == 0;
         }

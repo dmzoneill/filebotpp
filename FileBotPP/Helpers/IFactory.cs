@@ -18,6 +18,7 @@ namespace FileBotPP.Helpers
         ISeriesAnalyzer SeriesAnalyzer { get; set; }
         IUtils Utils { get; set; }
         ISettings Settings { get; set; }
+        IItemProvider ItemProvider { get; set; }
         string ScanLocation { get; set; }
         List< ISupportsStop > Working { get; set; }
         int MetaDataReady { get; set; }

@@ -184,7 +184,7 @@ namespace FileBotPP.Tree
                 this.Path = newpath;
                 this.FullName = newName;
 
-                ItemProvider.move_item( this );
+                Factory.Instance.ItemProvider.move_item( this );
                 this.Polling = false;
                 this.Polling = true;
 

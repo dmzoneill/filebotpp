@@ -169,7 +169,7 @@ namespace FileBotPP.Tree
                     this.FullName = newName;
                     this.Extension = System.IO.Path.GetExtension( this.Path ).Substring( 1 );
                     this.ShortName = System.IO.Path.GetFileNameWithoutExtension( this.Path );
-                    ItemProvider.move_item( this, ( IDirectoryItem ) this.Parent );
+                    Factory.Instance.ItemProvider.move_item( this, ( IDirectoryItem ) this.Parent );
                     return true;
                 }
                 catch ( Exception ex )

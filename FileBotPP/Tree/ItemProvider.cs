@@ -12,36 +12,8 @@ using FileBotPP.Helpers;
 
 namespace FileBotPP.Tree
 {
-    public static class ItemProvider
+    public static class ItemSorter
     {
-        private static string _lastFolderScanned = "";
-        public static ObservableCollection< IItem > Items;
-        public static ConcurrentQueue< IDirectoryInsert > NewDirectoryUpdates;
-        public static ConcurrentQueue< IFileInsert > NewFilesUpdates;
-        public static ConcurrentQueue< IDirectoryItem > DetectedDirectories;
-        public static ConcurrentQueue< IFileItem > DetectedFiles;
-        public static ConcurrentQueue< IBadNameUpdate > BadNameFiles;
-        public static ConcurrentQueue< IExtraFileUpdate > ExtraFiles;
-        public static ConcurrentQueue< IDuplicateUpdate > DuplicateFiles;
-        public static ConcurrentQueue< IBadLocationUpdate > BadLocationFiles;
-        public static ConcurrentQueue< IDeletionUpdate > DirectoryDeletions;
-        private static BackgroundWorker _folderScanner;
-        private static IFsPoller _fsPoller;
-
-        static ItemProvider()
-        {
-            NewDirectoryUpdates = new ConcurrentQueue< IDirectoryInsert >();
-            NewFilesUpdates = new ConcurrentQueue< IFileInsert >();
-            DetectedDirectories = new ConcurrentQueue< IDirectoryItem >();
-            DetectedFiles = new ConcurrentQueue< IFileItem >();
-            BadNameFiles = new ConcurrentQueue< IBadNameUpdate >();
-            DuplicateFiles = new ConcurrentQueue< IDuplicateUpdate >();
-            BadLocationFiles = new ConcurrentQueue< IBadLocationUpdate >();
-            DirectoryDeletions = new ConcurrentQueue< IDeletionUpdate >();
-            ExtraFiles = new ConcurrentQueue< IExtraFileUpdate >();
-            Items = new ObservableCollection< IItem >();
-        }
-
         public static IEnumerable< T > order_by_alpha_numeric<T>( this IEnumerable< T > source, Func< T, string > selector )
         {
             var max =
@@ -50,13 +22,45 @@ namespace FileBotPP.Tree
 
             return source.OrderBy( i => Regex.Replace( selector( i ), @"\d+", m => m.Value.PadLeft( max, '0' ) ) );
         }
+    }
 
-        public static string get_last_scanned_folder()
+    public class ItemProvider : IItemProvider
+    {
+        private BackgroundWorker _folderScanner;
+        private IFsPoller _fsPoller;
+        private string _lastFolderScanned = "";
+
+        public ItemProvider()
         {
-            return _lastFolderScanned;
+            this.NewDirectoryUpdates = new ConcurrentQueue< IDirectoryInsert >();
+            this.NewFilesUpdates = new ConcurrentQueue< IFileInsert >();
+            this.DetectedDirectories = new ConcurrentQueue< IDirectoryItem >();
+            this.DetectedFiles = new ConcurrentQueue< IFileItem >();
+            this.BadNameFiles = new ConcurrentQueue< IBadNameUpdate >();
+            this.DuplicateFiles = new ConcurrentQueue< IDuplicateUpdate >();
+            this.BadLocationFiles = new ConcurrentQueue< IBadLocationUpdate >();
+            this.DirectoryDeletions = new ConcurrentQueue< IDeletionUpdate >();
+            this.ExtraFiles = new ConcurrentQueue< IExtraFileUpdate >();
+            this.Items = new ObservableCollection< IItem >();
         }
 
-        public static void rename_directory_items( IDirectoryItem directory )
+        public ObservableCollection< IItem > Items { get; }
+        public ConcurrentQueue< IDirectoryInsert > NewDirectoryUpdates { get; }
+        public ConcurrentQueue< IFileInsert > NewFilesUpdates { get; }
+        public ConcurrentQueue< IDirectoryItem > DetectedDirectories { get; }
+        public ConcurrentQueue< IFileItem > DetectedFiles { get; }
+        public ConcurrentQueue< IBadNameUpdate > BadNameFiles { get; }
+        public ConcurrentQueue< IExtraFileUpdate > ExtraFiles { get; }
+        public ConcurrentQueue< IDuplicateUpdate > DuplicateFiles { get; }
+        public ConcurrentQueue< IBadLocationUpdate > BadLocationFiles { get; }
+        public ConcurrentQueue< IDeletionUpdate > DirectoryDeletions { get; }
+
+        public string get_last_scanned_folder()
+        {
+            return this._lastFolderScanned;
+        }
+
+        public void rename_directory_items( IDirectoryItem directory )
         {
             var renameitems = new List< IFileItem >();
             foreach ( var item in directory.Items.Where( item => item.BadName ) )
@@ -70,17 +74,17 @@ namespace FileBotPP.Tree
                 var ditem = item as IDirectoryItem;
                 if ( ditem != null )
                 {
-                    rename_directory_items( ditem );
+                    this.rename_directory_items( ditem );
                 }
             }
 
             foreach ( var fitem in renameitems )
             {
-                rename_file_item( fitem );
+                this.rename_file_item( fitem );
             }
         }
 
-        public static void rename_file_item( IFileItem fileitem )
+        public void rename_file_item( IFileItem fileitem )
         {
             if ( File.Exists( fileitem.Parent.Path + "\\" + fileitem.SuggestedName ) )
             {
@@ -113,56 +117,13 @@ namespace FileBotPP.Tree
             fileitem.NewPath = "";
             fileitem.BadName = false;
 
-            check_is_right_Location( fileitem );
+            this.check_is_right_Location( fileitem );
 
             fileitem.Update();
-            move_item( fileitem );
+            this.move_item( fileitem );
         }
 
-        private static void check_is_right_Location( IItem item )
-        {
-            var epnums = Regex.Match( item.FullName, @"(\d+)x(\d+)" );
-            int epseasonnum;
-
-            if ( epnums.Success )
-            {
-                epseasonnum = Int32.Parse( epnums.Groups[ 1 ].Value );
-            }
-            else
-            {
-                return;
-            }
-
-            var snums = Regex.Match( item.Parent.FullName, @"(\d+)" );
-            int sseasonnum;
-
-            if ( snums.Success )
-            {
-                sseasonnum = Int32.Parse( snums.Groups[ 1 ].Value );
-            }
-            else
-            {
-                item.BadLocation = true;
-                var checkdir = item.Parent.Path + "\\Season " + epseasonnum;
-                item.NewPath = checkdir + "\\" + item.FullName;
-                return;
-            }
-
-            if ( item.Parent.Parent == null && epseasonnum != sseasonnum )
-            {
-                item.BadLocation = true;
-                var checkdir = item.Parent.Path + "\\Season " + epseasonnum;
-                item.NewPath = checkdir + "\\" + item.FullName;
-            }
-            if ( item.Parent.Parent != null && epseasonnum != sseasonnum )
-            {
-                item.BadLocation = true;
-                var checkdir = item.Parent.Parent.Path + "\\Season " + epseasonnum;
-                item.NewPath = checkdir + "\\" + item.FullName;
-            }
-        }
-
-        public static void move_item( IFileItem fileitem )
+        public void move_item( IFileItem fileitem )
         {
             var episodenum = 0;
 
@@ -233,9 +194,9 @@ namespace FileBotPP.Tree
             }
         }
 
-        public static void move_item( IDirectoryItem diritem )
+        public void move_item( IDirectoryItem diritem )
         {
-            var items = diritem.Parent == null ? Items : diritem.Parent.Items;
+            var items = diritem.Parent == null ? this.Items : diritem.Parent.Items;
             items.Remove( diritem );
 
             var addpoint = 0;
@@ -260,7 +221,7 @@ namespace FileBotPP.Tree
             diritem.Update();
         }
 
-        public static void move_item( IFileItem fileitem, IDirectoryItem parent )
+        public void move_item( IFileItem fileitem, IDirectoryItem parent )
         {
             var episodenum = 0;
 
@@ -328,9 +289,9 @@ namespace FileBotPP.Tree
             fileitem.Parent.Items.Insert( addpoint, fileitem );
         }
 
-        public static void insert_item_ordered( IItem item )
+        public void insert_item_ordered( IItem item )
         {
-            var whichitems = item.Parent == null ? Items : item.Parent.Items;
+            var whichitems = item.Parent == null ? this.Items : item.Parent.Items;
             var point = whichitems.Select( t => t.FullName ).TakeWhile( entryname => String.Compare( entryname, item.FullName, StringComparison.Ordinal ) <= 0 ).Count();
 
             if ( point == 0 )
@@ -357,12 +318,12 @@ namespace FileBotPP.Tree
             }
         }
 
-        public static void insert_item_ordered_threadsafe( IItem item )
+        public void insert_item_ordered_threadsafe( IItem item )
         {
             Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate { insert_item_ordered( item ); } );
         }
 
-        public static void insert_item_ordered( IDirectoryItem parent, IDirectoryItem child, int seasonnum )
+        public void insert_item_ordered( IDirectoryItem parent, IDirectoryItem child, int seasonnum )
         {
             var addpoint = 0;
             for ( var x = 0; x < parent.Items.Count; x++ )
@@ -413,7 +374,7 @@ namespace FileBotPP.Tree
             }
         }
 
-        public static void insert_item_ordered( IDirectoryItem parent, IItem child, int episodenum )
+        public void insert_item_ordered( IDirectoryItem parent, IItem child, int episodenum )
         {
             var addpoint = 0;
             foreach ( var t in parent.Items )
@@ -453,12 +414,12 @@ namespace FileBotPP.Tree
             }
         }
 
-        public static bool contains_child( IDirectoryItem parent, string childname )
+        public bool contains_child( IDirectoryItem parent, string childname )
         {
             return parent.Items.Any( child => String.Compare( child.FullName, childname, StringComparison.Ordinal ) == 0 );
         }
 
-        private static void create_collection_tree( IItem parent, string path )
+        public void refresh_tree_directory( IItem parent, string path )
         {
             try
             {
@@ -470,11 +431,11 @@ namespace FileBotPP.Tree
                 {
                     var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent, Polling = true};
 
-                    DetectedDirectories.Enqueue( item );
+                    this.DetectedDirectories.Enqueue( item );
+                    this._lastFolderScanned = directory.FullName;
 
                     Thread.Sleep( 5 );
-                    create_collection_tree( item, item.Path );
-                    _lastFolderScanned = directory.FullName;
+                    this.refresh_tree_directory( item, item.Path );
                 }
 
                 var files = dirInfo.GetFiles().order_by_alpha_numeric( x => x.Name ).ToArray();
@@ -504,64 +465,7 @@ namespace FileBotPP.Tree
                         item.BadLocation = true;
                     }
 
-                    DetectedFiles.Enqueue( item );
-                }
-                _folderScanner.ReportProgress( 1 );
-            }
-            catch ( Exception ex )
-            {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
-            }
-        }
-
-        public static void refresh_tree_directory( IItem parent, string path )
-        {
-            try
-            {
-                var dirInfo = new DirectoryInfo( path );
-
-                var directories = dirInfo.GetDirectories().order_by_alpha_numeric( x => x.Name ).ToArray();
-
-                foreach ( var directory in directories )
-                {
-                    var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent, Polling = true};
-
-                    DetectedDirectories.Enqueue( item );
-                    _lastFolderScanned = directory.FullName;
-
-                    Thread.Sleep( 5 );
-                    refresh_tree_directory( item, item.Path );
-                }
-
-                var files = dirInfo.GetFiles().order_by_alpha_numeric( x => x.Name ).ToArray();
-
-                foreach ( var file in files )
-                {
-                    var shortname = file.Name;
-                    var extension = "";
-
-                    if ( file.Name.Contains( "." ) )
-                    {
-                        shortname = file.Name.Substring( 0, file.Name.LastIndexOf( ".", StringComparison.Ordinal ) );
-                        extension = file.Name.Substring( file.Name.LastIndexOf( ".", StringComparison.Ordinal ) + 1 );
-                    }
-
-                    var item = new FileItem
-                    {
-                        FullName = file.Name,
-                        ShortName = shortname,
-                        Extension = extension,
-                        Path = file.FullName,
-                        Parent = parent
-                    };
-
-                    if ( parent == null )
-                    {
-                        item.BadLocation = true;
-                    }
-
-                    DetectedFiles.Enqueue( item );
+                    this.DetectedFiles.Enqueue( item );
                 }
             }
             catch ( Exception ex )
@@ -571,10 +475,10 @@ namespace FileBotPP.Tree
             }
         }
 
-        public static void update_model()
+        public void update_model()
         {
             IDirectoryInsert dinsert;
-            while ( NewDirectoryUpdates.TryDequeue( out dinsert ) )
+            while ( this.NewDirectoryUpdates.TryDequeue( out dinsert ) )
             {
                 var exists = dinsert.Directory.Items.Any( item => String.CompareOrdinal( item.FullName, dinsert.SubDirectory.FullName ) == 0 );
 
@@ -583,14 +487,14 @@ namespace FileBotPP.Tree
                     continue;
                 }
 
-                insert_item_ordered( dinsert.Directory, dinsert.SubDirectory, dinsert.Seasonnum );
+                this.insert_item_ordered( dinsert.Directory, dinsert.SubDirectory, dinsert.Seasonnum );
                 dinsert.Directory.Update();
                 dinsert.Directory.Parent?.Update();
                 dinsert.Directory.Parent?.Parent?.Update();
             }
 
             IFileInsert finsert;
-            while ( NewFilesUpdates.TryDequeue( out finsert ) )
+            while ( this.NewFilesUpdates.TryDequeue( out finsert ) )
             {
                 var exists = finsert.Directory.Items.OfType< IFileItem >().Any( fitem => String.CompareOrdinal( fitem.FullName, finsert.File.FullName ) == 0 );
 
@@ -599,7 +503,7 @@ namespace FileBotPP.Tree
                     continue;
                 }
 
-                insert_item_ordered( finsert.Directory, finsert.File, finsert.EpisodeNum );
+                this.insert_item_ordered( finsert.Directory, finsert.File, finsert.EpisodeNum );
                 finsert.Directory.Update();
                 finsert.Directory.Parent?.Update();
                 finsert.Directory.Parent?.Parent?.Update();
@@ -608,7 +512,7 @@ namespace FileBotPP.Tree
 
             IBadNameUpdate bnupdate;
 
-            while ( BadNameFiles.TryDequeue( out bnupdate ) )
+            while ( this.BadNameFiles.TryDequeue( out bnupdate ) )
             {
                 if ( bnupdate.File == null )
                 {
@@ -629,7 +533,7 @@ namespace FileBotPP.Tree
 
             IDuplicateUpdate dfupdate;
 
-            while ( DuplicateFiles.TryDequeue( out dfupdate ) )
+            while ( this.DuplicateFiles.TryDequeue( out dfupdate ) )
             {
                 dfupdate.FileA.Duplicate = true;
                 dfupdate.FileB.Duplicate = true;
@@ -641,7 +545,7 @@ namespace FileBotPP.Tree
 
             IBadLocationUpdate blupdate;
 
-            while ( BadLocationFiles.TryDequeue( out blupdate ) )
+            while ( this.BadLocationFiles.TryDequeue( out blupdate ) )
             {
                 if ( blupdate.File == null )
                 {
@@ -661,7 +565,7 @@ namespace FileBotPP.Tree
 
             IDeletionUpdate ddeltion;
 
-            while ( DirectoryDeletions.TryDequeue( out ddeltion ) )
+            while ( this.DirectoryDeletions.TryDequeue( out ddeltion ) )
             {
                 // delete files here
                 ddeltion.Directory.Update();
@@ -670,7 +574,7 @@ namespace FileBotPP.Tree
 
             IExtraFileUpdate extrafile;
 
-            while ( ExtraFiles.TryDequeue( out extrafile ) )
+            while ( this.ExtraFiles.TryDequeue( out extrafile ) )
             {
                 // delete files here
                 extrafile.File.Extra = true;
@@ -681,7 +585,7 @@ namespace FileBotPP.Tree
             Factory.Instance.MetaDataReady += 1;
         }
 
-        public static void move_files_to_valid_folders( IDirectoryItem directory )
+        public void move_files_to_valid_folders( IDirectoryItem directory )
         {
             var subdirs = directory.Parent?.Items;
             var moveitems = new List< IFileItem >();
@@ -705,11 +609,11 @@ namespace FileBotPP.Tree
 
             foreach ( var item in moveitems )
             {
-                move_file_to_valid_folder( item );
+                this.move_file_to_valid_folder( item );
             }
         }
 
-        public static void move_file_to_valid_folder( IFileItem fitem )
+        public void move_file_to_valid_folder( IFileItem fitem )
         {
             if ( fitem.NewPath == null || String.Compare( fitem.NewPath, "", StringComparison.Ordinal ) == 0 )
             {
@@ -726,7 +630,7 @@ namespace FileBotPP.Tree
             {
                 Directory.CreateDirectory( newdir );
                 var newdirentry = new DirectoryItem {FullName = targetDirectory, Path = newdir, Parent = fitem.Parent, Polling = true};
-                insert_item_ordered( newdirentry );
+                this.insert_item_ordered( newdirentry );
             }
 
             if ( fitem.Parent?.Parent != null )
@@ -748,7 +652,7 @@ namespace FileBotPP.Tree
                     fitem.BadLocation = false;
                     fitem.Parent = season;
 
-                    move_item( fitem, season );
+                    this.move_item( fitem, season );
                     fitem.Update();
                     season.Update();
 
@@ -780,7 +684,7 @@ namespace FileBotPP.Tree
                 fitem.BadLocation = false;
                 fitem.Parent = season;
 
-                move_item( fitem, season );
+                this.move_item( fitem, season );
                 fitem.Update();
                 season.Update();
 
@@ -790,25 +694,25 @@ namespace FileBotPP.Tree
             }
         }
 
-        public static void delete_invalid_folder( IDirectoryItem directory )
+        public void delete_invalid_folder( IDirectoryItem directory )
         {
-            delete_invalid_folder_from_tree( directory );
+            this.delete_invalid_folder_from_tree( directory );
         }
 
-        public static void delete_invalid_folder_from_tree( IDirectoryItem directory )
+        public void delete_invalid_folder_from_tree( IDirectoryItem directory )
         {
             if ( directory.Items.Count == 0 )
             {
                 if ( directory.Parent == null )
                 {
-                    Items.Remove( directory );
-                    delete_invalid_folder_from_filesystem( directory );
+                    this.Items.Remove( directory );
+                    this.delete_invalid_folder_from_filesystem( directory );
                     return;
                 }
                 directory.Parent?.Items.Remove( directory );
                 directory.Update();
                 directory.Parent?.Update();
-                delete_invalid_folder_from_filesystem( directory );
+                this.delete_invalid_folder_from_filesystem( directory );
                 return;
             }
 
@@ -816,14 +720,14 @@ namespace FileBotPP.Tree
 
             foreach ( var subdirectory in directories.Where( subdirectory => subdirectory.AllowedType == false || subdirectory.Corrupt || subdirectory.Empty ).ToArray() )
             {
-                delete_invalid_folder_from_tree( subdirectory );
+                this.delete_invalid_folder_from_tree( subdirectory );
             }
 
             var files = directory.Items.OfType< IFileItem >().ToArray();
 
             foreach ( var file in files.Where( file => file.AllowedType == false || file.Corrupt ).ToArray() )
             {
-                delete_invalid_file_from_tree( file );
+                this.delete_invalid_file_from_tree( file );
             }
 
             if ( directory.Items.Count != 0 )
@@ -833,17 +737,17 @@ namespace FileBotPP.Tree
 
             if ( directory.Parent == null )
             {
-                Items.Remove( directory );
-                delete_invalid_folder_from_filesystem( directory );
+                this.Items.Remove( directory );
+                this.delete_invalid_folder_from_filesystem( directory );
                 return;
             }
 
             directory.Parent?.Items.Remove( directory );
             directory.Parent?.Update();
-            delete_invalid_folder_from_filesystem( directory );
+            this.delete_invalid_folder_from_filesystem( directory );
         }
 
-        public static void delete_invalid_folder_from_filesystem( IDirectoryItem directory )
+        public void delete_invalid_folder_from_filesystem( IDirectoryItem directory )
         {
             try
             {
@@ -858,17 +762,17 @@ namespace FileBotPP.Tree
             }
         }
 
-        public static void delete_invalid_file( IFileItem file )
+        public void delete_invalid_file( IFileItem file )
         {
-            delete_invalid_file_from_tree( file );
+            this.delete_invalid_file_from_tree( file );
         }
 
-        public static void delete_file( IFileItem file )
+        public void delete_file( IFileItem file )
         {
-            delete_invalid_file_from_tree( file );
+            this.delete_invalid_file_from_tree( file );
         }
 
-        public static void delete_file_in_memory( IFileItem file )
+        public void delete_file_in_memory( IFileItem file )
         {
             Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
             {
@@ -877,7 +781,7 @@ namespace FileBotPP.Tree
             } );
         }
 
-        public static void delete_folder( IDirectoryItem directory )
+        public void delete_folder( IDirectoryItem directory )
         {
             Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
             {
@@ -895,7 +799,7 @@ namespace FileBotPP.Tree
             } );
         }
 
-        public static void delete_folder_in_memory( IDirectoryItem directory )
+        public void delete_folder_in_memory( IDirectoryItem directory )
         {
             Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) delegate
             {
@@ -911,23 +815,23 @@ namespace FileBotPP.Tree
             } );
         }
 
-        public static void delete_invalid_file_from_tree( IFileItem file )
+        public void delete_invalid_file_from_tree( IFileItem file )
         {
             var parent = file.Parent;
 
             if ( parent == null )
             {
-                Items.Remove( file );
-                delete_invalid_file_from_filesystem( file );
+                this.Items.Remove( file );
+                this.delete_invalid_file_from_filesystem( file );
                 return;
             }
 
-            delete_invalid_file_from_filesystem( file );
+            this.delete_invalid_file_from_filesystem( file );
             parent.Items.Remove( file );
             parent.Update();
         }
 
-        public static void delete_invalid_file_from_filesystem( IFileItem file )
+        public void delete_invalid_file_from_filesystem( IFileItem file )
         {
             try
             {
@@ -941,22 +845,17 @@ namespace FileBotPP.Tree
             }
         }
 
-        private static void FolderScanner_ProgressChanged( object sender, ProgressChangedEventArgs e )
+        public void folder_scan_update()
         {
-            folder_scan_update();
-        }
-
-        public static void folder_scan_update()
-        {
-            Factory.Instance.WindowFileBotPp.set_status_text( get_last_scanned_folder() );
+            Factory.Instance.WindowFileBotPp.set_status_text( this.get_last_scanned_folder() );
 
             IDirectoryItem ditem;
 
-            while ( DetectedDirectories.TryDequeue( out ditem ) )
+            while ( this.DetectedDirectories.TryDequeue( out ditem ) )
             {
                 if ( ditem.Parent == null )
                 {
-                    Items.Add( ditem );
+                    this.Items.Add( ditem );
                 }
                 else
                 {
@@ -970,11 +869,11 @@ namespace FileBotPP.Tree
 
             IFileItem fitem;
 
-            while ( DetectedFiles.TryDequeue( out fitem ) )
+            while ( this.DetectedFiles.TryDequeue( out fitem ) )
             {
                 if ( fitem.Parent == null )
                 {
-                    Items.Add( fitem );
+                    this.Items.Add( fitem );
                 }
                 else
                 {
@@ -986,65 +885,46 @@ namespace FileBotPP.Tree
                 fitem.Parent?.Parent?.Update();
             }
 
-            Factory.Instance.WindowFileBotPp.set_series_count( Items.OfType< IDirectoryItem >().Count().ToString() );
-            Factory.Instance.WindowFileBotPp.set_season_count( Items.OfType< IDirectoryItem >().ToList().Sum( series => series.Items.OfType< IDirectoryItem >().Count( item => item.Empty != true ) ).ToString() );
-            Factory.Instance.WindowFileBotPp.set_episode_count( Items.OfType< IDirectoryItem >().Sum( item => item.Count ).ToString() );
+            Factory.Instance.WindowFileBotPp.set_series_count( this.Items.OfType< IDirectoryItem >().Count().ToString() );
+            Factory.Instance.WindowFileBotPp.set_season_count( this.Items.OfType< IDirectoryItem >().ToList().Sum( series => series.Items.OfType< IDirectoryItem >().Count( item => item.Empty != true ) ).ToString() );
+            Factory.Instance.WindowFileBotPp.set_episode_count( this.Items.OfType< IDirectoryItem >().Sum( item => item.Count ).ToString() );
         }
 
-        public static void folder_scan_update_threadsafe()
+        public void folder_scan_update_threadsafe()
         {
-            Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) folder_scan_update );
+            Factory.Instance.WindowFileBotPp.Dispatcher.Invoke( ( MethodInvoker ) this.folder_scan_update );
         }
 
-        private static void FolderScanner_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            Factory.Instance.WindowFileBotPp.set_status_text( "Series tree populated..." );
-            Factory.Instance.MetaDataReady += 1;
-            Factory.Instance.WindowFileBotPp.set_ready( true );
-        }
-
-        private static void FolderScanner_DoWork( object sender, DoWorkEventArgs e )
-        {
-            if ( _fsPoller != null )
-            {
-                FsPoller.stop_all();
-                _fsPoller = null;
-            }
-
-            create_collection_tree( null, Factory.Instance.ScanLocation );
-            _fsPoller = new FsPoller();
-        }
-
-        public static void scan_series_folder()
+        public void scan_series_folder()
         {
             Factory.Instance.WindowFileBotPp.set_status_text( "Scanning..." );
-            _folderScanner = new BackgroundWorker {WorkerReportsProgress = true};
-            _folderScanner.DoWork += FolderScanner_DoWork;
-            _folderScanner.RunWorkerCompleted += FolderScanner_RunWorkerCompleted;
-            _folderScanner.ProgressChanged += FolderScanner_ProgressChanged;
-            _folderScanner.RunWorkerAsync();
+            this._folderScanner = new BackgroundWorker {WorkerReportsProgress = true};
+            this._folderScanner.DoWork += this.FolderScanner_DoWork;
+            this._folderScanner.RunWorkerCompleted += this.FolderScanner_RunWorkerCompleted;
+            this._folderScanner.ProgressChanged += this.FolderScanner_ProgressChanged;
+            this._folderScanner.RunWorkerAsync();
         }
 
-        public static int Count()
+        public int Count()
         {
-            return Items.Sum( item => item.Count );
+            return this.Items.Sum( item => item.Count );
         }
 
-        public static string get_series_name_from_file( IFileItem fitem )
+        public string get_series_name_from_file( IFileItem fitem )
         {
             var subdir = fitem.Parent;
             var parent = subdir?.Parent;
             return parent?.FullName;
         }
 
-        public static string get_series_name_from_folder( IDirectoryItem ditem )
+        public string get_series_name_from_folder( IDirectoryItem ditem )
         {
             return ditem.Parent == null ? ditem.FullName : ditem.Parent.FullName;
         }
 
-        public static IFileItem ContainsFile( string name )
+        public IFileItem ContainsFile( string name )
         {
-            foreach ( var item in Items.OfType< IFileItem >() )
+            foreach ( var item in this.Items.OfType< IFileItem >() )
             {
                 if ( String.Compare( item.FullName, name, StringComparison.Ordinal ) == 0 )
                 {
@@ -1055,9 +935,133 @@ namespace FileBotPP.Tree
             return null;
         }
 
-        public static IDirectoryItem ContainsDirectory( string name )
+        public IDirectoryItem ContainsDirectory( string name )
         {
-            return Items.OfType< IDirectoryItem >().FirstOrDefault( item => String.Compare( item.FullName, name, StringComparison.Ordinal ) == 0 );
+            return this.Items.OfType< IDirectoryItem >().FirstOrDefault( item => String.Compare( item.FullName, name, StringComparison.Ordinal ) == 0 );
+        }
+
+        private void check_is_right_Location( IItem item )
+        {
+            var epnums = Regex.Match( item.FullName, @"(\d+)x(\d+)" );
+            int epseasonnum;
+
+            if ( epnums.Success )
+            {
+                epseasonnum = Int32.Parse( epnums.Groups[ 1 ].Value );
+            }
+            else
+            {
+                return;
+            }
+
+            var snums = Regex.Match( item.Parent.FullName, @"(\d+)" );
+            int sseasonnum;
+
+            if ( snums.Success )
+            {
+                sseasonnum = Int32.Parse( snums.Groups[ 1 ].Value );
+            }
+            else
+            {
+                item.BadLocation = true;
+                var checkdir = item.Parent.Path + "\\Season " + epseasonnum;
+                item.NewPath = checkdir + "\\" + item.FullName;
+                return;
+            }
+
+            if ( item.Parent.Parent == null && epseasonnum != sseasonnum )
+            {
+                item.BadLocation = true;
+                var checkdir = item.Parent.Path + "\\Season " + epseasonnum;
+                item.NewPath = checkdir + "\\" + item.FullName;
+            }
+            if ( item.Parent.Parent != null && epseasonnum != sseasonnum )
+            {
+                item.BadLocation = true;
+                var checkdir = item.Parent.Parent.Path + "\\Season " + epseasonnum;
+                item.NewPath = checkdir + "\\" + item.FullName;
+            }
+        }
+
+        private void create_collection_tree( IItem parent, string path )
+        {
+            try
+            {
+                var dirInfo = new DirectoryInfo( path );
+
+                var directories = dirInfo.GetDirectories().order_by_alpha_numeric( x => x.Name ).ToArray();
+
+                foreach ( var directory in directories )
+                {
+                    var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent, Polling = true};
+
+                    this.DetectedDirectories.Enqueue( item );
+
+                    Thread.Sleep( 5 );
+                    this.create_collection_tree( item, item.Path );
+                    this._lastFolderScanned = directory.FullName;
+                }
+
+                var files = dirInfo.GetFiles().order_by_alpha_numeric( x => x.Name ).ToArray();
+
+                foreach ( var file in files )
+                {
+                    var shortname = file.Name;
+                    var extension = "";
+
+                    if ( file.Name.Contains( "." ) )
+                    {
+                        shortname = file.Name.Substring( 0, file.Name.LastIndexOf( ".", StringComparison.Ordinal ) );
+                        extension = file.Name.Substring( file.Name.LastIndexOf( ".", StringComparison.Ordinal ) + 1 );
+                    }
+
+                    var item = new FileItem
+                    {
+                        FullName = file.Name,
+                        ShortName = shortname,
+                        Extension = extension,
+                        Path = file.FullName,
+                        Parent = parent
+                    };
+
+                    if ( parent == null )
+                    {
+                        item.BadLocation = true;
+                    }
+
+                    this.DetectedFiles.Enqueue( item );
+                }
+                this._folderScanner.ReportProgress( 1 );
+            }
+            catch ( Exception ex )
+            {
+                Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+            }
+        }
+
+        private void FolderScanner_ProgressChanged( object sender, ProgressChangedEventArgs e )
+        {
+            this.folder_scan_update();
+        }
+
+        private void FolderScanner_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        {
+            Factory.Instance.WindowFileBotPp.set_status_text( "Series tree populated..." );
+            Factory.Instance.MetaDataReady += 1;
+            Factory.Instance.WindowFileBotPp.set_ready( true );
+        }
+
+        private void FolderScanner_DoWork( object sender, DoWorkEventArgs e )
+        {
+            if ( this._fsPoller != null )
+            {
+                FsPoller.stop_all();
+                this._fsPoller = null;
+            }
+
+            this.create_collection_tree( null, Factory.Instance.ScanLocation );
+            this._fsPoller = new FsPoller();
         }
     }
 }

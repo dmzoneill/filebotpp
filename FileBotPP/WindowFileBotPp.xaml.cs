@@ -45,8 +45,8 @@ namespace FileBotPP
                 }
 
                 directory.Items.Clear();
-                ItemProvider.refresh_tree_directory( directory, directory.Path );
-                ItemProvider.folder_scan_update();
+                Factory.Instance.ItemProvider.refresh_tree_directory( directory, directory.Path );
+                Factory.Instance.ItemProvider.folder_scan_update();
             }
             catch ( Exception ex )
             {
@@ -88,7 +88,7 @@ namespace FileBotPP
                 Thread.Sleep( 100 );
 
                 var newseries = new DirectoryItem {FullName = Factory.Instance.AddSeriesName, Path = Factory.Instance.ScanLocation + "\\" + Factory.Instance.AddSeriesName, Polling = true};
-                ItemProvider.insert_item_ordered( newseries );
+                Factory.Instance.ItemProvider.insert_item_ordered( newseries );
 
                 var item = this.SeriesTreeView.ItemContainerGenerator.ContainerFromItem( newseries ) as TreeViewItem;
 
@@ -468,7 +468,7 @@ namespace FileBotPP
         {
             try
             {
-                foreach ( var dir in ItemProvider.Items.OfType< IDirectoryItem >() )
+                foreach ( var dir in Factory.Instance.ItemProvider.Items.OfType< IDirectoryItem >() )
                 {
                     foreach ( var subdir in dir.Items.OfType< IDirectoryItem >().Where( sdir => sdir.Torrent ) )
                     {
@@ -633,7 +633,7 @@ namespace FileBotPP
 
                 if ( directory != null )
                 {
-                    ItemProvider.delete_invalid_folder( directory );
+                    Factory.Instance.ItemProvider.delete_invalid_folder( directory );
                 }
 
                 if ( file == null )
@@ -641,7 +641,7 @@ namespace FileBotPP
                     return;
                 }
 
-                ItemProvider.delete_invalid_file( file );
+                Factory.Instance.ItemProvider.delete_invalid_file( file );
             }
             catch ( Exception ex )
             {
@@ -661,7 +661,7 @@ namespace FileBotPP
                     return;
                 }
 
-                ItemProvider.delete_file( file );
+                Factory.Instance.ItemProvider.delete_file( file );
             }
             catch ( Exception ex )
             {
@@ -681,7 +681,7 @@ namespace FileBotPP
                     return;
                 }
 
-                ItemProvider.delete_folder( folder );
+                Factory.Instance.ItemProvider.delete_folder( folder );
             }
             catch ( Exception ex )
             {
@@ -719,7 +719,7 @@ namespace FileBotPP
                 var fitem = treeViewItem.Header as IFileItem;
                 if ( fitem != null )
                 {
-                    ItemProvider.rename_file_item( fitem );
+                    Factory.Instance.ItemProvider.rename_file_item( fitem );
                 }
                 else
                 {
@@ -727,7 +727,7 @@ namespace FileBotPP
 
                     if ( header != null )
                     {
-                        ItemProvider.rename_directory_items( header );
+                        Factory.Instance.ItemProvider.rename_directory_items( header );
                     }
                 }
             }
@@ -745,7 +745,7 @@ namespace FileBotPP
 
         private void CheckNamesAllButton_OnClick( object sender, RoutedEventArgs e )
         {
-            check_names_all();
+            this.check_names_all();
         }
 
         private void check_names()
@@ -788,7 +788,7 @@ namespace FileBotPP
             }
         }
 
-        private static void check_names_all()
+        private void check_names_all()
         {
             try
             {
@@ -834,7 +834,7 @@ namespace FileBotPP
 
                 if ( directory != null )
                 {
-                    ItemProvider.move_files_to_valid_folders( directory );
+                    Factory.Instance.ItemProvider.move_files_to_valid_folders( directory );
                 }
 
                 if ( file == null )
@@ -842,7 +842,7 @@ namespace FileBotPP
                     return;
                 }
 
-                ItemProvider.move_file_to_valid_folder( file );
+                Factory.Instance.ItemProvider.move_file_to_valid_folder( file );
 
                 Factory.Instance.WindowFileBotPp.set_status_text( "Files moved, see log for details" );
                 Factory.Instance.LogLines.Enqueue( "Files moved, see log for details" );
@@ -973,7 +973,7 @@ namespace FileBotPP
             {
                 this.set_status_text( "Checking for internet access.." );
                 var connectionChecker = new BackgroundWorker();
-                connectionChecker.DoWork += connectionChecker_DoWork;
+                connectionChecker.DoWork += this.connectionChecker_DoWork;
                 connectionChecker.RunWorkerCompleted += this.connectionChecker_RunWorkerCompleted;
                 connectionChecker.RunWorkerAsync();
             }
@@ -1008,7 +1008,7 @@ namespace FileBotPP
             }
         }
 
-        private static void connectionChecker_DoWork( object sender, DoWorkEventArgs e )
+        private void connectionChecker_DoWork( object sender, DoWorkEventArgs e )
         {
             try
             {
@@ -1036,7 +1036,7 @@ namespace FileBotPP
 
                 if ( directory != null )
                 {
-                    var fname = ItemProvider.get_series_name_from_folder( directory );
+                    var fname = Factory.Instance.ItemProvider.get_series_name_from_folder( directory );
                     var series = Factory.Instance.Tvdb?.get_series_by_name( fname );
 
                     if ( series != null )
@@ -1054,7 +1054,7 @@ namespace FileBotPP
                     return;
                 }
 
-                var name = ItemProvider.get_series_name_from_file( file );
+                var name = Factory.Instance.ItemProvider.get_series_name_from_file( file );
 
                 if ( name != null )
                 {
@@ -1079,7 +1079,8 @@ namespace FileBotPP
                     return;
                 }
 
-                MediaInfoWorker.scan_file_one_time( file );
+                var mw = new MediaInfoWorker();
+                mw.scan_file_one_time( file );
 
                 if ( file.Mediainfo == null )
                 {
@@ -1146,9 +1147,9 @@ namespace FileBotPP
                 Factory.Instance.ScanLocation = dialog.SelectedPath;
                 this.ScanLocationLabel.Content = dialog.SelectedPath;
 
-                ItemProvider.Items.Clear();
-                this.SeriesTreeView.DataContext = ItemProvider.Items;
-                ItemProvider.scan_series_folder();
+                Factory.Instance.ItemProvider = new ItemProvider();
+                this.SeriesTreeView.DataContext = Factory.Instance.ItemProvider.Items;
+                Factory.Instance.ItemProvider.scan_series_folder();
 
                 if ( Factory.Instance.TvdbAvailable == false )
                 {
@@ -1187,7 +1188,8 @@ namespace FileBotPP
                     return;
                 }
 
-                MediaInfoWorker.scan_file_one_time( this._item );
+                var mw = new MediaInfoWorker();
+                mw.scan_file_one_time( this._item );
             }
             catch ( Exception ex )
             {

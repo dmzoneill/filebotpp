@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -11,47 +10,22 @@ namespace FileBotPP.Metadata
 {
     public class Tvdb : ITvdb, ISupportsStop, IDisposable
     {
-        public static ConcurrentQueue< string[] > FileDownloads;
-        private static readonly Random Random = new Random();
-        private static BackgroundWorker _artworkWorker;
         private readonly string[] _dirs;
+        private readonly Random _random = new Random();
         private readonly List< ITvdbSeries > _series;
         private readonly List< ITvdbWorker > _workers;
         private BackgroundWorker _allSeriesWorker;
+        private BackgroundWorker _artworkWorker;
         private string _seriesName;
         private BackgroundWorker _seriesWorker;
         private bool _stop;
-
-        static Tvdb()
-        {
-            FileDownloads = new ConcurrentQueue< string[] >();
-
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/" ) )
-            {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork" );
-            }
-
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/banner" ) )
-            {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/banner" );
-            }
-
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" ) )
-            {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" );
-            }
-
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/poster" ) )
-            {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/poster" );
-            }
-        }
 
         public Tvdb( string[] dirs )
         {
             this._dirs = dirs;
             this._series = new List< ITvdbSeries >();
             this._workers = new List< ITvdbWorker >();
+            this.create_folders();
         }
 
         public void Dispose()
@@ -66,8 +40,8 @@ namespace FileBotPP.Metadata
             {
                 this._allSeriesWorker = new BackgroundWorker();
                 this._allSeriesWorker.DoWork += this.AllSeriesWorkerDoWork;
-                this._allSeriesWorker.RunWorkerCompleted += AllSeriesWorkerRunWorkerCompleted;
-                this._allSeriesWorker.ProgressChanged += AllSeriesWorkerProgressChanged;
+                this._allSeriesWorker.RunWorkerCompleted += this.AllSeriesWorkerRunWorkerCompleted;
+                this._allSeriesWorker.ProgressChanged += this.AllSeriesWorkerProgressChanged;
                 this._allSeriesWorker.WorkerReportsProgress = true;
                 this._allSeriesWorker.RunWorkerAsync();
             }
@@ -150,6 +124,29 @@ namespace FileBotPP.Metadata
             }
         }
 
+        private void create_folders()
+        {
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/" ) )
+            {
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork" );
+            }
+
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/banner" ) )
+            {
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/banner" );
+            }
+
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" ) )
+            {
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" );
+            }
+
+            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/poster" ) )
+            {
+                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/poster" );
+            }
+        }
+
         private void SeriesWorkerDoWork( object sender, DoWorkEventArgs e )
         {
             try
@@ -175,13 +172,13 @@ namespace FileBotPP.Metadata
             }
         }
 
-        private static void start_artwork_downloader()
+        private void start_artwork_downloader()
         {
             try
             {
-                _artworkWorker = new BackgroundWorker();
-                _artworkWorker.DoWork += ArtWorkerDoWork;
-                _artworkWorker.RunWorkerAsync();
+                this._artworkWorker = new BackgroundWorker();
+                this._artworkWorker.DoWork += this.ArtWorkerDoWork;
+                this._artworkWorker.RunWorkerAsync();
             }
             catch ( Exception ex )
             {
@@ -190,7 +187,7 @@ namespace FileBotPP.Metadata
             }
         }
 
-        private static void AllSeriesWorkerProgressChanged( object sender, ProgressChangedEventArgs e )
+        private void AllSeriesWorkerProgressChanged( object sender, ProgressChangedEventArgs e )
         {
             try
             {
@@ -204,13 +201,13 @@ namespace FileBotPP.Metadata
             }
         }
 
-        private static void AllSeriesWorkerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        private void AllSeriesWorkerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
             try
             {
                 Factory.Instance.WindowFileBotPp.set_status_text( "Tvdb done..." );
                 Factory.Instance.MetaDataReady += 1;
-                start_artwork_downloader();
+                this.start_artwork_downloader();
             }
             catch ( Exception ex )
             {
@@ -261,22 +258,18 @@ namespace FileBotPP.Metadata
             }
         }
 
-        private static void ArtWorkerDoWork( object sender, DoWorkEventArgs e )
+        private void ArtWorkerDoWork( object sender, DoWorkEventArgs e )
         {
             try
             {
                 Factory.Instance.LogLines.Enqueue( @"Fetching TVDB metadata..." );
 
-                string[] download;
-
-                while ( FileDownloads.TryDequeue( out download ) )
+                foreach ( var worker in this._workers )
                 {
-                    if ( File.Exists( download[ 1 ] ) )
-                    {
-                        continue;
-                    }
-
-                    Factory.Instance.Utils.download_file( download[ 0 ], download[ 1 ] );
+                    var aw = worker.get_artwork_links();
+                    Factory.Instance.Utils.download_file( aw[ 0 ], aw[ 1 ] );
+                    Factory.Instance.Utils.download_file( aw[ 2 ], aw[ 3 ] );
+                    Factory.Instance.Utils.download_file( aw[ 4 ], aw[ 5 ] );
                 }
             }
             catch ( Exception ex )
@@ -322,10 +315,10 @@ namespace FileBotPP.Metadata
                 {
                     count = this._workers.Count( worker => worker.is_working() );
 
-                    Thread.Sleep( wait ? Random.Next( 10, 40 ) : 5 );
+                    Thread.Sleep( wait ? this._random.Next( 10, 40 ) : 5 );
                 }
 
-                Thread.Sleep( wait ? Random.Next( 10, 40 ) : 5 );
+                Thread.Sleep( wait ? this._random.Next( 10, 40 ) : 5 );
             }
             catch ( Exception ex )
             {

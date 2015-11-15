@@ -1407,7 +1407,7 @@ namespace FileBotPP.Metadata
 
         private void parse_section( string tkey, string tvalue, IReadOnlyDictionary< string, string > dict )
         {
-            var property = get_property( tkey, dict );
+            var property = this.get_property( tkey, dict );
 
             if ( property == null )
             {
@@ -1423,7 +1423,7 @@ namespace FileBotPP.Metadata
             }
         }
 
-        private static string get_property( string key, IReadOnlyDictionary< string, string > dict )
+        private string get_property( string key, IReadOnlyDictionary< string, string > dict )
         {
             if ( dict.Keys.Contains( key ) )
             {

@@ -95,6 +95,7 @@
     <Compile Include="Helpers\IFfmpegCorruptWorker.cs" />
     <Compile Include="Helpers\ISettings.cs" />
     <Compile Include="Helpers\IUtils.cs" />
+    <Compile Include="Tree\IItemProvider.cs" />
     <Compile Include="WindowAddSeries.xaml.cs">
       <DependentUpon>WindowAddSeries.xaml</DependentUpon>
     </Compile>
@@ -156,7 +157,6 @@
     <Compile Include="Tree\IFileInsert.cs" />
     <Compile Include="Tree\Item.cs" />
     <Compile Include="Tree\ItemProvider.cs" />
-    <Compile Include="Tree\ItemStatus.cs" />
     <Compile Include="Tree\ItemStatusMask.cs" />
     <Page Include="WindowAddSeries.xaml">
       <SubType>Designer</SubType>

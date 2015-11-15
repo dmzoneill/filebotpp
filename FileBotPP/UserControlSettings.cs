@@ -32,8 +32,8 @@ namespace FileBotPP
                 this.ProxyPortTextBox.Text = Factory.Instance.Settings.ProxyServerPort == 0 ? "" : Factory.Instance.Settings.ProxyServerPort.ToString();
                 this.AllowedtypesTextBox.Text = String.Join( ",", Factory.Instance.Settings.AllowedTypes );
                 this.CacheTimeoutTextBox.Text = Factory.Instance.Settings.CacheTimeout.ToString();
-                this.TorrentQualityComboBox.SelectedIndex = load_torrent_quality();
-                this.PoorQualityComboBox.SelectedIndex = load_video_quality();
+                this.TorrentQualityComboBox.SelectedIndex = this.load_torrent_quality();
+                this.PoorQualityComboBox.SelectedIndex = this.load_video_quality();
                 this.load_fswatcher_values();
             }
             catch ( Exception ex )
@@ -43,7 +43,7 @@ namespace FileBotPP
             }
         }
 
-        private static int load_torrent_quality()
+        private int load_torrent_quality()
         {
             var tq = Factory.Instance.Settings.TorrentPreferredQuality;
 
@@ -71,7 +71,7 @@ namespace FileBotPP
             this.ToggleSwitch.IsChecked = enabled;
         }
 
-        private static int load_video_quality()
+        private int load_video_quality()
         {
             var vq = Factory.Instance.Settings.PoorQualityP;
 
@@ -213,10 +213,10 @@ namespace FileBotPP
 
         private void NumericTextBox_PreviewTextInput( object sender, TextCompositionEventArgs e )
         {
-            e.Handled = !IsTextAllowed( e.Text );
+            e.Handled = !this.IsTextAllowed( e.Text );
         }
 
-        private static bool IsTextAllowed( string text )
+        private bool IsTextAllowed( string text )
         {
             var regex = new Regex( "[^0-9.-]+" ); //regex that matches disallowed text
             return !regex.IsMatch( text );

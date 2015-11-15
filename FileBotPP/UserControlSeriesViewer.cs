@@ -125,7 +125,7 @@ namespace FileBotPP
                     var link = new Hyperlink {IsEnabled = true};
                     link.Inlines.Add( textblock );
                     link.NavigateUri = new Uri( torrent.Magnetlink );
-                    link.Click += Link_Click;
+                    link.Click += this.Link_Click;
 
                     para.Inlines.Add( link );
                     para.Inlines.Add( Environment.NewLine );
@@ -146,7 +146,7 @@ namespace FileBotPP
             }
         }
 
-        private static void Link_Click( object sender, RoutedEventArgs e )
+        private void Link_Click( object sender, RoutedEventArgs e )
         {
             try
             {

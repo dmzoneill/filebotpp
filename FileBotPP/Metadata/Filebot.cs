@@ -63,7 +63,7 @@ namespace FileBotPP.Metadata
             this.consume_queue();
         }
 
-        private static IItem get_file_rename( IItem directory, string oldpath )
+        private IItem get_file_rename( IItem directory, string oldpath )
         {
             foreach ( var subdirectory in directory.Items.OfType< IDirectoryItem >() )
             {
@@ -83,9 +83,9 @@ namespace FileBotPP.Metadata
         {
             if ( this._checkSeasonDirectory == null )
             {
-                this._toCheckCount = ItemProvider.Items.Count;
+                this._toCheckCount = Factory.Instance.ItemProvider.Items.Count;
 
-                foreach ( var series in ItemProvider.Items )
+                foreach ( var series in Factory.Instance.ItemProvider.Items )
                 {
                     if ( this._stop )
                     {
@@ -122,7 +122,7 @@ namespace FileBotPP.Metadata
                 }
 
                 var correctPath = match.Groups[ 1 ].Value.Replace( "\\\\", "\\" );
-                var filerename = get_file_rename( directory, correctPath );
+                var filerename = this.get_file_rename( directory, correctPath );
 
                 if ( filerename != null )
                 {

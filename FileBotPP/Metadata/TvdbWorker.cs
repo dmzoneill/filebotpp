@@ -9,6 +9,7 @@ namespace FileBotPP.Metadata
     internal class TvdbWorker : ITvdbWorker
     {
         private readonly string _seriesName;
+        private string[] _artworkDownloads;
         private int _seriesid = -1;
         private ITvdbSeries _tvdbSeries;
         private bool _working;
@@ -35,6 +36,11 @@ namespace FileBotPP.Metadata
         public string get_series_name()
         {
             return this._seriesName;
+        }
+
+        public string[] get_artwork_links()
+        {
+            return this._artworkDownloads;
         }
 
         public bool is_cached()
@@ -75,7 +81,13 @@ namespace FileBotPP.Metadata
 
                 this.parse_series_episodes_metadata( document );
                 this.parse_series_metadata( document );
-                this.download_artwork();
+
+                this._artworkDownloads = new[]
+                {
+                    "http://thetvdb.com/banners/_cache/" + this._tvdbSeries.Poster, Factory.Instance.AppDataFolder + "/tvdbartwork/poster/" + this._tvdbSeries.Id + ".jpg",
+                    "http://thetvdb.com/banners/_cache/" + this._tvdbSeries.Fanart, Factory.Instance.AppDataFolder + "/tvdbartwork/fanart/" + this._tvdbSeries.Id + ".jpg",
+                    "http://thetvdb.com/banners/_cache/" + this._tvdbSeries.Banner, Factory.Instance.AppDataFolder + "/tvdbartwork/banner/" + this._tvdbSeries.Id + ".jpg"
+                };
 
                 this._xml = null;
             }
@@ -278,21 +290,6 @@ namespace FileBotPP.Metadata
                 this._tvdbSeries.Poster = seriesdata.SelectSingleNode( ".//poster" )?.InnerText.Trim();
                 this._tvdbSeries.TmsWantedOld = seriesdata.SelectSingleNode( ".//tms_wanted_old" )?.InnerText.Trim();
                 this._tvdbSeries.Zap2ItId = seriesdata.SelectSingleNode( ".//zap2it_id" )?.InnerText.Trim();
-            }
-            catch ( Exception ex )
-            {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
-            }
-        }
-
-        private void download_artwork()
-        {
-            try
-            {
-                Tvdb.FileDownloads.Enqueue( new[] {"http://thetvdb.com/banners/_cache/" + this._tvdbSeries.Poster, Factory.Instance.AppDataFolder + "/tvdbartwork/poster/" + this._tvdbSeries.Id + ".jpg"} );
-                Tvdb.FileDownloads.Enqueue( new[] {"http://thetvdb.com/banners/_cache/" + this._tvdbSeries.Fanart, Factory.Instance.AppDataFolder + "/tvdbartwork/fanart/" + this._tvdbSeries.Id + ".jpg"} );
-                Tvdb.FileDownloads.Enqueue( new[] {"http://thetvdb.com/banners/_cache/" + this._tvdbSeries.Banner, Factory.Instance.AppDataFolder + "/tvdbartwork/banner/" + this._tvdbSeries.Id + ".jpg"} );
             }
             catch ( Exception ex )
             {

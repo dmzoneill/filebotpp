@@ -8,5 +8,6 @@ namespace FileBotPP.Metadata
         string get_series_name();
         bool is_cached();
         void parse_series_data();
+        string[] get_artwork_links();
     }
 }

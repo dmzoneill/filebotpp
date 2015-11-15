@@ -79,8 +79,8 @@ namespace FileBotPP.Helpers
         {
             if ( this._directory == null && this._fileitem == null )
             {
-                this._convertItemsCount = ItemProvider.Count();
-                foreach ( var dir in ItemProvider.Items.OfType< IDirectoryItem >().ToArray() )
+                this._convertItemsCount = Factory.Instance.ItemProvider.Count();
+                foreach ( var dir in Factory.Instance.ItemProvider.Items.OfType< IDirectoryItem >().ToArray() )
                 {
                     if ( this._stop )
                     {

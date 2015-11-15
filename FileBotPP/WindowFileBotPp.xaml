@@ -5,6 +5,7 @@
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:tree="clr-namespace:FileBotPP.Tree"
                       xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:system="clr-namespace:System;assembly=mscorlib"
                       mc:Ignorable="d"
                       Title="Filebot++" Height="650" Width="1000" MinWidth="1000" MinHeight="600"
                       Loaded="Window_Loaded" Closing="Window_Closing" ResizeMode="CanResizeWithGrip"
@@ -37,6 +38,26 @@
 		</DataTemplate>
 	</controls:MetroWindow.IconTemplate>
 	<controls:MetroWindow.Resources>
+        <SolidColorBrush x:Key="EmptyColour">Black</SolidColorBrush>
+        <system:String x:Key="EmptyTooltip">Empty folder</system:String>
+        <SolidColorBrush x:Key="CorruptedColour">Red</SolidColorBrush>
+        <system:String x:Key="CorruptedTooltip">Corrupted</system:String>
+        <SolidColorBrush x:Key="BadLocationColour">Blue</SolidColorBrush>
+        <system:String x:Key="BadLocationTooltip">Bad location</system:String>
+        <SolidColorBrush x:Key="MissingColour">Green</SolidColorBrush>
+        <system:String x:Key="MissingTooltip">Missing</system:String>
+        <SolidColorBrush x:Key="QualityColour">DarkOrange</SolidColorBrush>
+        <system:String x:Key="QualityTooltip">Poor quality</system:String>
+        <SolidColorBrush x:Key="DisallowedTypeColour">Yellow</SolidColorBrush>
+        <system:String x:Key="DisallowedTypeTooltip">Disallowed file type</system:String>
+        <SolidColorBrush x:Key="BadNameColour">DeepSkyBlue</SolidColorBrush>
+        <system:String x:Key="BadNameTooltip">Bad name</system:String>
+        <SolidColorBrush x:Key="ExtraColour">LawnGreen</SolidColorBrush>
+        <system:String x:Key="ExtraTooltip">Extra files/seasons not in TVDB</system:String>
+        <SolidColorBrush x:Key="TorrentColour">LightCoral</SolidColorBrush>
+        <system:String x:Key="TorrentTooltip">Torrent available</system:String>
+        <SolidColorBrush x:Key="OkColour">White</SolidColorBrush>
+        <system:String x:Key="OkTooltip">Ok</system:String>
 		<Style TargetType="{x:Type controls:WindowButtonCommands}">
 			<Style.Triggers>
 				<DataTrigger
@@ -80,34 +101,34 @@
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="1">
 				<Border BorderBrush="Black" BorderThickness="1" Height="12" Margin="0,0,5,0" MinWidth="12">
 					<UniformGrid Rows="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="18" Margin="0">
-						<Rectangle Fill="{x:Static tree:ItemStatus.EmptyColour}" ToolTip="{x:Static tree:ItemStatus.EmptyTooltip}"
-						           MinWidth="4" Name="EmptyRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.CorruptedColour}"
-						           ToolTip="{x:Static tree:ItemStatus.CorruptedTooltip}" MinWidth="4" Name="CorruptedRectangle"
+                        <Rectangle Fill="{StaticResource EmptyColour}" 
+                                   ToolTip="{StaticResource EmptyTooltip}" MinWidth="4" Name="EmptyRectangle" 
+                                   VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
+                        <Rectangle Fill="{StaticResource CorruptedColour}"
+						           ToolTip="{StaticResource CorruptedTooltip}" MinWidth="4" Name="CorruptedRectangle"
 						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.BadLocationColour}"
-						           ToolTip="{x:Static tree:ItemStatus.BadLocationTooltip}" MinWidth="4" Name="BadLocationRectangle"
+                        <Rectangle Fill="{StaticResource BadLocationColour}"
+						           ToolTip="{StaticResource BadLocationTooltip}" MinWidth="4" Name="BadLocationRectangle"
 						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.MissingColour}" ToolTip="{x:Static tree:ItemStatus.MissingTooltip}"
+                        <Rectangle Fill="{StaticResource MissingColour}" ToolTip="{StaticResource MissingTooltip}"
 						           MinWidth="4" Name="MissingRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.QualityColour}" ToolTip="{x:Static tree:ItemStatus.QualityTooltip}"
+                        <Rectangle Fill="{StaticResource QualityColour}" ToolTip="{StaticResource QualityTooltip}"
 						           MinWidth="4" Name="BadQualityRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.DisallowedTypeColour}"
-						           ToolTip="{x:Static tree:ItemStatus.DisallowedTypeTooltip}" MinWidth="4" Name="DisallowedTypeRectangle"
+                        <Rectangle Fill="{StaticResource DisallowedTypeColour}"
+						           ToolTip="{StaticResource DisallowedTypeTooltip}" MinWidth="4" Name="DisallowedTypeRectangle"
 						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.BadNameColour}" ToolTip="{x:Static tree:ItemStatus.BadNameTooltip}"
+                        <Rectangle Fill="{StaticResource BadNameColour}" ToolTip="{StaticResource BadNameTooltip}"
 						           MinWidth="4" Name="BadNameRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.ExtraColour}" ToolTip="{x:Static tree:ItemStatus.ExtraTooltip}"
+                        <Rectangle Fill="{StaticResource ExtraColour}" ToolTip="{StaticResource ExtraTooltip}"
 						           MinWidth="4" Name="ExtraRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.TorrentColour}" ToolTip="{x:Static tree:ItemStatus.TorrentTooltip}"
+                        <Rectangle Fill="{StaticResource TorrentColour}" ToolTip="{StaticResource TorrentTooltip}"
 						           MinWidth="4" Name="TorrentRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.OkColour}" ToolTip="{x:Static tree:ItemStatus.OkTooltip}" MinWidth="4"
+                        <Rectangle Fill="{StaticResource OkColour}" ToolTip="{StaticResource OkTooltip}" MinWidth="4"
 						           Name="OkRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0"
 						           Visibility="Collapsed" />
 					</UniformGrid>
@@ -307,31 +328,31 @@
 			<StackPanel Orientation="Horizontal">
 				<Border BorderBrush="Black" BorderThickness="1" Margin="0,2,5,2" MinWidth="12" Height="12" VerticalAlignment="Top">
 					<UniformGrid Rows="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="18" Margin="0">
-						<Rectangle Fill="{x:Static tree:ItemStatus.CorruptedColour}"
-						           ToolTip="{x:Static tree:ItemStatus.CorruptedTooltip}" MinWidth="4" Name="CorruptedRectangle"
+                        <Rectangle Fill="{StaticResource CorruptedColour}"
+						           ToolTip="{StaticResource CorruptedTooltip}" MinWidth="4" Name="CorruptedRectangle"
 						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.BadLocationColour}"
-						           ToolTip="{x:Static tree:ItemStatus.BadLocationTooltip}" MinWidth="4" Name="BadLocationRectangle"
+                        <Rectangle Fill="{StaticResource BadLocationColour}"
+						           ToolTip="{StaticResource BadLocationTooltip}" MinWidth="4" Name="BadLocationRectangle"
 						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.MissingColour}" ToolTip="{x:Static tree:ItemStatus.MissingTooltip}"
+                        <Rectangle Fill="{StaticResource MissingColour}" ToolTip="{StaticResource MissingTooltip}"
 						           MinWidth="4" Name="MissingRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.QualityColour}" ToolTip="{x:Static tree:ItemStatus.QualityTooltip}"
+                        <Rectangle Fill="{StaticResource QualityColour}" ToolTip="{StaticResource QualityTooltip}"
 						           MinWidth="4" Name="BadQualityRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.DisallowedTypeColour}"
-						           ToolTip="{x:Static tree:ItemStatus.DisallowedTypeTooltip}" MinWidth="4" Name="DisallowedTypeRectangle"
+                        <Rectangle Fill="{StaticResource DisallowedTypeColour}"
+						           ToolTip="{StaticResource DisallowedTypeTooltip}" MinWidth="4" Name="DisallowedTypeRectangle"
 						           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.BadNameColour}" ToolTip="{x:Static tree:ItemStatus.BadNameTooltip}"
+                        <Rectangle Fill="{StaticResource BadNameColour}" ToolTip="{StaticResource BadNameTooltip}"
 						           MinWidth="4" Name="BadNameRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.ExtraColour}" ToolTip="{x:Static tree:ItemStatus.ExtraTooltip}"
+                        <Rectangle Fill="{StaticResource ExtraColour}" ToolTip="{StaticResource ExtraTooltip}"
 						           MinWidth="4" Name="ExtraRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.TorrentColour}" ToolTip="{x:Static tree:ItemStatus.TorrentTooltip}"
+                        <Rectangle Fill="{StaticResource TorrentColour}" ToolTip="{StaticResource TorrentTooltip}"
 						           MinWidth="4" Name="TorrentRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						           Margin="0" Visibility="Collapsed" />
-						<Rectangle Fill="{x:Static tree:ItemStatus.OkColour}" ToolTip="{x:Static tree:ItemStatus.OkTooltip}" MinWidth="4"
+                        <Rectangle Fill="{StaticResource OkColour}" ToolTip="{StaticResource OkTooltip}" MinWidth="4"
 						           Name="OkRectangle" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0"
 						           Visibility="Collapsed" />
 					</UniformGrid>
@@ -752,35 +773,35 @@
 						            VerticalAlignment="Bottom">
 							<Border BorderThickness="1" BorderBrush="Gray" Margin="0,20,0,0" VerticalAlignment="Bottom">
 								<StackPanel Orientation="Vertical" HorizontalAlignment="Center" Background="White" Margin="0">
-									<Rectangle Fill="{x:Static tree:ItemStatus.EmptyColour}" Margin="5,5,5,0"
-									           ToolTip="{x:Static tree:ItemStatus.EmptyTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+                                    <Rectangle Fill="{StaticResource EmptyColour}" Margin="5,5,5,0"
+									           ToolTip="{StaticResource EmptyTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
 									           Height="16" />
-									<Rectangle Fill="{x:Static tree:ItemStatus.CorruptedColour}" Margin="5,5,5,0"
-									           ToolTip="{x:Static tree:ItemStatus.CorruptedTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+                                    <Rectangle Fill="{StaticResource CorruptedColour}" Margin="5,5,5,0"
+									           ToolTip="{StaticResource CorruptedTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
 									           Height="16" />
-									<Rectangle Fill="{x:Static tree:ItemStatus.BadLocationColour}" Margin="5,5,5,0"
-									           ToolTip="{x:Static tree:ItemStatus.BadLocationTooltip}" Stroke="Black" StrokeThickness="1"
+                                    <Rectangle Fill="{StaticResource BadLocationColour}" Margin="5,5,5,0"
+									           ToolTip="{StaticResource BadLocationTooltip}" Stroke="Black" StrokeThickness="1"
 									           Width="16" Height="16" />
-									<Rectangle Fill="{x:Static tree:ItemStatus.MissingColour}" Margin="5,5,5,0"
-									           ToolTip="{x:Static tree:ItemStatus.MissingTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+                                    <Rectangle Fill="{StaticResource MissingColour}" Margin="5,5,5,0"
+									           ToolTip="{StaticResource MissingTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
 									           Height="16" />
-									<Rectangle Fill="{x:Static tree:ItemStatus.QualityColour}" Margin="5,5,5,0"
-									           ToolTip="{x:Static tree:ItemStatus.QualityTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+                                    <Rectangle Fill="{StaticResource QualityColour}" Margin="5,5,5,0"
+									           ToolTip="{StaticResource QualityTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
 									           Height="16" />
-									<Rectangle Fill="{x:Static tree:ItemStatus.DisallowedTypeColour}" Margin="5,5,5,0"
-									           ToolTip="{x:Static tree:ItemStatus.DisallowedTypeTooltip}" Stroke="Black" StrokeThickness="1"
+                                    <Rectangle Fill="{StaticResource DisallowedTypeColour}" Margin="5,5,5,0"
+									           ToolTip="{StaticResource DisallowedTypeTooltip}" Stroke="Black" StrokeThickness="1"
 									           Width="16" Height="16" />
-									<Rectangle Fill="{x:Static tree:ItemStatus.BadNameColour}" Margin="5,5,5,0"
-									           ToolTip="{x:Static tree:ItemStatus.BadNameTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+                                    <Rectangle Fill="{StaticResource BadNameColour}" Margin="5,5,5,0"
+									           ToolTip="{StaticResource BadNameTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
 									           Height="16" />
-									<Rectangle Fill="{x:Static tree:ItemStatus.ExtraColour}" Margin="5,5,5,0"
-									           ToolTip="{x:Static tree:ItemStatus.ExtraTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+                                    <Rectangle Fill="{StaticResource ExtraColour}" Margin="5,5,5,0"
+									           ToolTip="{StaticResource ExtraTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
 									           Height="16" />
-									<Rectangle Fill="{x:Static tree:ItemStatus.TorrentColour}" Margin="5,5,5,0"
-									           ToolTip="{x:Static tree:ItemStatus.TorrentTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+                                    <Rectangle Fill="{StaticResource TorrentColour}" Margin="5,5,5,0"
+									           ToolTip="{StaticResource TorrentTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
 									           Height="16" />
-									<Rectangle Fill="{x:Static tree:ItemStatus.OkColour}" Margin="5,5,5,5"
-									           ToolTip="{x:Static tree:ItemStatus.OkTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
+                                    <Rectangle Fill="{StaticResource OkColour}" Margin="5,5,5,5"
+									           ToolTip="{StaticResource OkTooltip}" Stroke="Black" StrokeThickness="1" Width="16"
 									           Height="16" />
 								</StackPanel>
 							</Border>
@@ -894,7 +915,7 @@
 			<Label x:Name="EpisodeCount" Grid.Column="8" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
 			<Label Content="TvDB" Name="TvDbLabel" Grid.Column="9" VerticalAlignment="Top" HorizontalAlignment="Right"
 			       FontWeight="Bold" Visibility="Collapsed" />
-            <Label x:Name="TvDbProgress" Content="" Grid.Column="10" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
+			<Label x:Name="TvDbProgress" Content="" Grid.Column="10" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
 			<Label Content="EzTV" Name="EzTvLabel" Grid.Column="11" VerticalAlignment="Top" HorizontalAlignment="Right"
 			       FontWeight="Bold" Visibility="Collapsed" />
 			<Label x:Name="EzTvProgress" Content="" Grid.Column="12" VerticalAlignment="Top" HorizontalContentAlignment="Left" />

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using FileBotPP.Helpers;
-using FileBotPP.Tree;
 
 namespace FileBotPP
 {
@@ -33,7 +32,7 @@ namespace FileBotPP
                     return;
                 }
 
-                var got = ItemProvider.Items.Select( item => item.FullName ).ToList();
+                var got = Factory.Instance.ItemProvider.Items.Select( item => item.FullName ).ToList();
                 var want = new List< string >();
 
                 foreach ( var torrent in Factory.Instance.Eztv.get_torrents().Where( torrent => got.Contains( torrent.Series ) == false ).Where( torrent => want.Contains( torrent.Series ) == false ) )
