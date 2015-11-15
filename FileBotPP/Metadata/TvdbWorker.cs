@@ -245,7 +245,7 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                var seriesdata = document.SelectSingleNode( ".//TvdbTvdbSeries" );
+                var seriesdata = document.SelectSingleNode( ".//Series" );
 
                 if ( seriesdata == null )
                 {
@@ -262,7 +262,7 @@ namespace FileBotPP.Metadata
                 this._tvdbSeries.ImdbId = seriesdata.SelectSingleNode( ".//IMDB_ID" )?.InnerText.Trim();
                 this._tvdbSeries.Language = seriesdata.SelectSingleNode( ".//Language" )?.InnerText.Trim();
                 this._tvdbSeries.Network = seriesdata.SelectSingleNode( ".//NetworkID" )?.InnerText.Trim();
-                this._tvdbSeries.NetworkId = seriesdata.SelectSingleNode( ".//TvdbTvdbSeries" )?.InnerText.Trim();
+                this._tvdbSeries.NetworkId = seriesdata.SelectSingleNode( ".//Series" )?.InnerText.Trim();
                 this._tvdbSeries.Overview = seriesdata.SelectSingleNode( ".//Overview" )?.InnerText.Trim();
                 this._tvdbSeries.Rating = seriesdata.SelectSingleNode( ".//Rating" )?.InnerText.Trim();
                 this._tvdbSeries.RatingCount = seriesdata.SelectSingleNode( ".//RatingCount" )?.InnerText.Trim();
@@ -305,7 +305,7 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                var episodes = document.SelectNodes( ".//TvdbTvdbEpisode" );
+                var episodes = document.SelectNodes( ".//Episode" );
 
                 if ( episodes == null )
                 {
@@ -378,7 +378,7 @@ namespace FileBotPP.Metadata
                     File.Delete( tempFile );
                 }
 
-                var download = Factory.Instance.Utils.download_file( "http://thetvdb.com/api/" + Factory.Instance.Settings.TvdbApiKey + "/tvdbSeries/" + this._seriesid + "/all/en.zip", tempFile );
+                var download = Factory.Instance.Utils.download_file( "http://thetvdb.com/api/" + Factory.Instance.Settings.TvdbApiKey + "/Series/" + this._seriesid + "/all/en.zip", tempFile );
 
                 if ( download == false )
                 {

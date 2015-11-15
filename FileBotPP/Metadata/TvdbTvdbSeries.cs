@@ -77,7 +77,7 @@ namespace FileBotPP.Metadata
 
         public string TvdbHyperlink
         {
-            get { return "http://thetvdb.com/?tab=tvdbSeries&id=" + this.Id; }
+            get { return "http://thetvdb.com/?tab=Series&id=" + this.Id; }
             set { }
         }
 

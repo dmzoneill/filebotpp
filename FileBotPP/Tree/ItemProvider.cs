@@ -143,7 +143,7 @@ namespace FileBotPP.Tree
             else
             {
                 item.BadLocation = true;
-                var checkdir = item.Parent.Path + "\\TvdbTvdbSeason " + epseasonnum;
+                var checkdir = item.Parent.Path + "\\Season " + epseasonnum;
                 item.NewPath = checkdir + "\\" + item.FullName;
                 return;
             }
@@ -151,13 +151,13 @@ namespace FileBotPP.Tree
             if ( item.Parent.Parent == null && epseasonnum != sseasonnum )
             {
                 item.BadLocation = true;
-                var checkdir = item.Parent.Path + "\\TvdbTvdbSeason " + epseasonnum;
+                var checkdir = item.Parent.Path + "\\Season " + epseasonnum;
                 item.NewPath = checkdir + "\\" + item.FullName;
             }
             if ( item.Parent.Parent != null && epseasonnum != sseasonnum )
             {
                 item.BadLocation = true;
-                var checkdir = item.Parent.Parent.Path + "\\TvdbTvdbSeason " + epseasonnum;
+                var checkdir = item.Parent.Parent.Path + "\\Season " + epseasonnum;
                 item.NewPath = checkdir + "\\" + item.FullName;
             }
         }
@@ -998,7 +998,7 @@ namespace FileBotPP.Tree
 
         private static void FolderScanner_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
         {
-            Factory.Instance.WindowFileBotPp.set_status_text( "TvdbTvdbSeries tree populated..." );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Series tree populated..." );
             Factory.Instance.MetaDataReady += 1;
             Factory.Instance.WindowFileBotPp.set_ready( true );
         }

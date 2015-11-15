@@ -117,8 +117,8 @@ namespace FileBotPP.Tree
 
                         var seasonint = match1.Success ? match1.Groups[ 1 ].Value : match2.Groups[ 1 ].Value;
 
-                        var newdirectory = directory.Path + "\\TvdbTvdbSeason " + seasonint;
-                        var newfilelocation = directory.Path + "\\TvdbTvdbSeason " + seasonint + "\\" + file.FullName;
+                        var newdirectory = directory.Path + "\\Season " + seasonint;
+                        var newfilelocation = directory.Path + "\\Season " + seasonint + "\\" + file.FullName;
 
                         ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = subdirectory, File = file, NewPath = newfilelocation} );
 
@@ -127,7 +127,7 @@ namespace FileBotPP.Tree
                             continue;
                         }
 
-                        var missingdirectory = new DirectoryItem {Parent = directory, FullName = "TvdbTvdbSeason " + seasonint, Path = newdirectory};
+                        var missingdirectory = new DirectoryItem {Parent = directory, FullName = "Season " + seasonint, Path = newdirectory};
                         var di = new DirectoryInsert {Directory = directory, SubDirectory = missingdirectory, Seasonnum = int.Parse( seasonint )};
                         ItemProvider.NewDirectoryUpdates.Enqueue( di );
                     }
@@ -392,7 +392,7 @@ namespace FileBotPP.Tree
                 if ( match.Success )
                 {
                     var seasonNum = int.Parse( match.Groups[ 1 ].ToString() );
-                    var checkdir = directory.Path + "\\TvdbTvdbSeason " + seasonNum;
+                    var checkdir = directory.Path + "\\Season " + seasonNum;
 
                     item.BadLocation = true;
 
@@ -424,7 +424,7 @@ namespace FileBotPP.Tree
 
             foreach ( var inode in directory.Items.OfType< IDirectoryItem >() )
             {
-                if ( Regex.IsMatch( inode.FullName, @"^TvdbTvdbSeason ([0-9]+)" ) )
+                if ( Regex.IsMatch( inode.FullName, @"^Season ([0-9]+)" ) )
                 {
                     continue;
                 }
@@ -447,7 +447,7 @@ namespace FileBotPP.Tree
 
                 foreach ( var season in series.get_seasons() )
                 {
-                    var check = @"TvdbTvdbSeason " + season.get_season_num();
+                    var check = @"Season " + season.get_season_num();
 
                     if ( ItemProvider.contains_child( directory, check ) )
                     {

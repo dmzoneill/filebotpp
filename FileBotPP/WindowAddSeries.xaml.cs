@@ -41,7 +41,7 @@ namespace FileBotPP
                     want.Add( torrent.Series );
                 }
 
-                var tbname = new TextBlock {Text = "TvdbTvdbSeries Names"};
+                var tbname = new TextBlock {Text = "Series Names"};
                 var tbnum = new TextBlock {Text = "#Torrents"};
                 var grid = new Grid();
                 grid.ColumnDefinitions.Add( new ColumnDefinition {Width = new GridLength( 290 )} );

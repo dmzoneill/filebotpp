@@ -118,7 +118,7 @@ namespace FileBotPP.Metadata
                 File.Delete( tempFile );
             }
 
-            Factory.Instance.LogLines.Enqueue( @"Dowloading " + this._series + @" metadata..." );
+            Factory.Instance.LogLines.Enqueue( @"Downloading " + this._series + @" metadata..." );
 
             var temp = Factory.Instance.Utils.Fetch( "https://eztv.ag/shows/" + this._seriesid + "/" + this._series );
 
@@ -141,13 +141,13 @@ namespace FileBotPP.Metadata
         {
             string[] parts;
 
-            if ( temp.Contains( "TvdbTvdbEpisode Name" ) )
+            if ( temp.Contains( "Episode Name" ) )
             {
-                parts = temp.Split( new[] {"TvdbTvdbEpisode Name"}, StringSplitOptions.None );
+                parts = temp.Split( new[] {"Episode Name"}, StringSplitOptions.None );
             }
-            else if ( temp.Contains( "TvdbTvdbEpisode FullName" ) )
+            else if ( temp.Contains( "Episode FullName" ) )
             {
-                parts = temp.Split( new[] {"TvdbTvdbEpisode FullName"}, StringSplitOptions.None );
+                parts = temp.Split( new[] {"Episode FullName"}, StringSplitOptions.None );
             }
             else
             {

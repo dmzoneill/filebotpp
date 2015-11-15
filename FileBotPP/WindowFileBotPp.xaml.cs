@@ -57,7 +57,7 @@ namespace FileBotPP
 
         #endregion
 
-        #region Tree add tvdbSeries
+        #region Tree add Series
 
         private void AddSeriesMenuItem_OnClick( object sender, RoutedEventArgs e )
         {
@@ -1125,7 +1125,7 @@ namespace FileBotPP
         {
             try
             {
-                var dialog = new VistaFolderBrowserDialog {Description = @"Please select your tvdbSeries folder.", UseDescriptionForTitle = true};
+                var dialog = new VistaFolderBrowserDialog {Description = @"Please select your Series folder.", UseDescriptionForTitle = true};
 
                 var result = dialog.ShowDialog();
 

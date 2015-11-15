@@ -31,7 +31,7 @@ namespace FileBotPP.Metadata
 
         public void check_series( IDirectoryItem directory )
         {
-            Factory.Instance.WindowFileBotPp.set_status_text( "Checking names in tvdbSeries: " + directory.FullName );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Checking names in Series: " + directory.FullName );
             this._checkSeasonDirectory = directory;
             this._worker = new BackgroundWorker();
             this._worker.RunWorkerCompleted += this._worker_RunWorkerCompleted;
@@ -48,7 +48,7 @@ namespace FileBotPP.Metadata
 
         public void check_series_all()
         {
-            Factory.Instance.WindowFileBotPp.set_status_text( "Checking all tvdbSeries names" );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Checking all Series names" );
             this._worker = new BackgroundWorker();
             this._worker.RunWorkerCompleted += this._worker_RunWorkerCompleted;
             this._worker.ProgressChanged += this._worker_ProgressChanged;
@@ -135,7 +135,7 @@ namespace FileBotPP.Metadata
         {
             this.consume_queue();
 
-            Factory.Instance.WindowFileBotPp.set_status_text( "TvdbTvdbSeries name check completed" );
+            Factory.Instance.WindowFileBotPp.set_status_text( "Series name check completed" );
         }
 
         private void consume_queue()

@@ -155,7 +155,7 @@
 									<Style />
 								</Separator.Style>
 							</Separator>
-							<MenuItem Header="Check filename tvdbEpisode name(s)" Name="CheckFilenamesMenuItem"
+							<MenuItem Header="Check filename Episode name(s)" Name="CheckFilenamesMenuItem"
 							          Click="CheckNamesMenuItem_OnClick">
 								<MenuItem.Style>
 									<Style />
@@ -362,7 +362,7 @@
 										<Style />
 									</Separator.Style>
 								</Separator>
-								<MenuItem Header="Check tvdbEpisode name" Name="CheckFilenamesMenuItem" Click="CheckNamesMenuItem_OnClick">
+								<MenuItem Header="Check Episode name" Name="CheckFilenamesMenuItem" Click="CheckNamesMenuItem_OnClick">
 									<MenuItem.Style>
 										<Style TargetType="MenuItem">
 											<Style.Triggers>
@@ -631,7 +631,7 @@
 								<Image Source="Images/16/Very_Basic/opened_folder-16.png" Width="16" Height="16" Margin="3" />
 							</Button>
 							<Separator Width="5" Visibility="Hidden" />
-							<Button IsEnabled="False" ToolTip="Check all filename tvdbEpisode name(s)" Name="CheckNamesAllButton"
+							<Button IsEnabled="False" ToolTip="Check all filename Episode name(s)" Name="CheckNamesAllButton"
 							        Click="CheckNamesAllButton_OnClick" HorizontalAlignment="Left">
 								<Button.Style>
 									<Style />
@@ -655,7 +655,7 @@
 								<Image Source="Images/16/Gaming/magnet-16.png" Width="16" Height="16" Margin="3" />
 							</Button>
 							<Separator Width="5" Visibility="Hidden" />
-							<Button IsEnabled="False" ToolTip="Add tvdbSeries" Name="AddSeriesButton" Click="AddSeriesButton_OnClick">
+							<Button IsEnabled="False" ToolTip="Add Series" Name="AddSeriesButton" Click="AddSeriesButton_OnClick">
 								<Button.Style>
 									<Style />
 								</Button.Style>
@@ -669,7 +669,7 @@
 							<RowDefinition Height="230" />
 						</Grid.RowDefinitions>
 						<StackPanel Orientation="Vertical" Width="30" Background="White" Margin="0,0,5,0" Grid.Row="0">
-							<Button ToolTip="Check filename tvdbEpisode name(s)" Name="CheckNamesButton" Click="CheckNamesButton_Click"
+							<Button ToolTip="Check filename Episode name(s)" Name="CheckNamesButton" Click="CheckNamesButton_Click"
 							        HorizontalAlignment="Left" Width="30">
 								<Button.Style>
 									<Style>
@@ -795,7 +795,7 @@
 						</TreeView.Style>
 						<TreeView.ContextMenu>
 							<ContextMenu>
-								<MenuItem Header="Add TvdbTvdbSeries" Name="AddSeriesMenuItem" Click="AddSeriesMenuItem_OnClick">
+								<MenuItem Header="Add Series" Name="AddSeriesMenuItem" Click="AddSeriesMenuItem_OnClick">
 									<MenuItem.Icon>
 										<Image Source="Images/16/Folders/add_folder-16.png" />
 									</MenuItem.Icon>
@@ -883,18 +883,18 @@
 			<Label Content="Status" x:Name="StatusLabel" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right"
 			       FontWeight="Bold" Visibility="Collapsed" />
 			<Label x:Name="Status" Content="" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
-			<Label Content="TvdbTvdbSeries" x:Name="SeriesCountLabel" FontWeight="Bold" VerticalAlignment="Top"
+			<Label Content="Series" x:Name="SeriesCountLabel" FontWeight="Bold" VerticalAlignment="Top"
 			       HorizontalContentAlignment="Right" Grid.Column="3" Visibility="Collapsed" />
 			<Label x:Name="SeriesCount" Grid.Column="4" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
-			<Label Content="TvdbSeasons" Name="SeasonCountLabel" FontWeight="Bold" VerticalAlignment="Top"
+			<Label Content="Seasons" Name="SeasonCountLabel" FontWeight="Bold" VerticalAlignment="Top"
 			       HorizontalContentAlignment="Right" Grid.Column="5" Visibility="Collapsed" />
 			<Label x:Name="SeasonCount" Grid.Column="6" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
-			<Label Content="TvDBEpisodes" Name="EpisodeCountLabel" FontWeight="Bold" VerticalAlignment="Top"
+			<Label Content="Episodes" Name="EpisodeCountLabel" FontWeight="Bold" VerticalAlignment="Top"
 			       HorizontalContentAlignment="Right" Grid.Column="7" Visibility="Collapsed" />
 			<Label x:Name="EpisodeCount" Grid.Column="8" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
 			<Label Content="TvDB" Name="TvDbLabel" Grid.Column="9" VerticalAlignment="Top" HorizontalAlignment="Right"
 			       FontWeight="Bold" Visibility="Collapsed" />
-			<Label x:Name="TvDbProgress" Content="" Grid.Column="10" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
+            <Label x:Name="TvDbProgress" Content="" Grid.Column="10" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
 			<Label Content="EzTV" Name="EzTvLabel" Grid.Column="11" VerticalAlignment="Top" HorizontalAlignment="Right"
 			       FontWeight="Bold" Visibility="Collapsed" />
 			<Label x:Name="EzTvProgress" Content="" Grid.Column="12" VerticalAlignment="Top" HorizontalContentAlignment="Left" />
