@@ -11,7 +11,6 @@ namespace FileBotPP.Tree
     {
         private static readonly List< FsPoller > Fspollers;
         private static readonly Object Lockobj = new Object();
-        private static readonly Random Random;
         private readonly IDirectoryItem _directory;
         private readonly DirectoryInfo _directoryInfo;
         private DispatcherTimer _timer;
@@ -19,7 +18,6 @@ namespace FileBotPP.Tree
         static FsPoller()
         {
             Fspollers = new List< FsPoller >();
-            Random = new Random();
         }
 
         public FsPoller()
@@ -40,7 +38,7 @@ namespace FileBotPP.Tree
         {
             this._timer = new DispatcherTimer
             {
-                Interval = new TimeSpan( 0, 0, Random.Next( Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) ),
+                Interval = new TimeSpan( 0, 0, Factory.Instance.Random.Next( Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) ),
                 IsEnabled = true
             };
             this._timer.Tick += this.TimerOnElapsed;
@@ -84,7 +82,7 @@ namespace FileBotPP.Tree
         {
             try
             {
-                this._timer.Interval = new TimeSpan( 0, 0, Random.Next( Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) );
+                this._timer.Interval = new TimeSpan( 0, 0, Factory.Instance.Random.Next( Factory.Instance.Settings.FilesSystemWatcherMinRefreshTime, Factory.Instance.Settings.FilesSystemWatcherMaxRefreshTime ) );
 
                 lock (Lockobj)
                 {

@@ -10,15 +10,12 @@ namespace FileBotPP.Metadata
 {
     public class Eztv : ISupportsStop, IEztv, IDisposable
     {
-        private static readonly Random Random = new Random();
-        private readonly List< ITorrent > _torrents;
         private readonly List< IEztvWorker > _workers;
         private BackgroundWorker _mainWorker;
         private bool _stop;
 
         public Eztv()
         {
-            this._torrents = new List< ITorrent >();
             this._workers = new List< IEztvWorker >();
         }
 
@@ -36,31 +33,6 @@ namespace FileBotPP.Metadata
             this._mainWorker.DoWork += this._mainWorker_DoWork;
             this._mainWorker.WorkerReportsProgress = true;
             this._mainWorker.RunWorkerAsync();
-        }
-
-        public List< ITorrent > get_torrents()
-        {
-            return this._torrents;
-        }
-
-        public void get_series_from_workers()
-        {
-            foreach ( var worker in this._workers )
-            {
-                var torrents = worker.get_torrents();
-
-                if ( torrents == null )
-                {
-                    continue;
-                }
-
-                foreach ( var torrent in torrents )
-                {
-                    this._torrents.Add( torrent );
-                }
-            }
-
-            this._workers.Clear();
         }
 
         public void free_workers()
@@ -115,9 +87,7 @@ namespace FileBotPP.Metadata
             this.wait_for_workers();
             if ( this._stop )
             {
-                return;
             }
-            this.get_series_from_workers();
         }
 
         private void _mainWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
@@ -135,7 +105,7 @@ namespace FileBotPP.Metadata
 
         private void wait_for_workers()
         {
-            Thread.Sleep( Random.Next( 10, 40 ) );
+            Thread.Sleep( Factory.Instance.Random.Next( 10, 40 ) );
 
             Factory.Instance.LogLines.Enqueue( "Waiting for threads" );
 
@@ -145,7 +115,7 @@ namespace FileBotPP.Metadata
             {
                 count = this._workers.Count( worker => worker.is_working() );
 
-                Thread.Sleep( Random.Next( 10, 40 ) );
+                Thread.Sleep( Factory.Instance.Random.Next( 10, 40 ) );
             }
         }
 
@@ -157,10 +127,10 @@ namespace FileBotPP.Metadata
             {
                 count = this._workers.Count( worker => worker.is_working() );
 
-                Thread.Sleep( wait ? Random.Next( 10, 40 ) : 5 );
+                Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
             }
 
-            Thread.Sleep( wait ? Random.Next( 10, 40 ) : 5 );
+            Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
         }
 
         protected virtual void Dispose( bool disposing )

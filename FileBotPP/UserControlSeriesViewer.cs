@@ -94,7 +94,7 @@ namespace FileBotPP
                 var para = new Paragraph();
                 doc.Blocks.Add( para );
 
-                foreach ( var torrent in Factory.Instance.Eztv.get_torrents().Where( torrent => String.Compare( torrent.Imbdid, this.TvdbSeries.ImdbId, StringComparison.Ordinal ) == 0 ) )
+                foreach ( var torrent in Factory.Instance.Torrents.Where( torrent => String.Compare( torrent.Imbdid, this.TvdbSeries.ImdbId, StringComparison.Ordinal ) == 0 ) )
                 {
                     if ( this.CheckBoxHdtv.IsChecked ?? false )
                     {

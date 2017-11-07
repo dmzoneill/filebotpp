@@ -11,7 +11,6 @@ namespace FileBotPP.Metadata
     public class Tvdb : ITvdb, ISupportsStop, IDisposable
     {
         private readonly string[] _dirs;
-        private readonly Random _random = new Random();
         private readonly List< ITvdbSeries > _series;
         private readonly List< ITvdbWorker > _workers;
         private BackgroundWorker _allSeriesWorker;
@@ -315,10 +314,10 @@ namespace FileBotPP.Metadata
                 {
                     count = this._workers.Count( worker => worker.is_working() );
 
-                    Thread.Sleep( wait ? this._random.Next( 10, 40 ) : 5 );
+                    Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
                 }
 
-                Thread.Sleep( wait ? this._random.Next( 10, 40 ) : 5 );
+                Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
             }
             catch ( Exception ex )
             {
@@ -329,11 +328,14 @@ namespace FileBotPP.Metadata
 
         protected virtual void Dispose( bool disposing )
         {
-            if ( disposing )
+            if ( !disposing )
             {
-                this._allSeriesWorker.Dispose();
-                this._seriesWorker.Dispose();
+                return;
             }
+
+            this._allSeriesWorker.Dispose();
+            this._seriesWorker.Dispose();
+            this._artworkWorker.Dispose();
         }
     }
 }

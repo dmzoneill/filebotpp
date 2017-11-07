@@ -83,6 +83,7 @@ namespace FileBotPP.Helpers
             catch ( Exception ex )
             {
                 Factory.Instance.LogLines.Enqueue( ex.Message );
+                Factory.Instance.LogLines.Enqueue( "Attempted to download " + url + " to " + filename );
                 Factory.Instance.LogLines.Enqueue( ex.StackTrace );
                 return false;
             }

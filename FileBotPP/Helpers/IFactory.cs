@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using FileBotPP.Metadata;
 using FileBotPP.Tree;
@@ -7,7 +8,9 @@ namespace FileBotPP.Helpers
 {
     public interface IFactory
     {
+        Random Random { get; set; }
         ConcurrentQueue< string > LogLines { get; }
+        BlockingCollection< ITorrent > Torrents { get; set; }
         string[] LocationParts { get; set; }
         string AddSeriesName { get; set; }
         IWindowFileBotPp WindowFileBotPp { get; set; }

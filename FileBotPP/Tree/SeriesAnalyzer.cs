@@ -167,9 +167,9 @@ namespace FileBotPP.Tree
             foreach ( var episode in episodes )
             {
                 var epnameclean = episode.get_episode_name().ToLower();
-                epnameclean = epnameclean.Replace( ":", "" );
-                epnameclean = epnameclean.Replace( "?", "" );
-                epnameclean = Regex.Replace( epnameclean, ".+", "." );
+                var invalid = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+                epnameclean = invalid.Aggregate( epnameclean, ( current, c ) => current.Replace( c.ToString(), "" ) );
+                epnameclean = Regex.Replace(epnameclean, ".+", ".");
 
                 if ( item.FullName.ToLower().Contains( epnameclean ) )
                 {
@@ -303,28 +303,26 @@ namespace FileBotPP.Tree
             ITorrent t1080 = null;
             ITorrent thdtv = null;
 
-            foreach ( var torrent in Factory.Instance.Eztv.get_torrents() )
+            foreach ( var torrent in Factory.Instance.Torrents )
             {
                 if ( String.Compare( torrent.Imbdid, imdbid, StringComparison.Ordinal ) != 0 )
                 {
                     continue;
                 }
-
-                var epname = torrent.Epname.ToLower();
-
-                if ( epname.Contains( "s" + String.Format( "{0:00}", seasonnum ) + "e" + string.Format( "{0:00}", epnum ) ) )
+                
+                if (torrent.EpnameLower.Contains( "s" + String.Format( "{0:00}", seasonnum ) + "e" + string.Format( "{0:00}", epnum ) ) )
                 {
-                    if ( epname.Contains( Factory.Instance.Settings.TorrentPreferredQuality ) )
+                    if (torrent.EpnameLower.Contains( Factory.Instance.Settings.TorrentPreferredQuality ) )
                     {
                         preferred = torrent;
                         continue;
                     }
-                    if ( epname.Contains( "720p" ) )
+                    if (torrent.EpnameLower.Contains( "720p" ) )
                     {
                         t720 = torrent;
                         continue;
                     }
-                    if ( epname.Contains( "1080p" ) )
+                    if (torrent.EpnameLower.Contains( "1080p" ) )
                     {
                         t1080 = torrent;
                         continue;

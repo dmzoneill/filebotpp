@@ -35,7 +35,7 @@ namespace FileBotPP
                 var got = Factory.Instance.ItemProvider.Items.Select( item => item.FullName ).ToList();
                 var want = new List< string >();
 
-                foreach ( var torrent in Factory.Instance.Eztv.get_torrents().Where( torrent => got.Contains( torrent.Series ) == false ).Where( torrent => want.Contains( torrent.Series ) == false ) )
+                foreach ( var torrent in Factory.Instance.Torrents.Where( torrent => got.Contains( torrent.Series ) == false ).Where( torrent => want.Contains( torrent.Series ) == false ) )
                 {
                     want.Add( torrent.Series );
                 }
@@ -54,7 +54,7 @@ namespace FileBotPP
 
                 foreach ( var gotitem in want )
                 {
-                    var numtorrents = Factory.Instance.Eztv.get_torrents().Count( torrent => String.Compare( torrent.Series, gotitem, StringComparison.Ordinal ) == 0 );
+                    var numtorrents = Factory.Instance.Torrents.Count( torrent => String.Compare( torrent.Series, gotitem, StringComparison.Ordinal ) == 0 );
 
                     tbname = new TextBlock {Text = gotitem, Width = 280};
                     tbnum = new TextBlock {Text = numtorrents.ToString(), HorizontalAlignment = HorizontalAlignment.Right};

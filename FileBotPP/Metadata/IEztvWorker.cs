@@ -9,7 +9,6 @@ namespace FileBotPP.Metadata
         string get_html();
         string get_series_name();
         bool is_processed();
-        List< ITorrent > get_torrents();
         bool is_cached();
     }
 }

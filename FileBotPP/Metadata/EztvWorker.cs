@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -11,7 +10,6 @@ namespace FileBotPP.Metadata
     {
         private readonly string _series;
         private readonly int _seriesid;
-        private readonly List< ITorrent > _torrents;
         private string _html;
         private string _imdbid;
         private bool _processed;
@@ -21,7 +19,6 @@ namespace FileBotPP.Metadata
         {
             this._series = seriesname;
             this._seriesid = seriesid;
-            this._torrents = new List< ITorrent >();
         }
 
         public void Run()
@@ -52,11 +49,6 @@ namespace FileBotPP.Metadata
         public bool is_processed()
         {
             return this._processed;
-        }
-
-        public List< ITorrent > get_torrents()
-        {
-            return this._torrents;
         }
 
         public bool is_cached()
@@ -184,7 +176,7 @@ namespace FileBotPP.Metadata
                 }
 
                 var torrent = new Torrent {Epname = epname.Groups[ 1 ].Value.Trim(), Magnetlink = epmagnet.Groups[ 1 ].Value.Trim(), Series = this._series, Imbdid = this._imdbid};
-                this._torrents.Add( torrent );
+                Factory.Instance.Torrents.Add( torrent );
             }
 
             this._html = null;

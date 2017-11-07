@@ -375,7 +375,7 @@ namespace FileBotPP.Metadata
                     File.Delete( tempFile );
                 }
 
-                var download = Factory.Instance.Utils.download_file( "http://thetvdb.com/api/" + Factory.Instance.Settings.TvdbApiKey + "/Series/" + this._seriesid + "/all/en.zip", tempFile );
+                var download = Factory.Instance.Utils.download_file( "http://thetvdb.com/api/" + Factory.Instance.Settings.TvdbApiKey + "/series/" + this._seriesid + "/all/en.zip", tempFile );
 
                 if ( download == false )
                 {
