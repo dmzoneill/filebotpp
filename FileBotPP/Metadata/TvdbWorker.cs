@@ -15,17 +15,14 @@ namespace FileBotPP.Metadata
         private bool _working;
         private string _xml;
 
-        public TvdbWorker( string series )
+        public TvdbWorker(string series)
         {
             this._seriesName = series;
         }
 
         public void Run()
         {
-            var worker = new BackgroundWorker();
-            worker.DoWork += this.Worker_DoWork;
-            worker.RunWorkerCompleted += this.Worker_RunWorkerCompleted;
-            worker.RunWorkerAsync();
+            BackgroundTasks.RunOnce(() => this.Worker_DoWork(null, null), () => this._working = false);
         }
 
         public bool is_working()
@@ -49,22 +46,22 @@ namespace FileBotPP.Metadata
             {
                 this.get_series_id_local();
 
-                var cticks = DateTime.Now.Ticks/TimeSpan.TicksPerSecond;
+                var cticks = DateTime.Now.Ticks / TimeSpan.TicksPerSecond;
                 var tempFile1 = Factory.Instance.AppDataFolder + "/tvdb/" + this._seriesid;
 
                 var tempFile2 = Factory.Instance.AppDataFolder + "/tvdbids/" + this._seriesName;
 
-                if ( !File.Exists( tempFile1 ) || !File.Exists( tempFile2 ) )
+                if (!File.Exists(tempFile1) || !File.Exists(tempFile2))
                 {
                     return false;
                 }
 
-                return ( File.GetLastWriteTime( tempFile1 ).Ticks/TimeSpan.TicksPerSecond + Factory.Instance.Settings.CacheTimeout ) > cticks && ( File.GetLastWriteTime( tempFile2 ).Ticks/TimeSpan.TicksPerSecond + Factory.Instance.Settings.CacheTimeout ) > cticks;
+                return (File.GetLastWriteTime(tempFile1).Ticks / TimeSpan.TicksPerSecond + Factory.Instance.Settings.CacheTimeout) > cticks && (File.GetLastWriteTime(tempFile2).Ticks / TimeSpan.TicksPerSecond + Factory.Instance.Settings.CacheTimeout) > cticks;
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
                 return false;
             }
         }
@@ -73,14 +70,14 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                Factory.Instance.LogLines.Enqueue( @"Parsing " + this._seriesName + @" metadata..." );
+                Factory.Instance.LogLines.Enqueue(@"Parsing " + this._seriesName + @" metadata...");
 
                 var document = new XmlDocument();
-                document.LoadXml( this._xml );
-                this._tvdbSeries = new TvdbSeries( this._seriesName );
+                document.LoadXml(this._xml);
+                this._tvdbSeries = new TvdbSeries(this._seriesName);
 
-                this.parse_series_episodes_metadata( document );
-                this.parse_series_metadata( document );
+                this.parse_series_episodes_metadata(document);
+                this.parse_series_metadata(document);
 
                 this._artworkDownloads = new[]
                 {
@@ -91,10 +88,10 @@ namespace FileBotPP.Metadata
 
                 this._xml = null;
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
@@ -103,32 +100,27 @@ namespace FileBotPP.Metadata
             return this._tvdbSeries;
         }
 
-        private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            this._working = false;
-        }
-
-        private void Worker_DoWork( object sender, DoWorkEventArgs e )
+        private void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
             this._working = true;
             try
             {
                 this.get_series_id();
 
-                if ( this._seriesid > 0 )
+                if (this._seriesid > 0)
                 {
                     this.get_series_data();
 
-                    if ( this._xml != null )
+                    if (this._xml != null)
                     {
                         this.parse_series_data();
                     }
                 }
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
@@ -136,40 +128,19 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbids/" ) )
-                {
-                    Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbids" );
-                }
+                var folder = Factory.Instance.AppDataFolder + "/tvdbids/";
+                CacheFiles.EnsureDirectory(folder);
 
-                var tempFile = Factory.Instance.AppDataFolder + "/tvdbids/" + this._seriesName;
+                var tempFile = folder + this._seriesName;
+                var xml = CacheFiles.ReadIfFresh(tempFile, true) ?? Factory.Instance.Utils.Fetch("http://thetvdb.com/api/GetSeries.php?seriesname=" + this._seriesName);
 
-                string xml;
+                Factory.Instance.Utils.write_file(tempFile, xml);
 
-                if ( File.Exists( tempFile ) )
-                {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        xml = File.ReadAllText( tempFile );
-                    }
-                    else
-                    {
-                        File.Delete( tempFile );
-                        xml = Factory.Instance.Utils.Fetch( "http://thetvdb.com/api/GetSeries.php?seriesname=" + this._seriesName );
-                    }
-                }
-                else
-                {
-                    xml = Factory.Instance.Utils.Fetch( "http://thetvdb.com/api/GetSeries.php?seriesname=" + this._seriesName );
-                }
-
-                Factory.Instance.Utils.write_file( tempFile, xml );
-
-                this.parse_Series_id( xml );
+                this.parse_Series_id(xml);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception(ex);
             }
         }
 
@@ -177,66 +148,55 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbids/" ) )
-                {
-                    Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbids" );
-                }
+                var folder = Factory.Instance.AppDataFolder + "/tvdbids/";
+                CacheFiles.EnsureDirectory(folder);
 
-                var tempFile = Factory.Instance.AppDataFolder + "/tvdbids/" + this._seriesName;
+                var tempFile = folder + this._seriesName;
+                var xml = CacheFiles.ReadIfFresh(tempFile, false) ?? "";
 
-                var xml = "";
-
-                if ( File.Exists( tempFile ) )
-                {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        xml = File.ReadAllText( tempFile );
-                    }
-                }
-
-                if ( String.Compare( xml, "", StringComparison.Ordinal ) == 0 )
+                if (String.Compare(xml, "", StringComparison.Ordinal) == 0)
                 {
                     return;
                 }
 
-                this.parse_Series_id( xml );
+                this.parse_Series_id(xml);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        private void parse_Series_id( string xml )
+        private void parse_Series_id(string xml)
         {
             try
             {
                 var document = new XmlDocument();
-                document.LoadXml( xml );
+                document.LoadXml(xml);
 
-                var ids = document.SelectNodes( ".//seriesid" );
-                var names = document.SelectNodes( ".//SeriesName" );
+                var ids = document.SelectNodes(".//seriesid");
+                var names = document.SelectNodes(".//SeriesName");
 
-                if ( ids == null || names == null )
+                if (ids == null || names == null)
                 {
                     return;
                 }
 
-                for ( var x = 0; x < ids.Count; x++ )
+                for (var x = 0; x < ids.Count; x++)
                 {
-                    var xmlname = names[ x ].InnerText.ToLower().Trim();
+                    var xmlname = names[x].InnerText.ToLower().Trim();
                     var searchname = this._seriesName.ToLower().Trim();
 
-                    if ( xmlname != searchname )
+                    if (xmlname != searchname)
                     {
                         continue;
                     }
 
                     int id;
-                    int.TryParse( ids[ x ].InnerText.Trim(), out id );
+                    int.TryParse(ids[x].InnerText.Trim(), out id);
 
-                    if ( id <= -1 )
+                    if (id <= -1)
                     {
                         continue;
                     }
@@ -245,109 +205,109 @@ namespace FileBotPP.Metadata
                     break;
                 }
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
         // ReSharper disable once FunctionComplexityOverflow
-        private void parse_series_metadata( XmlNode document )
+        private void parse_series_metadata(XmlNode document)
         {
             try
             {
-                var seriesdata = document.SelectSingleNode( ".//Series" );
+                var seriesdata = document.SelectSingleNode(".//Series");
 
-                if ( seriesdata == null )
+                if (seriesdata == null)
                 {
                     return;
                 }
 
-                this._tvdbSeries.Id = seriesdata.SelectSingleNode( ".//id" )?.InnerText.Trim();
-                this._tvdbSeries.Actors = seriesdata.SelectSingleNode( ".//Actors" )?.InnerText.Trim();
-                this._tvdbSeries.AirsDayOfWeek = seriesdata.SelectSingleNode( ".//Airs_DayOfWeek" )?.InnerText.Trim();
-                this._tvdbSeries.AirsTime = seriesdata.SelectSingleNode( ".//Airs_Time" )?.InnerText.Trim();
-                this._tvdbSeries.ContentRating = seriesdata.SelectSingleNode( ".//ContentRating" )?.InnerText.Trim();
-                this._tvdbSeries.FirstAired = seriesdata.SelectSingleNode( ".//FirstAired" )?.InnerText.Trim();
-                this._tvdbSeries.Genre = seriesdata.SelectSingleNode( ".//Genre" )?.InnerText.Trim();
-                this._tvdbSeries.ImdbId = seriesdata.SelectSingleNode( ".//IMDB_ID" )?.InnerText.Trim();
-                this._tvdbSeries.Language = seriesdata.SelectSingleNode( ".//Language" )?.InnerText.Trim();
-                this._tvdbSeries.Network = seriesdata.SelectSingleNode( ".//NetworkID" )?.InnerText.Trim();
-                this._tvdbSeries.NetworkId = seriesdata.SelectSingleNode( ".//Series" )?.InnerText.Trim();
-                this._tvdbSeries.Overview = seriesdata.SelectSingleNode( ".//Overview" )?.InnerText.Trim();
-                this._tvdbSeries.Rating = seriesdata.SelectSingleNode( ".//Rating" )?.InnerText.Trim();
-                this._tvdbSeries.RatingCount = seriesdata.SelectSingleNode( ".//RatingCount" )?.InnerText.Trim();
-                this._tvdbSeries.Runtime = seriesdata.SelectSingleNode( ".//Runtime" )?.InnerText.Trim();
-                this._tvdbSeries.SeriesId = seriesdata.SelectSingleNode( ".//SeriesID" )?.InnerText.Trim();
-                this._tvdbSeries.SeriesName = seriesdata.SelectSingleNode( ".//SeriesName" )?.InnerText.Trim();
-                this._tvdbSeries.Status = seriesdata.SelectSingleNode( ".//Status" )?.InnerText.Trim();
-                this._tvdbSeries.Added = seriesdata.SelectSingleNode( ".//added" )?.InnerText.Trim();
-                this._tvdbSeries.AddedBy = seriesdata.SelectSingleNode( ".//addedBy" )?.InnerText.Trim();
-                this._tvdbSeries.Banner = seriesdata.SelectSingleNode( ".//banner" )?.InnerText.Trim();
-                this._tvdbSeries.Fanart = seriesdata.SelectSingleNode( ".//fanart" )?.InnerText.Trim();
-                this._tvdbSeries.Lastupdated = seriesdata.SelectSingleNode( ".//lastupdated" )?.InnerText.Trim();
-                this._tvdbSeries.Poster = seriesdata.SelectSingleNode( ".//poster" )?.InnerText.Trim();
-                this._tvdbSeries.TmsWantedOld = seriesdata.SelectSingleNode( ".//tms_wanted_old" )?.InnerText.Trim();
-                this._tvdbSeries.Zap2ItId = seriesdata.SelectSingleNode( ".//zap2it_id" )?.InnerText.Trim();
+                this._tvdbSeries.Id = seriesdata.SelectSingleNode(".//id")?.InnerText.Trim();
+                this._tvdbSeries.Actors = seriesdata.SelectSingleNode(".//Actors")?.InnerText.Trim();
+                this._tvdbSeries.AirsDayOfWeek = seriesdata.SelectSingleNode(".//Airs_DayOfWeek")?.InnerText.Trim();
+                this._tvdbSeries.AirsTime = seriesdata.SelectSingleNode(".//Airs_Time")?.InnerText.Trim();
+                this._tvdbSeries.ContentRating = seriesdata.SelectSingleNode(".//ContentRating")?.InnerText.Trim();
+                this._tvdbSeries.FirstAired = seriesdata.SelectSingleNode(".//FirstAired")?.InnerText.Trim();
+                this._tvdbSeries.Genre = seriesdata.SelectSingleNode(".//Genre")?.InnerText.Trim();
+                this._tvdbSeries.ImdbId = seriesdata.SelectSingleNode(".//IMDB_ID")?.InnerText.Trim();
+                this._tvdbSeries.Language = seriesdata.SelectSingleNode(".//Language")?.InnerText.Trim();
+                this._tvdbSeries.Network = seriesdata.SelectSingleNode(".//NetworkID")?.InnerText.Trim();
+                this._tvdbSeries.NetworkId = seriesdata.SelectSingleNode(".//Series")?.InnerText.Trim();
+                this._tvdbSeries.Overview = seriesdata.SelectSingleNode(".//Overview")?.InnerText.Trim();
+                this._tvdbSeries.Rating = seriesdata.SelectSingleNode(".//Rating")?.InnerText.Trim();
+                this._tvdbSeries.RatingCount = seriesdata.SelectSingleNode(".//RatingCount")?.InnerText.Trim();
+                this._tvdbSeries.Runtime = seriesdata.SelectSingleNode(".//Runtime")?.InnerText.Trim();
+                this._tvdbSeries.SeriesId = seriesdata.SelectSingleNode(".//SeriesID")?.InnerText.Trim();
+                this._tvdbSeries.SeriesName = seriesdata.SelectSingleNode(".//SeriesName")?.InnerText.Trim();
+                this._tvdbSeries.Status = seriesdata.SelectSingleNode(".//Status")?.InnerText.Trim();
+                this._tvdbSeries.Added = seriesdata.SelectSingleNode(".//added")?.InnerText.Trim();
+                this._tvdbSeries.AddedBy = seriesdata.SelectSingleNode(".//addedBy")?.InnerText.Trim();
+                this._tvdbSeries.Banner = seriesdata.SelectSingleNode(".//banner")?.InnerText.Trim();
+                this._tvdbSeries.Fanart = seriesdata.SelectSingleNode(".//fanart")?.InnerText.Trim();
+                this._tvdbSeries.Lastupdated = seriesdata.SelectSingleNode(".//lastupdated")?.InnerText.Trim();
+                this._tvdbSeries.Poster = seriesdata.SelectSingleNode(".//poster")?.InnerText.Trim();
+                this._tvdbSeries.TmsWantedOld = seriesdata.SelectSingleNode(".//tms_wanted_old")?.InnerText.Trim();
+                this._tvdbSeries.Zap2ItId = seriesdata.SelectSingleNode(".//zap2it_id")?.InnerText.Trim();
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        private void parse_series_episodes_metadata( XmlNode document )
+        private void parse_series_episodes_metadata(XmlNode document)
         {
             try
             {
-                var episodes = document.SelectNodes( ".//Episode" );
+                var episodes = document.SelectNodes(".//Episode");
 
-                if ( episodes == null )
+                if (episodes == null)
                 {
                     return;
                 }
 
                 var currentDate = DateTime.Now;
 
-                foreach ( XmlNode episode in episodes )
+                foreach (XmlNode episode in episodes)
                 {
-                    var epname = episode.SelectSingleNode( ".//EpisodeName" )?.InnerText.Trim();
-                    var epseasonnum = episode.SelectSingleNode( ".//SeasonNumber" )?.InnerText.Trim();
-                    var epaireddate = episode.SelectSingleNode( ".//FirstAired" )?.InnerText.Trim();
-                    var epepisodenum = episode.SelectSingleNode( ".//EpisodeNumber" )?.InnerText.Trim();
+                    var epname = episode.SelectSingleNode(".//EpisodeName")?.InnerText.Trim();
+                    var epseasonnum = episode.SelectSingleNode(".//SeasonNumber")?.InnerText.Trim();
+                    var epaireddate = episode.SelectSingleNode(".//FirstAired")?.InnerText.Trim();
+                    var epepisodenum = episode.SelectSingleNode(".//EpisodeNumber")?.InnerText.Trim();
 
-                    var airdate = ( epaireddate == "" ) ? Convert.ToDateTime( "2050-01-01" ) : Convert.ToDateTime( epaireddate );
+                    var airdate = (epaireddate == "") ? Convert.ToDateTime("2050-01-01") : Convert.ToDateTime(epaireddate);
 
-                    if ( epseasonnum == null )
+                    if (epseasonnum == null)
                     {
                         continue;
                     }
 
-                    var epsnum = int.Parse( epseasonnum );
+                    var epsnum = int.Parse(epseasonnum);
 
-                    if ( epepisodenum == null )
+                    if (epepisodenum == null)
                     {
                         continue;
                     }
 
-                    var epnum = int.Parse( epepisodenum );
+                    var epnum = int.Parse(epepisodenum);
 
-                    if ( airdate > currentDate || epsnum <= 0 )
+                    if (airdate > currentDate || epsnum <= 0)
                     {
                         continue;
                     }
 
-                    var season = this._tvdbSeries.get_season( epsnum );
-                    var newepisode = new TvdbEpisode( epnum, epname );
-                    season.add_episode( newepisode );
+                    var season = this._tvdbSeries.get_season(epsnum);
+                    var newepisode = new TvdbEpisode(epnum, epname);
+                    season.add_episode(newepisode);
                 }
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
@@ -355,39 +315,37 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                Factory.Instance.LogLines.Enqueue( @"Download " + this._seriesName + @" metadata..." );
+                Factory.Instance.LogLines.Enqueue(@"Download " + this._seriesName + @" metadata...");
 
-                if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdb/" ) )
+                var folder = Factory.Instance.AppDataFolder + "/tvdb/";
+                CacheFiles.EnsureDirectory(folder);
+
+                var tempFile = folder + this._seriesid;
+
+                if (CacheFiles.IsWithinTimeout(tempFile))
                 {
-                    Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdb" );
+                    this._xml = Factory.Instance.Utils.read_file_from_zip(tempFile, "en.xml");
+                    return;
                 }
 
-                var tempFile = Factory.Instance.AppDataFolder + "/tvdb/" + this._seriesid;
-
-                if ( File.Exists( tempFile ) )
+                if (File.Exists(tempFile))
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        this._xml = Factory.Instance.Utils.read_file_from_zip( tempFile, "en.xml" );
-                        return;
-                    }
-
-                    File.Delete( tempFile );
+                    File.Delete(tempFile);
                 }
 
-                var download = Factory.Instance.Utils.download_file( "http://thetvdb.com/api/" + Factory.Instance.Settings.TvdbApiKey + "/series/" + this._seriesid + "/all/en.zip", tempFile );
+                var download = Factory.Instance.Utils.download_file("http://thetvdb.com/api/" + Factory.Instance.Settings.TvdbApiKey + "/series/" + this._seriesid + "/all/en.zip", tempFile);
 
-                if ( download == false )
+                if (download == false)
                 {
                     return;
                 }
 
-                this._xml = Factory.Instance.Utils.read_file_from_zip( tempFile, "en.xml" );
+                this._xml = Factory.Instance.Utils.read_file_from_zip(tempFile, "en.xml");
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
     }
