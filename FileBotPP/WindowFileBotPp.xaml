@@ -147,7 +147,7 @@
 					</Button.Style>
 				</Button>
 				<TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="DirectoryNameTextBlock"
-				           VerticalAlignment="Center" MouseDown="DirectoryNameTextBlock_MouseDown">
+				           VerticalAlignment="Center" MouseDown="NameTextBlock_OnMouseDown">
 					<TextBlock.ContextMenu>
 						<ContextMenu>
 							<MenuItem Header="Refresh" Name="RefreshMenuItem" Click="RefreshMenuItem_OnClick">
@@ -359,7 +359,7 @@
 				</Border>
 				<StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 					<TextBlock Text="{Binding Path=FullName}" ToolTip="{Binding Path=Path}" Name="FileNameTextBlock"
-					           VerticalAlignment="Center" MouseDown="FileNameTextBlock_OnMouseDown">
+					           VerticalAlignment="Center" MouseDown="NameTextBlock_OnMouseDown">
 						<TextBlock.ContextMenu>
 							<ContextMenu>
 								<MenuItem Header="Play Video" Name="PlayFileMenuItem" Click="PlayFileMenuItem_OnClick">

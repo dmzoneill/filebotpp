@@ -22,10 +22,7 @@ namespace FileBotPP.Metadata
 
         public void Run()
         {
-            var worker = new BackgroundWorker();
-            worker.DoWork += this.Worker_DoWork;
-            worker.RunWorkerCompleted += this.Worker_RunWorkerCompleted;
-            worker.RunWorkerAsync();
+            BackgroundTasks.RunOnce( () => this.Worker_DoWork( null, null ), () => this._working = false );
         }
 
         public bool is_working()
@@ -103,11 +100,6 @@ namespace FileBotPP.Metadata
             return this._tvdbSeries;
         }
 
-        private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            this._working = false;
-        }
-
         private void Worker_DoWork( object sender, DoWorkEventArgs e )
         {
             this._working = true;
@@ -136,31 +128,11 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbids/" ) )
-                {
-                    Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbids" );
-                }
+                var folder = Factory.Instance.AppDataFolder + "/tvdbids/";
+                CacheFiles.EnsureDirectory( folder );
 
-                var tempFile = Factory.Instance.AppDataFolder + "/tvdbids/" + this._seriesName;
-
-                string xml;
-
-                if ( File.Exists( tempFile ) )
-                {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        xml = File.ReadAllText( tempFile );
-                    }
-                    else
-                    {
-                        File.Delete( tempFile );
-                        xml = Factory.Instance.Utils.Fetch( "http://thetvdb.com/api/GetSeries.php?seriesname=" + this._seriesName );
-                    }
-                }
-                else
-                {
-                    xml = Factory.Instance.Utils.Fetch( "http://thetvdb.com/api/GetSeries.php?seriesname=" + this._seriesName );
-                }
+                var tempFile = folder + this._seriesName;
+                var xml = CacheFiles.ReadIfFresh( tempFile, true ) ?? Factory.Instance.Utils.Fetch( "http://thetvdb.com/api/GetSeries.php?seriesname=" + this._seriesName );
 
                 Factory.Instance.Utils.write_file( tempFile, xml );
 
@@ -168,8 +140,7 @@ namespace FileBotPP.Metadata
             }
             catch ( Exception ex )
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception( ex );
             }
         }
 
@@ -177,22 +148,11 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbids/" ) )
-                {
-                    Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbids" );
-                }
+                var folder = Factory.Instance.AppDataFolder + "/tvdbids/";
+                CacheFiles.EnsureDirectory( folder );
 
-                var tempFile = Factory.Instance.AppDataFolder + "/tvdbids/" + this._seriesName;
-
-                var xml = "";
-
-                if ( File.Exists( tempFile ) )
-                {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        xml = File.ReadAllText( tempFile );
-                    }
-                }
+                var tempFile = folder + this._seriesName;
+                var xml = CacheFiles.ReadIfFresh( tempFile, false ) ?? "";
 
                 if ( String.Compare( xml, "", StringComparison.Ordinal ) == 0 )
                 {
@@ -357,21 +317,19 @@ namespace FileBotPP.Metadata
             {
                 Factory.Instance.LogLines.Enqueue( @"Download " + this._seriesName + @" metadata..." );
 
-                if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdb/" ) )
-                {
-                    Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdb" );
-                }
+                var folder = Factory.Instance.AppDataFolder + "/tvdb/";
+                CacheFiles.EnsureDirectory( folder );
 
-                var tempFile = Factory.Instance.AppDataFolder + "/tvdb/" + this._seriesid;
+                var tempFile = folder + this._seriesid;
+
+                if ( CacheFiles.IsWithinTimeout( tempFile ) )
+                {
+                    this._xml = Factory.Instance.Utils.read_file_from_zip( tempFile, "en.xml" );
+                    return;
+                }
 
                 if ( File.Exists( tempFile ) )
                 {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        this._xml = Factory.Instance.Utils.read_file_from_zip( tempFile, "en.xml" );
-                        return;
-                    }
-
                     File.Delete( tempFile );
                 }
 

@@ -125,71 +125,21 @@ namespace FileBotPP.Tree
 
         public void move_item( IFileItem fileitem )
         {
-            var episodenum = 0;
-
-            try
-            {
-                var fepnum = Regex.Match( fileitem.FullName, @"(\d+)x(\d+)" );
-                if ( fepnum.Success )
-                {
-                    episodenum = Int32.Parse( fepnum.Groups[ 2 ].Value );
-                }
-            }
-            catch ( Exception ex )
-            {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
-            }
+            var episodenum = ParseEpisodeNumber( fileitem.FullName );
 
             if ( fileitem.Parent == null )
             {
                 return;
             }
 
-            var addpoint = 0;
-            foreach ( var t in fileitem.Parent.Items )
-            {
-                if ( t.FullName.ToLower().Contains( "special" ) )
-                {
-                    addpoint++;
-                    continue;
-                }
-
-                var seepnum = Regex.Match( t.FullName, @"(\d+)x(\d+)" );
-
-                if ( seepnum.Success == false )
-                {
-                    addpoint++;
-                    continue;
-                }
-
-                var epnum = Int32.Parse( seepnum.Groups[ 2 ].Value );
-
-                if ( episodenum > epnum )
-                {
-                    addpoint++;
-                    continue;
-                }
-
-                break;
-            }
+            var addpoint = EpisodeInsertIndex( fileitem.Parent.Items, episodenum );
 
             fileitem.Parent.Items.Insert( addpoint, fileitem );
             fileitem.Parent.Items.Remove( fileitem );
             fileitem.Update();
 
-            IItem missingitem = null;
-
-            foreach ( var fitem in fileitem.Parent.Items.Where( fitem => fitem.Missing && String.Compare( fitem.FullName, fileitem.ShortName, StringComparison.Ordinal ) == 0 ) )
+            if ( RemoveMissingTwin( fileitem ) )
             {
-                missingitem = fitem;
-                break;
-            }
-
-
-            if ( missingitem != null )
-            {
-                fileitem.Parent.Items.Remove( missingitem );
                 fileitem.Parent.Update();
             }
         }
@@ -223,69 +173,15 @@ namespace FileBotPP.Tree
 
         public void move_item( IFileItem fileitem, IDirectoryItem parent )
         {
-            var episodenum = 0;
-
-            try
-            {
-                var fepnum = Regex.Match( fileitem.FullName, @"(\d+)x(\d+)" );
-                if ( fepnum.Success )
-                {
-                    episodenum = Int32.Parse( fepnum.Groups[ 2 ].Value );
-                }
-            }
-            catch ( Exception ex )
-            {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
-            }
+            var episodenum = ParseEpisodeNumber( fileitem.FullName );
 
             if ( parent == null )
             {
                 return;
             }
 
-            var addpoint = 0;
-            foreach ( var t in parent.Items )
-            {
-                if ( t.FullName.ToLower().Contains( "special" ) )
-                {
-                    addpoint++;
-                    continue;
-                }
-
-                var seepnum = Regex.Match( t.FullName, @"(\d+)x(\d+)" );
-
-                if ( seepnum.Success == false )
-                {
-                    addpoint++;
-                    continue;
-                }
-
-                var epnum = Int32.Parse( seepnum.Groups[ 2 ].Value );
-
-                if ( episodenum > epnum )
-                {
-                    addpoint++;
-                    continue;
-                }
-
-                break;
-            }
-
-            IItem missingitem = null;
-
-            foreach ( var fitem in fileitem.Parent.Items.Where( fitem => fitem.Missing && String.Compare( fitem.FullName, fileitem.ShortName, StringComparison.Ordinal ) == 0 ) )
-            {
-                missingitem = fitem;
-                break;
-            }
-
-
-            if ( missingitem != null )
-            {
-                fileitem.Parent.Items.Remove( missingitem );
-            }
-
+            var addpoint = EpisodeInsertIndex( parent.Items, episodenum );
+            RemoveMissingTwin( fileitem );
             fileitem.Parent.Items.Insert( addpoint, fileitem );
         }
 
@@ -376,33 +272,7 @@ namespace FileBotPP.Tree
 
         public void insert_item_ordered( IDirectoryItem parent, IItem child, int episodenum )
         {
-            var addpoint = 0;
-            foreach ( var t in parent.Items )
-            {
-                if ( t.FullName.ToLower().Contains( "special" ) )
-                {
-                    addpoint++;
-                    continue;
-                }
-
-                var seepnum = Regex.Match( t.FullName, @"(\d+)x(\d+)" );
-
-                if ( seepnum.Success == false )
-                {
-                    addpoint++;
-                    continue;
-                }
-
-                var epnum = Int32.Parse( seepnum.Groups[ 2 ].Value );
-
-                if ( episodenum > epnum )
-                {
-                    addpoint++;
-                    continue;
-                }
-
-                break;
-            }
+            var addpoint = EpisodeInsertIndex( parent.Items, episodenum );
 
             if ( parent.Items.Count == addpoint )
             {
@@ -421,58 +291,7 @@ namespace FileBotPP.Tree
 
         public void refresh_tree_directory( IItem parent, string path )
         {
-            try
-            {
-                var dirInfo = new DirectoryInfo( path );
-
-                var directories = dirInfo.GetDirectories().order_by_alpha_numeric( x => x.Name ).ToArray();
-
-                foreach ( var directory in directories )
-                {
-                    var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent, Polling = true};
-
-                    this.DetectedDirectories.Enqueue( item );
-                    this._lastFolderScanned = directory.FullName;
-
-                    Thread.Sleep( 5 );
-                    this.refresh_tree_directory( item, item.Path );
-                }
-
-                var files = dirInfo.GetFiles().order_by_alpha_numeric( x => x.Name ).ToArray();
-
-                foreach ( var file in files )
-                {
-                    var shortname = file.Name;
-                    var extension = "";
-
-                    if ( file.Name.Contains( "." ) )
-                    {
-                        shortname = file.Name.Substring( 0, file.Name.LastIndexOf( ".", StringComparison.Ordinal ) );
-                        extension = file.Name.Substring( file.Name.LastIndexOf( ".", StringComparison.Ordinal ) + 1 );
-                    }
-
-                    var item = new FileItem
-                    {
-                        FullName = file.Name,
-                        ShortName = shortname,
-                        Extension = extension,
-                        Path = file.FullName,
-                        Parent = parent
-                    };
-
-                    if ( parent == null )
-                    {
-                        item.BadLocation = true;
-                    }
-
-                    this.DetectedFiles.Enqueue( item );
-                }
-            }
-            catch ( Exception ex )
-            {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
-            }
+            this.scan_tree( parent, path, true, false, ( item, itemPath ) => this.refresh_tree_directory( item, itemPath ) );
         }
 
         public void update_model()
@@ -633,33 +452,9 @@ namespace FileBotPP.Tree
                 this.insert_item_ordered( newdirentry );
             }
 
-            if ( fitem.Parent?.Parent != null )
+            if ( fitem.Parent?.Parent != null && this.MoveIntoMatchingSeason( fitem, fitem.Parent.Parent.Items.OfType< IDirectoryItem >(), targetDirectory ) )
             {
-                foreach ( var season in fitem.Parent.Parent.Items.OfType< IDirectoryItem >().Where( seasons => String.Compare( seasons.FullName, targetDirectory, StringComparison.Ordinal ) == 0 ) )
-                {
-                    if ( File.Exists( fitem.NewPath ) )
-                    {
-                        fitem.NewPathExists = true;
-                        return;
-                    }
-
-                    File.Move( fitem.Path, fitem.NewPath );
-
-                    fitem.Parent.Items.Remove( fitem );
-                    fitem.Parent.Update();
-                    fitem.Path = fitem.NewPath;
-                    fitem.NewPath = "";
-                    fitem.BadLocation = false;
-                    fitem.Parent = season;
-
-                    this.move_item( fitem, season );
-                    fitem.Update();
-                    season.Update();
-
-                    Factory.Instance.WindowFileBotPp.set_status_text( "Moved file: " + fitem.FullName + " to " + fitem.Path );
-                    Factory.Instance.LogLines.Enqueue( "Moved file: " + fitem.FullName + " to " + fitem.Path );
-                    break;
-                }
+                return;
             }
 
             if ( fitem.Parent == null )
@@ -667,31 +462,7 @@ namespace FileBotPP.Tree
                 return;
             }
 
-            foreach ( var season in fitem.Parent.Items.OfType< IDirectoryItem >().Where( seasons => String.Compare( seasons.FullName, targetDirectory, StringComparison.Ordinal ) == 0 ) )
-            {
-                if ( File.Exists( fitem.NewPath ) )
-                {
-                    fitem.NewPathExists = true;
-                    return;
-                }
-
-                File.Move( fitem.Path, fitem.NewPath );
-
-                fitem.Parent.Items.Remove( fitem );
-                fitem.Parent.Update();
-                fitem.Path = fitem.NewPath;
-                fitem.NewPath = "";
-                fitem.BadLocation = false;
-                fitem.Parent = season;
-
-                this.move_item( fitem, season );
-                fitem.Update();
-                season.Update();
-
-                Factory.Instance.WindowFileBotPp.set_status_text( "Moved file: " + fitem.FullName + " to " + fitem.Path );
-                Factory.Instance.LogLines.Enqueue( "Moved file: " + fitem.FullName + " to " + fitem.Path );
-                break;
-            }
+            this.MoveIntoMatchingSeason( fitem, fitem.Parent.Items.OfType< IDirectoryItem >(), targetDirectory );
         }
 
         public void delete_invalid_folder( IDirectoryItem directory )
@@ -985,59 +756,152 @@ namespace FileBotPP.Tree
 
         private void create_collection_tree( IItem parent, string path )
         {
+            this.scan_tree( parent, path, false, true, ( item, itemPath ) => this.create_collection_tree( item, itemPath ) );
+        }
+
+        private void scan_tree( IItem parent, string path, bool markFolderBeforeRecurse, bool reportProgress, Action< IItem, string > recurse )
+        {
             try
             {
                 var dirInfo = new DirectoryInfo( path );
 
-                var directories = dirInfo.GetDirectories().order_by_alpha_numeric( x => x.Name ).ToArray();
-
-                foreach ( var directory in directories )
+                foreach ( var directory in dirInfo.GetDirectories().order_by_alpha_numeric( x => x.Name ).ToArray() )
                 {
                     var item = new DirectoryItem {FullName = directory.Name, Path = directory.FullName, Parent = parent, Polling = true};
-
                     this.DetectedDirectories.Enqueue( item );
 
+                    if ( markFolderBeforeRecurse )
+                    {
+                        this._lastFolderScanned = directory.FullName;
+                    }
+
                     Thread.Sleep( 5 );
-                    this.create_collection_tree( item, item.Path );
-                    this._lastFolderScanned = directory.FullName;
+                    recurse( item, item.Path );
+
+                    if ( markFolderBeforeRecurse == false )
+                    {
+                        this._lastFolderScanned = directory.FullName;
+                    }
                 }
 
-                var files = dirInfo.GetFiles().order_by_alpha_numeric( x => x.Name ).ToArray();
-
-                foreach ( var file in files )
+                foreach ( var file in dirInfo.GetFiles().order_by_alpha_numeric( x => x.Name ).ToArray() )
                 {
-                    var shortname = file.Name;
-                    var extension = "";
-
-                    if ( file.Name.Contains( "." ) )
-                    {
-                        shortname = file.Name.Substring( 0, file.Name.LastIndexOf( ".", StringComparison.Ordinal ) );
-                        extension = file.Name.Substring( file.Name.LastIndexOf( ".", StringComparison.Ordinal ) + 1 );
-                    }
-
-                    var item = new FileItem
-                    {
-                        FullName = file.Name,
-                        ShortName = shortname,
-                        Extension = extension,
-                        Path = file.FullName,
-                        Parent = parent
-                    };
-
-                    if ( parent == null )
-                    {
-                        item.BadLocation = true;
-                    }
-
-                    this.DetectedFiles.Enqueue( item );
+                    this.DetectedFiles.Enqueue( ScannedFileItems.FromFile( file, parent, true ) );
                 }
-                this._folderScanner.ReportProgress( 1 );
+
+                if ( reportProgress )
+                {
+                    this._folderScanner.ReportProgress( 1 );
+                }
             }
             catch ( Exception ex )
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception( ex );
             }
+        }
+
+        private bool MoveIntoMatchingSeason( IFileItem fitem, IEnumerable< IDirectoryItem > seasons, string targetDirectory )
+        {
+            foreach ( var season in seasons.Where( season => String.Compare( season.FullName, targetDirectory, StringComparison.Ordinal ) == 0 ) )
+            {
+                if ( File.Exists( fitem.NewPath ) )
+                {
+                    fitem.NewPathExists = true;
+                    return true;
+                }
+
+                File.Move( fitem.Path, fitem.NewPath );
+
+                fitem.Parent.Items.Remove( fitem );
+                fitem.Parent.Update();
+                fitem.Path = fitem.NewPath;
+                fitem.NewPath = "";
+                fitem.BadLocation = false;
+                fitem.Parent = season;
+
+                this.move_item( fitem, season );
+                fitem.Update();
+                season.Update();
+
+                Factory.Instance.WindowFileBotPp.set_status_text( "Moved file: " + fitem.FullName + " to " + fitem.Path );
+                Factory.Instance.LogLines.Enqueue( "Moved file: " + fitem.FullName + " to " + fitem.Path );
+                break;
+            }
+
+            return false;
+        }
+
+        private static int ParseEpisodeNumber( string fullName )
+        {
+            var episodenum = 0;
+
+            try
+            {
+                var fepnum = Regex.Match( fullName, @"(\d+)x(\d+)" );
+                if ( fepnum.Success )
+                {
+                    episodenum = Int32.Parse( fepnum.Groups[ 2 ].Value );
+                }
+            }
+            catch ( Exception ex )
+            {
+                AppLog.Exception( ex );
+            }
+
+            return episodenum;
+        }
+
+        private static int EpisodeInsertIndex( IEnumerable< IItem > items, int episodenum )
+        {
+            var addpoint = 0;
+
+            foreach ( var t in items )
+            {
+                if ( t.FullName.ToLower().Contains( "special" ) )
+                {
+                    addpoint++;
+                    continue;
+                }
+
+                var seepnum = Regex.Match( t.FullName, @"(\d+)x(\d+)" );
+
+                if ( seepnum.Success == false )
+                {
+                    addpoint++;
+                    continue;
+                }
+
+                var epnum = Int32.Parse( seepnum.Groups[ 2 ].Value );
+
+                if ( episodenum > epnum )
+                {
+                    addpoint++;
+                    continue;
+                }
+
+                break;
+            }
+
+            return addpoint;
+        }
+
+        private static bool RemoveMissingTwin( IFileItem fileitem )
+        {
+            IItem missingitem = null;
+
+            foreach ( var fitem in fileitem.Parent.Items.Where( fitem => fitem.Missing && String.Compare( fitem.FullName, fileitem.ShortName, StringComparison.Ordinal ) == 0 ) )
+            {
+                missingitem = fitem;
+                break;
+            }
+
+            if ( missingitem == null )
+            {
+                return false;
+            }
+
+            fileitem.Parent.Items.Remove( missingitem );
+            return true;
         }
 
         private void FolderScanner_ProgressChanged( object sender, ProgressChangedEventArgs e )

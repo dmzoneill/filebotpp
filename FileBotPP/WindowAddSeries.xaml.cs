@@ -40,33 +40,12 @@ namespace FileBotPP
                     want.Add( torrent.Series );
                 }
 
-                var tbname = new TextBlock {Text = "Series Names"};
-                var tbnum = new TextBlock {Text = "#Torrents"};
-                var grid = new Grid();
-                grid.ColumnDefinitions.Add( new ColumnDefinition {Width = new GridLength( 290 )} );
-                grid.ColumnDefinitions.Add( new ColumnDefinition {Width = new GridLength( 60 )} );
-                grid.Children.Add( tbnum );
-                grid.Children.Add( tbname );
-                Grid.SetColumn( tbname, 0 );
-                Grid.SetColumn( tbnum, 1 );
-
-                this.ComboBox.Items.Add( new ComboBoxItem {Content = grid, Tag = null} );
+                this.ComboBox.Items.Add( SeriesComboItem( "Series Names", "#Torrents", null, false ) );
 
                 foreach ( var gotitem in want )
                 {
                     var numtorrents = Factory.Instance.Torrents.Count( torrent => String.Compare( torrent.Series, gotitem, StringComparison.Ordinal ) == 0 );
-
-                    tbname = new TextBlock {Text = gotitem, Width = 280};
-                    tbnum = new TextBlock {Text = numtorrents.ToString(), HorizontalAlignment = HorizontalAlignment.Right};
-                    grid = new Grid();
-                    grid.ColumnDefinitions.Add( new ColumnDefinition {Width = new GridLength( 290 )} );
-                    grid.ColumnDefinitions.Add( new ColumnDefinition {Width = new GridLength( 60 )} );
-                    grid.Children.Add( tbnum );
-                    grid.Children.Add( tbname );
-                    Grid.SetColumn( tbname, 0 );
-                    Grid.SetColumn( tbnum, 1 );
-
-                    this.ComboBox.Items.Add( new ComboBoxItem {Content = grid, Tag = gotitem} );
+                    this.ComboBox.Items.Add( SeriesComboItem( gotitem, numtorrents.ToString(), gotitem, true ) );
                 }
 
                 this.ComboBox.SelectedIndex = 0;
@@ -76,6 +55,20 @@ namespace FileBotPP
                 Factory.Instance.LogLines.Enqueue( ex.Message );
                 Factory.Instance.LogLines.Enqueue( ex.StackTrace );
             }
+        }
+
+        private static ComboBoxItem SeriesComboItem( string name, string count, object tag, bool sized )
+        {
+            var tbname = sized ? new TextBlock {Text = name, Width = 280} : new TextBlock {Text = name};
+            var tbnum = sized ? new TextBlock {Text = count, HorizontalAlignment = HorizontalAlignment.Right} : new TextBlock {Text = count};
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add( new ColumnDefinition {Width = new GridLength( 290 )} );
+            grid.ColumnDefinitions.Add( new ColumnDefinition {Width = new GridLength( 60 )} );
+            grid.Children.Add( tbnum );
+            grid.Children.Add( tbname );
+            Grid.SetColumn( tbname, 0 );
+            Grid.SetColumn( tbnum, 1 );
+            return new ComboBoxItem {Content = grid, Tag = tag};
         }
 
         private void Button_Click( object sender, RoutedEventArgs e )

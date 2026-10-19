@@ -24,10 +24,7 @@ namespace FileBotPP.Metadata
         public void Run()
         {
             this._working = true;
-            var worker = new BackgroundWorker();
-            worker.DoWork += this.Worker_DoWork;
-            worker.RunWorkerCompleted += this.Worker_RunWorkerCompleted;
-            worker.RunWorkerAsync();
+            BackgroundTasks.RunOnce( this.get_series_data, () => this._working = false );
         }
 
         public bool is_working()
@@ -55,59 +52,28 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                var tempFile = Factory.Instance.AppDataFolder + "/eztv/" + this._seriesid;
-
-                if ( File.Exists( tempFile ) )
-                {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        return true;
-                    }
-
-                    File.Delete( tempFile );
-                }
-
-                return false;
+                return CacheFiles.IsFresh( Factory.Instance.AppDataFolder + "/eztv/" + this._seriesid );
             }
             catch ( Exception ex )
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception( ex );
                 return false;
             }
-        }
-
-        private void Worker_DoWork( object sender, DoWorkEventArgs e )
-        {
-            this.get_series_data();
-        }
-
-        private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            this._working = false;
         }
 
         private void get_series_data()
         {
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/eztv/" ) )
+            var folder = Factory.Instance.AppDataFolder + "/eztv/";
+            CacheFiles.EnsureDirectory( folder );
+
+            var tempFile = folder + this._seriesid;
+            var cached = CacheFiles.ReadIfFresh( tempFile, true );
+            if ( cached != null )
             {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/eztv" );
-            }
-
-            var tempFile = Factory.Instance.AppDataFolder + "/eztv/" + this._seriesid;
-
-            if ( File.Exists( tempFile ) )
-            {
-                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                {
-                    var filehtml = File.ReadAllText( tempFile );
-                    this.parse_imdb_id( filehtml );
-                    this.strip_unneeded( filehtml );
-                    this.parse_episodes();
-                    return;
-                }
-
-                File.Delete( tempFile );
+                this.parse_imdb_id( cached );
+                this.strip_unneeded( cached );
+                this.parse_episodes();
+                return;
             }
 
             Factory.Instance.LogLines.Enqueue( @"Downloading " + this._series + @" metadata..." );
@@ -165,19 +131,7 @@ namespace FileBotPP.Metadata
         {
             Factory.Instance.LogLines.Enqueue( @"Parsing " + this._series + @" metadata..." );
 
-            foreach ( Match match in Regex.Matches( this._html, "<tr.*?>(.*?)</tr>", RegexOptions.IgnoreCase | RegexOptions.Singleline ) )
-            {
-                var epname = Regex.Match( match.Groups[ 1 ].Value, @"class=.epinfo.>(.*?)<\/a>" );
-                var epmagnet = Regex.Match( match.Groups[ 1 ].Value, "\"(magnet:.*?)\"" );
-
-                if ( !epmagnet.Success || !epname.Success )
-                {
-                    continue;
-                }
-
-                var torrent = new Torrent {Epname = epname.Groups[ 1 ].Value.Trim(), Magnetlink = epmagnet.Groups[ 1 ].Value.Trim(), Series = this._series, Imbdid = this._imdbid};
-                Factory.Instance.Torrents.Add( torrent );
-            }
+            TorrentRows.AddFromHtml( this._html, @"class=.epinfo.>(.*?)<\/a>", this._series, this._imdbid );
 
             this._html = null;
         }

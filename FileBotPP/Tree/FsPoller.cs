@@ -125,23 +125,7 @@ namespace FileBotPP.Tree
                         continue;
                     }
 
-                    var shortname = file.Name;
-                    var extension = "";
-
-                    if ( file.Name.Contains( "." ) )
-                    {
-                        shortname = file.Name.Substring( 0, file.Name.LastIndexOf( ".", StringComparison.Ordinal ) );
-                        extension = file.Name.Substring( file.Name.LastIndexOf( ".", StringComparison.Ordinal ) + 1 );
-                    }
-
-                    var item = new FileItem
-                    {
-                        FullName = file.Name,
-                        ShortName = shortname,
-                        Extension = extension,
-                        Path = file.FullName,
-                        Parent = this._directory
-                    };
+                    var item = ScannedFileItems.FromFile( file, this._directory, false );
 
                     Factory.Instance.ItemProvider.insert_item_ordered_threadsafe( item );
                     Factory.Instance.ItemProvider.folder_scan_update_threadsafe();

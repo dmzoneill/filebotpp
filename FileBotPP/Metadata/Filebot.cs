@@ -31,14 +31,8 @@ namespace FileBotPP.Metadata
 
         public void check_series( IDirectoryItem directory )
         {
-            Factory.Instance.WindowFileBotPp.set_status_text( "Checking names in Series: " + directory.FullName );
             this._checkSeasonDirectory = directory;
-            this._worker = new BackgroundWorker();
-            this._worker.RunWorkerCompleted += this._worker_RunWorkerCompleted;
-            this._worker.ProgressChanged += this._worker_ProgressChanged;
-            this._worker.DoWork += this._worker_DoWork;
-            this._worker.WorkerReportsProgress = true;
-            this._worker.RunWorkerAsync();
+            this.begin_name_check( "Checking names in Series: " + directory.FullName );
         }
 
         public void stop_worker()
@@ -48,13 +42,13 @@ namespace FileBotPP.Metadata
 
         public void check_series_all()
         {
-            Factory.Instance.WindowFileBotPp.set_status_text( "Checking all Series names" );
-            this._worker = new BackgroundWorker();
-            this._worker.RunWorkerCompleted += this._worker_RunWorkerCompleted;
-            this._worker.ProgressChanged += this._worker_ProgressChanged;
-            this._worker.DoWork += this._worker_DoWork;
-            this._worker.WorkerReportsProgress = true;
-            this._worker.RunWorkerAsync();
+            this.begin_name_check( "Checking all Series names" );
+        }
+
+        private void begin_name_check( string status )
+        {
+            Factory.Instance.WindowFileBotPp.set_status_text( status );
+            this._worker = BackgroundTasks.Start( this._worker_DoWork, this._worker_ProgressChanged, this._worker_RunWorkerCompleted, false );
         }
 
         private void _worker_ProgressChanged( object sender, ProgressChangedEventArgs e )

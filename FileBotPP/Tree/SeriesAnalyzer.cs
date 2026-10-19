@@ -138,29 +138,34 @@ namespace FileBotPP.Tree
             }
         }
 
-        private void clean_series_season_files_check_episode_name( IDirectoryItem directory, IItem subdirectory, IFileItem item )
+        private bool TryGetSeasonEpisodes( IDirectoryItem directory, IItem subdirectory, out List< ITvdbEpisode > episodes )
         {
+            episodes = null;
+
             if ( Factory.Instance.Tvdb == null )
             {
-                return;
+                return false;
             }
 
             var cSeasonNum = int.Parse( subdirectory.FullName.Substring( 7 ).Trim() );
-
             var series = Factory.Instance.Tvdb.get_series_by_name( directory.FullName );
 
-            if ( series == null )
+            if ( series == null || series.has_seasons( cSeasonNum ) == false )
+            {
+                return false;
+            }
+
+            episodes = series.get_season( cSeasonNum ).get_episodes();
+            return true;
+        }
+
+        private void clean_series_season_files_check_episode_name( IDirectoryItem directory, IItem subdirectory, IFileItem item )
+        {
+            List< ITvdbEpisode > episodes;
+            if ( this.TryGetSeasonEpisodes( directory, subdirectory, out episodes ) == false )
             {
                 return;
             }
-
-            if ( series.has_seasons( cSeasonNum ) == false )
-            {
-                return;
-            }
-
-            var season = series.get_season( cSeasonNum );
-            var episodes = season.get_episodes();
 
             var clean = false;
 
@@ -186,21 +191,8 @@ namespace FileBotPP.Tree
 
         private void clean_series_season_file_check_extra( IDirectoryItem directory, IItem subdirectory, IFileItem item )
         {
-            if ( Factory.Instance.Tvdb == null )
-            {
-                return;
-            }
-
-            var cSeasonNum = int.Parse( subdirectory.FullName.Substring( 7 ).Trim() );
-
-            var series = Factory.Instance.Tvdb.get_series_by_name( directory.FullName );
-
-            if ( series == null )
-            {
-                return;
-            }
-
-            if ( series.has_seasons( cSeasonNum ) == false )
+            List< ITvdbEpisode > episodes;
+            if ( this.TryGetSeasonEpisodes( directory, subdirectory, out episodes ) == false )
             {
                 return;
             }
@@ -213,7 +205,7 @@ namespace FileBotPP.Tree
 
             var epint = match1.Success ? match1.Groups[ 2 ].Value : match2.Groups[ 2 ].Value;
 
-            if ( series.get_season( cSeasonNum ).get_episodes().Any( episode => episode.get_episode_num() == int.Parse( epint ) ) )
+            if ( episodes.Any( episode => episode.get_episode_num() == int.Parse( epint ) ) )
             {
                 return;
             }

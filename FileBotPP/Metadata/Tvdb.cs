@@ -308,21 +308,11 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                var count = num + 1;
-
-                while ( count > num )
-                {
-                    count = this._workers.Count( worker => worker.is_working() );
-
-                    Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
-                }
-
-                Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
+                WorkerThrottle.Limit( () => this._workers.Count( worker => worker.is_working() ), num, wait );
             }
             catch ( Exception ex )
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception( ex );
             }
         }
 

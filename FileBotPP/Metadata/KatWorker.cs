@@ -27,10 +27,7 @@ namespace FileBotPP.Metadata
         public void Run()
         {
             this._working = true;
-            var worker = new BackgroundWorker();
-            worker.DoWork += this.Worker_DoWork;
-            worker.RunWorkerCompleted += this.Worker_RunWorkerCompleted;
-            worker.RunWorkerAsync();
+            BackgroundTasks.RunOnce( this.get_series_data, () => this._working = false );
         }
 
         public bool is_working()
@@ -47,58 +44,27 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                var tempFile = Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean;
-
-                if ( File.Exists( tempFile ) )
-                {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        return true;
-                    }
-
-                    File.Delete( tempFile );
-                }
-
-                return false;
+                return CacheFiles.IsFresh( Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean );
             }
             catch ( Exception ex )
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception( ex );
                 return false;
             }
-        }
-
-        private void Worker_DoWork( object sender, DoWorkEventArgs e )
-        {
-            this.get_series_data();
-        }
-
-        private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            this._working = false;
         }
 
         private void get_series_data()
         {
-            if ( Directory.Exists( Factory.Instance.AppDataFolder + "/kat/" ) == false )
+            var folder = Factory.Instance.AppDataFolder + "/kat/";
+            CacheFiles.EnsureDirectory( folder );
+
+            var tempFile = folder + this._seriesnameClean + ".tmp";
+            var cached = CacheFiles.ReadIfFresh( tempFile, true );
+            if ( cached != null )
             {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/kat" );
-            }
-
-            var tempFile = Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean + ".tmp";
-
-            if ( File.Exists( tempFile ) )
-            {
-                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                {
-                    var filehtml = File.ReadAllText( tempFile );
-                    this.parse_imdb_id( filehtml );
-                    this.parse_episodes_pages();
-                    return;
-                }
-
-                File.Delete( tempFile );
+                this.parse_imdb_id( cached );
+                this.parse_episodes_pages();
+                return;
             }
 
             Factory.Instance.LogLines.Enqueue( @"Dowloading " + this._seriesname + @" torrents..." );
@@ -136,10 +102,7 @@ namespace FileBotPP.Metadata
 
             Factory.Instance.LogLines.Enqueue( @"Parsing " + this._seriesnameClean + @" metadata..." );
 
-            if ( Directory.Exists( Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean ) == false )
-            {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean );
-            }
+            CacheFiles.EnsureDirectory( Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean );
 
             for ( var x = 1; x < this.get_series_torrents_pages_count(); x++ )
             {
@@ -190,7 +153,7 @@ namespace FileBotPP.Metadata
                 return torrentPage;
             }
 
-            if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+            if ( CacheFiles.IsWithinTimeout( tempFile ) )
             {
                 return File.ReadAllText( tempFile );
             }
@@ -209,19 +172,7 @@ namespace FileBotPP.Metadata
 
         private void parse_page_torrents( string page )
         {
-            foreach ( Match match in Regex.Matches( page, "<tr.*?>(.*?)</tr>", RegexOptions.IgnoreCase | RegexOptions.Singleline ) )
-            {
-                var epname = Regex.Match( match.Groups[ 1 ].Value, "<a href=\".*?\" class=\"cellMainLink\">(.*?)</a>" );
-                var epmagnet = Regex.Match( match.Groups[ 1 ].Value, "\"(magnet:.*?)\"" );
-
-                if ( !epmagnet.Success || !epname.Success )
-                {
-                    continue;
-                }
-
-                var torrent = new Torrent {Epname = epname.Groups[ 1 ].Value.Trim(), Magnetlink = epmagnet.Groups[ 1 ].Value.Trim(), Series = this._seriesname, Imbdid = this._imdbid};
-                Factory.Instance.Torrents.Add( torrent );
-            }
+            TorrentRows.AddFromHtml( page, "<a href=\".*?\" class=\"cellMainLink\">(.*?)</a>", this._seriesname, this._imdbid );
         }
     }
 }

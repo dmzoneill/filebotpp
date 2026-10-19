@@ -19,16 +19,7 @@ namespace FileBotPP.Helpers
             try
             {
                 var wrGeturl = WebRequest.Create( url );
-
-                if ( string.Compare( Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
-                {
-                    var wp = new WebProxy( Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
-                    wrGeturl.Proxy = wp;
-                }
-                else
-                {
-                    wrGeturl.Proxy = null;
-                }
+                WebProxyConfig.Apply( proxy => wrGeturl.Proxy = proxy );
 
                 var objStream = wrGeturl.GetResponse().GetResponseStream();
                 if ( objStream != null )
@@ -66,16 +57,7 @@ namespace FileBotPP.Helpers
             try
             {
                 var client = new WebClient();
-
-                if ( string.Compare( Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
-                {
-                    var wp = new WebProxy( Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
-                    client.Proxy = wp;
-                }
-                else
-                {
-                    client.Proxy = null;
-                }
+                WebProxyConfig.Apply( proxy => client.Proxy = proxy );
 
                 client.DownloadFile( url, filename );
                 return true;
@@ -185,104 +167,67 @@ namespace FileBotPP.Helpers
 
         public int run_process_foreground( string processname, string arguments )
         {
-            try
-            {
-                var myProcess = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = "\"" + processname + "\"",
-                        Arguments = arguments,
-                        UseShellExecute = true,
-                        RedirectStandardOutput = false,
-                        RedirectStandardError = false,
-                        WindowStyle = ProcessWindowStyle.Normal,
-                        CreateNoWindow = false
-                    }
-                };
-
-                myProcess.Start();
-
-                var running = true;
-
-                do
-                {
-                    myProcess.Refresh();
-
-                    if ( myProcess.HasExited )
-                    {
-                        running = false;
-                    }
-
-                    if ( myProcess.WaitForExit( 10800000 ) )
-                    {
-                        continue;
-                    }
-
-                    myProcess.Kill();
-                    running = false;
-                }
-                while ( running );
-
-                return myProcess.ExitCode;
-            }
-            catch ( Exception ex )
-            {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
-                return 1;
-            }
+            return this.run_process( processname, arguments, true );
         }
 
         public int run_process_background( string processname, string arguments )
         {
+            return this.run_process( processname, arguments, false );
+        }
+
+        private int run_process( string processname, string arguments, bool foreground )
+        {
             try
             {
-                var myProcess = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = "\"" + processname + "\"",
-                        Arguments = arguments,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = false,
-                        RedirectStandardError = false,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        CreateNoWindow = true
-                    }
-                };
-
+                var myProcess = new Process {StartInfo = CreateStartInfo( processname, arguments, foreground )};
                 myProcess.Start();
-
-                var running = true;
-
-                do
-                {
-                    myProcess.Refresh();
-
-                    if ( myProcess.HasExited )
-                    {
-                        running = false;
-                    }
-
-                    if ( myProcess.WaitForExit( 10800000 ) )
-                    {
-                        continue;
-                    }
-
-                    myProcess.Kill();
-                    running = false;
-                }
-                while ( running );
-
-                return myProcess.ExitCode;
+                return WaitForProcess( myProcess );
             }
             catch ( Exception ex )
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception( ex );
                 return 1;
             }
+        }
+
+        private static ProcessStartInfo CreateStartInfo( string processname, string arguments, bool foreground )
+        {
+            return new ProcessStartInfo
+            {
+                FileName = "\"" + processname + "\"",
+                Arguments = arguments,
+                UseShellExecute = foreground,
+                RedirectStandardOutput = false,
+                RedirectStandardError = false,
+                WindowStyle = foreground ? ProcessWindowStyle.Normal : ProcessWindowStyle.Hidden,
+                CreateNoWindow = foreground == false
+            };
+        }
+
+        private static int WaitForProcess( Process myProcess )
+        {
+            var running = true;
+
+            do
+            {
+                myProcess.Refresh();
+
+                if ( myProcess.HasExited )
+                {
+                    running = false;
+                }
+
+                if ( myProcess.WaitForExit( 10800000 ) )
+                {
+                    continue;
+                }
+
+                myProcess.Kill();
+                running = false;
+            }
+            while ( running );
+
+            return myProcess.ExitCode;
         }
 
         public bool check_for_internet_connection()
@@ -306,15 +251,7 @@ namespace FileBotPP.Helpers
             {
                 using ( var client = new WebClient() )
                 {
-                    if ( string.Compare( Factory.Instance.Settings.ProxyServerHost, "", StringComparison.Ordinal ) != 0 )
-                    {
-                        var wp = new WebProxy( Factory.Instance.Settings.ProxyServerHost + ":" + Factory.Instance.Settings.ProxyServerPort, true );
-                        client.Proxy = wp;
-                    }
-                    else
-                    {
-                        client.Proxy = null;
-                    }
+                    WebProxyConfig.Apply( proxy => client.Proxy = proxy );
 
                     using ( client.OpenRead( url ) )
                     {
