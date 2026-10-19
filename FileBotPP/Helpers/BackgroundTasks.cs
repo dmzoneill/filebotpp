@@ -5,7 +5,7 @@ namespace FileBotPP.Helpers
 {
     public static class BackgroundTasks
     {
-        public static BackgroundWorker Start( DoWorkEventHandler work, ProgressChangedEventHandler progress, RunWorkerCompletedEventHandler completed, bool supportsCancellation )
+        public static BackgroundWorker Start(DoWorkEventHandler work, ProgressChangedEventHandler progress, RunWorkerCompletedEventHandler completed, bool supportsCancellation)
         {
             var worker = new BackgroundWorker();
             worker.DoWork += work;
@@ -13,7 +13,7 @@ namespace FileBotPP.Helpers
             worker.ProgressChanged += progress;
             worker.RunWorkerCompleted += completed;
 
-            if ( supportsCancellation )
+            if (supportsCancellation)
             {
                 worker.WorkerSupportsCancellation = true;
             }
@@ -22,11 +22,11 @@ namespace FileBotPP.Helpers
             return worker;
         }
 
-        public static void RunOnce( Action work, Action completed )
+        public static void RunOnce(Action work, Action completed)
         {
             var worker = new BackgroundWorker();
-            worker.DoWork += ( sender, args ) => work();
-            worker.RunWorkerCompleted += ( sender, args ) => completed();
+            worker.DoWork += (sender, args) => work();
+            worker.RunWorkerCompleted += (sender, args) => completed();
             worker.RunWorkerAsync();
         }
     }

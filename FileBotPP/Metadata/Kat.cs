@@ -4,7 +4,7 @@ using FileBotPP.Helpers;
 
 namespace FileBotPP.Metadata
 {
-    public class Kat : SeriesMetadataFetch< IKatWorker >, IKat
+    public class Kat : SeriesMetadataFetch<IKatWorker>, IKat
     {
         protected override string LogMessage
         {
@@ -13,45 +13,45 @@ namespace FileBotPP.Metadata
 
         protected override MatchCollection LoadMatches()
         {
-            var data = Factory.Instance.Utils.FetchDeCompressed( "https://kat.cr/tv/show/" );
+            var data = Factory.Instance.Utils.FetchDeCompressed("https://kat.cr/tv/show/");
 
-            if ( data == null )
+            if (data == null)
             {
                 return null;
             }
 
-            return Regex.Matches( data, "<a class=\"plain\" href=\"(.*?)\">(.*?)</a>", RegexOptions.IgnoreCase | RegexOptions.Singleline );
+            return Regex.Matches(data, "<a class=\"plain\" href=\"(.*?)\">(.*?)</a>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
         }
 
-        protected override IKatWorker CreateWorker( Match option )
+        protected override IKatWorker CreateWorker(Match option)
         {
-            return new KatWorker( option.Groups[ 1 ].Value, option.Groups[ 2 ].Value );
+            return new KatWorker(option.Groups[1].Value, option.Groups[2].Value);
         }
 
-        protected override bool IsCached( IKatWorker worker )
+        protected override bool IsCached(IKatWorker worker)
         {
             return worker.is_cached();
         }
 
-        protected override void RunWorker( IKatWorker worker )
+        protected override void RunWorker(IKatWorker worker)
         {
             worker.Run();
         }
 
-        protected override bool IsWorking( IKatWorker worker )
+        protected override bool IsWorking(IKatWorker worker)
         {
             return worker.is_working();
         }
 
-        protected override void ReportFetchProgress( double percent )
+        protected override void ReportFetchProgress(double percent)
         {
-            Factory.Instance.WindowFileBotPp.set_kat_progress( percent + "%" );
+            Factory.Instance.WindowFileBotPp.set_kat_progress(percent + "%");
         }
 
         protected override void ReportFinished()
         {
-            Factory.Instance.WindowFileBotPp.set_kat_progress( "100%" );
-            Factory.Instance.WindowFileBotPp.set_status_text( "Kat done..." );
+            Factory.Instance.WindowFileBotPp.set_kat_progress("100%");
+            Factory.Instance.WindowFileBotPp.set_status_text("Kat done...");
         }
     }
 }

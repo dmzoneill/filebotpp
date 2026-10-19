@@ -6,68 +6,68 @@ namespace FileBotPP.Helpers
 {
     public static class ItemTreeScan
     {
-        public static void Run( IDirectoryItem directory, IFileItem file, Func< bool > stopped, Action< int > setCount, Action< IItem > processFolder, Action< IFileItem > processFile )
+        public static void Run(IDirectoryItem directory, IFileItem file, Func<bool> stopped, Action<int> setCount, Action<IItem> processFolder, Action<IFileItem> processFile)
         {
-            if ( directory == null && file == null )
+            if (directory == null && file == null)
             {
-                setCount( Factory.Instance.ItemProvider.Count() );
+                setCount(Factory.Instance.ItemProvider.Count());
 
-                foreach ( var dir in Factory.Instance.ItemProvider.Items.OfType< IDirectoryItem >().ToArray() )
+                foreach (var dir in Factory.Instance.ItemProvider.Items.OfType<IDirectoryItem>().ToArray())
                 {
-                    if ( stopped() )
+                    if (stopped())
                     {
                         return;
                     }
 
-                    processFolder( dir );
+                    processFolder(dir);
                 }
             }
 
-            if ( directory != null )
+            if (directory != null)
             {
-                if ( stopped() )
+                if (stopped())
                 {
                     return;
                 }
 
-                setCount( directory.Count );
-                processFolder( directory );
+                setCount(directory.Count);
+                processFolder(directory);
             }
 
-            if ( file == null )
+            if (file == null)
             {
                 return;
             }
 
-            if ( stopped() )
+            if (stopped())
             {
                 return;
             }
 
-            setCount( file.Count );
-            processFile( file );
+            setCount(file.Count);
+            processFile(file);
         }
 
-        public static void WalkChildren( IItem directory, Func< bool > stopped, bool honorStop, Action< IItem > processFolder, Action< IFileItem > processFile )
+        public static void WalkChildren(IItem directory, Func<bool> stopped, bool honorStop, Action<IItem> processFolder, Action<IFileItem> processFile)
         {
-            foreach ( var item in directory.Items.OfType< IDirectoryItem >() )
+            foreach (var item in directory.Items.OfType<IDirectoryItem>())
             {
-                if ( honorStop && stopped() )
+                if (honorStop && stopped())
                 {
                     return;
                 }
 
-                processFolder( item );
+                processFolder(item);
             }
 
-            foreach ( var item in directory.Items.OfType< IFileItem >().Where( item => item.Missing != true ) )
+            foreach (var item in directory.Items.OfType<IFileItem>().Where(item => item.Missing != true))
             {
-                if ( honorStop && stopped() )
+                if (honorStop && stopped())
                 {
                     return;
                 }
 
-                processFile( item );
+                processFile(item);
             }
         }
     }

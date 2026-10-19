@@ -6,14 +6,14 @@ namespace FileBotPP.Helpers
 {
     internal static class QueueDrain
     {
-        public static void Drain( ConcurrentQueue< IFileItem > queue, string status, Action< IFileItem > onItem )
+        public static void Drain(ConcurrentQueue<IFileItem> queue, string status, Action<IFileItem> onItem)
         {
-            Factory.Instance.WindowFileBotPp.set_status_text( status );
+            Factory.Instance.WindowFileBotPp.set_status_text(status);
 
             IFileItem item;
-            while ( queue.TryDequeue( out item ) )
+            while (queue.TryDequeue(out item))
             {
-                onItem( item );
+                onItem(item);
             }
         }
     }

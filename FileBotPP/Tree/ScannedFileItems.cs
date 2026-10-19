@@ -5,15 +5,15 @@ namespace FileBotPP.Tree
 {
     internal static class ScannedFileItems
     {
-        public static FileItem FromFile( FileInfo file, IItem parent, bool badLocationWhenRoot )
+        public static FileItem FromFile(FileInfo file, IItem parent, bool badLocationWhenRoot)
         {
             var shortname = file.Name;
             var extension = "";
 
-            if ( file.Name.Contains( "." ) )
+            if (file.Name.Contains("."))
             {
-                shortname = file.Name.Substring( 0, file.Name.LastIndexOf( ".", StringComparison.Ordinal ) );
-                extension = file.Name.Substring( file.Name.LastIndexOf( ".", StringComparison.Ordinal ) + 1 );
+                shortname = file.Name.Substring(0, file.Name.LastIndexOf(".", StringComparison.Ordinal));
+                extension = file.Name.Substring(file.Name.LastIndexOf(".", StringComparison.Ordinal) + 1);
             }
 
             var item = new FileItem
@@ -25,7 +25,7 @@ namespace FileBotPP.Tree
                 Parent = parent
             };
 
-            if ( badLocationWhenRoot && parent == null )
+            if (badLocationWhenRoot && parent == null)
             {
                 item.BadLocation = true;
             }

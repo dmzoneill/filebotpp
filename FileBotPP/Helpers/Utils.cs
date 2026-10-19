@@ -12,108 +12,108 @@ namespace FileBotPP.Helpers
 {
     public class Utils : IUtils
     {
-        public string Fetch( string url )
+        public string Fetch(string url)
         {
             var data = "";
 
             try
             {
-                var wrGeturl = WebRequest.Create( url );
-                WebProxyConfig.Apply( proxy => wrGeturl.Proxy = proxy );
+                var wrGeturl = WebRequest.Create(url);
+                WebProxyConfig.Apply(proxy => wrGeturl.Proxy = proxy);
 
                 var objStream = wrGeturl.GetResponse().GetResponseStream();
-                if ( objStream != null )
+                if (objStream != null)
                 {
-                    var objReader = new StreamReader( objStream );
+                    var objReader = new StreamReader(objStream);
                     data = objReader.ReadToEnd();
                 }
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
                 data = "";
             }
 
             return data;
         }
 
-        public string FetchDeCompressed( string url )
+        public string FetchDeCompressed(string url)
         {
             try
             {
-                var client = new ZlibWebClient {Proxy = null};
+                var client = new ZlibWebClient { Proxy = null };
 
-                return client.DownloadString( url );
+                return client.DownloadString(url);
             }
-            catch ( Exception )
+            catch (Exception)
             {
                 return null;
             }
         }
 
-        public bool download_file( string url, string filename )
+        public bool download_file(string url, string filename)
         {
             try
             {
                 var client = new WebClient();
-                WebProxyConfig.Apply( proxy => client.Proxy = proxy );
+                WebProxyConfig.Apply(proxy => client.Proxy = proxy);
 
-                client.DownloadFile( url, filename );
+                client.DownloadFile(url, filename);
                 return true;
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( "Attempted to download " + url + " to " + filename );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue("Attempted to download " + url + " to " + filename);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
                 return false;
             }
         }
 
-        public string read_file_from_zip( string zipfile, string internalfile )
+        public string read_file_from_zip(string zipfile, string internalfile)
         {
             try
             {
-                var zipStream = new FileStream( zipfile, FileMode.Open );
-                var archive = new ZipArchive( zipStream, ZipArchiveMode.Read );
+                var zipStream = new FileStream(zipfile, FileMode.Open);
+                var archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
 
-                foreach ( var entry in archive.Entries )
+                foreach (var entry in archive.Entries)
                 {
-                    if ( String.Compare( entry.Name, internalfile, StringComparison.Ordinal ) == 0 )
+                    if (String.Compare(entry.Name, internalfile, StringComparison.Ordinal) == 0)
                     {
                         var stream = entry.Open();
-                        var reader = new StreamReader( stream );
+                        var reader = new StreamReader(stream);
                         return reader.ReadToEnd();
                     }
                 }
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
                 return "";
             }
 
             return "";
         }
 
-        public bool write_file( string filename, string contents )
+        public bool write_file(string filename, string contents)
         {
             try
             {
-                File.WriteAllText( filename, contents );
+                File.WriteAllText(filename, contents);
                 return true;
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
                 return false;
             }
         }
 
-        public string get_process_output( string processname, string arguments, int waittime = 3000 )
+        public string get_process_output(string processname, string arguments, int waittime = 3000)
         {
             try
             {
@@ -140,12 +140,12 @@ namespace FileBotPP.Helpers
                 {
                     myProcess.Refresh();
 
-                    if ( myProcess.HasExited )
+                    if (myProcess.HasExited)
                     {
                         running = false;
                     }
 
-                    if ( myProcess.WaitForExit( waittime ) )
+                    if (myProcess.WaitForExit(waittime))
                     {
                         continue;
                     }
@@ -153,44 +153,44 @@ namespace FileBotPP.Helpers
                     myProcess.Kill();
                     running = false;
                 }
-                while ( running );
+                while (running);
 
                 return result;
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
                 return "";
             }
         }
 
-        public int run_process_foreground( string processname, string arguments )
+        public int run_process_foreground(string processname, string arguments)
         {
-            return this.run_process( processname, arguments, true );
+            return this.run_process(processname, arguments, true);
         }
 
-        public int run_process_background( string processname, string arguments )
+        public int run_process_background(string processname, string arguments)
         {
-            return this.run_process( processname, arguments, false );
+            return this.run_process(processname, arguments, false);
         }
 
-        private int run_process( string processname, string arguments, bool foreground )
+        private int run_process(string processname, string arguments, bool foreground)
         {
             try
             {
-                var myProcess = new Process {StartInfo = CreateStartInfo( processname, arguments, foreground )};
+                var myProcess = new Process { StartInfo = CreateStartInfo(processname, arguments, foreground) };
                 myProcess.Start();
-                return WaitForProcess( myProcess );
+                return WaitForProcess(myProcess);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                AppLog.Exception( ex );
+                AppLog.Exception(ex);
                 return 1;
             }
         }
 
-        private static ProcessStartInfo CreateStartInfo( string processname, string arguments, bool foreground )
+        private static ProcessStartInfo CreateStartInfo(string processname, string arguments, bool foreground)
         {
             return new ProcessStartInfo
             {
@@ -204,7 +204,7 @@ namespace FileBotPP.Helpers
             };
         }
 
-        private static int WaitForProcess( Process myProcess )
+        private static int WaitForProcess(Process myProcess)
         {
             var running = true;
 
@@ -212,12 +212,12 @@ namespace FileBotPP.Helpers
             {
                 myProcess.Refresh();
 
-                if ( myProcess.HasExited )
+                if (myProcess.HasExited)
                 {
                     running = false;
                 }
 
-                if ( myProcess.WaitForExit( 10800000 ) )
+                if (myProcess.WaitForExit(10800000))
                 {
                     continue;
                 }
@@ -225,114 +225,114 @@ namespace FileBotPP.Helpers
                 myProcess.Kill();
                 running = false;
             }
-            while ( running );
+            while (running);
 
             return myProcess.ExitCode;
         }
 
         public bool check_for_internet_connection()
         {
-            return this.check_for_website( "http://www.google.com" );
+            return this.check_for_website("http://www.google.com");
         }
 
         public bool check_for_eztv_connection()
         {
-            return this.check_for_website( "https://eztv.ag" );
+            return this.check_for_website("https://eztv.ag");
         }
 
         public bool check_for_tvdb_connection()
         {
-            return this.check_for_website( "http://thetvdb.com" );
+            return this.check_for_website("http://thetvdb.com");
         }
 
-        public bool check_for_website( string url )
+        public bool check_for_website(string url)
         {
             try
             {
-                using ( var client = new WebClient() )
+                using (var client = new WebClient())
                 {
-                    WebProxyConfig.Apply( proxy => client.Proxy = proxy );
+                    WebProxyConfig.Apply(proxy => client.Proxy = proxy);
 
-                    using ( client.OpenRead( url ) )
+                    using (client.OpenRead(url))
                     {
                         return true;
                     }
                 }
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
                 return false;
             }
         }
 
-        public void download_torrent( string magneturl )
+        public void download_torrent(string magneturl)
         {
             try
             {
-                Process.Start( magneturl );
+                Process.Start(magneturl);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        public void open_file( string file )
+        public void open_file(string file)
         {
             try
             {
-                Process.Start( file );
+                Process.Start(file);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        public T get_visual_parent<T>( Visual referencedVisual ) where T : Visual
+        public T get_visual_parent<T>(Visual referencedVisual) where T : Visual
         {
             var parent = referencedVisual;
 
-            while ( parent != null && !ReferenceEquals( parent.GetType(), typeof (T) ) )
+            while (parent != null && !ReferenceEquals(parent.GetType(), typeof(T)))
             {
-                parent = VisualTreeHelper.GetParent( parent ) as Visual;
+                parent = VisualTreeHelper.GetParent(parent) as Visual;
             }
 
             return parent as T;
         }
 
-        public T get_visual_child<T>( Visual referencedVisual ) where T : Visual
+        public T get_visual_child<T>(Visual referencedVisual) where T : Visual
         {
             var parent = referencedVisual;
 
-            if ( parent == null )
+            if (parent == null)
             {
                 return null;
             }
 
-            for ( var x = 0; x < VisualTreeHelper.GetChildrenCount( parent ); x++ )
+            for (var x = 0; x < VisualTreeHelper.GetChildrenCount(parent); x++)
             {
-                var child = VisualTreeHelper.GetChild( parent, x );
+                var child = VisualTreeHelper.GetChild(parent, x);
 
-                if ( ReferenceEquals( child.GetType(), typeof (StackPanel) ) )
+                if (ReferenceEquals(child.GetType(), typeof(StackPanel)))
                 {
                     var sp = child as StackPanel;
 
-                    if ( sp == null )
+                    if (sp == null)
                     {
                         continue;
                     }
 
-                    foreach ( var spchild in sp.Children )
+                    foreach (var spchild in sp.Children)
                     {
-                        return this.get_visual_child< T >( spchild as Visual );
+                        return this.get_visual_child<T>(spchild as Visual);
                     }
                 }
-                else if ( ReferenceEquals( child.GetType(), typeof (T) ) )
+                else if (ReferenceEquals(child.GetType(), typeof(T)))
                 {
                     return child as T;
                 }
@@ -341,17 +341,17 @@ namespace FileBotPP.Helpers
             return null;
         }
 
-        public List< Visual > AllChildren( DependencyObject parent )
+        public List<Visual> AllChildren(DependencyObject parent)
         {
-            var list = new List< Visual >();
-            for ( var i = 0; i < VisualTreeHelper.GetChildrenCount( parent ); i++ )
+            var list = new List<Visual>();
+            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
             {
-                var child = VisualTreeHelper.GetChild( parent, i );
-                if ( child is Visual )
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is Visual)
                 {
-                    list.Add( child as Visual );
+                    list.Add(child as Visual);
                 }
-                list.AddRange( this.AllChildren( child ) );
+                list.AddRange(this.AllChildren(child));
             }
             return list;
         }

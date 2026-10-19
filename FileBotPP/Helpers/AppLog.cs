@@ -4,10 +4,10 @@ namespace FileBotPP.Helpers
 {
     internal static class AppLog
     {
-        public static void Exception( Exception ex )
+        public static void Exception(Exception ex)
         {
-            Factory.Instance.LogLines.Enqueue( ex.Message );
-            Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+            Factory.Instance.LogLines.Enqueue(ex.Message);
+            Factory.Instance.LogLines.Enqueue(ex.StackTrace);
         }
     }
 }
