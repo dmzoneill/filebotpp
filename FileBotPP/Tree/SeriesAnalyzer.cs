@@ -18,189 +18,181 @@ namespace FileBotPP.Tree
 
         public void analyze_all_series_folders()
         {
-            Factory.Instance.WindowFileBotPp.set_status_text( "Analysing..." );
+            Factory.Instance.WindowFileBotPp.set_status_text("Analysing...");
 
-            this._scanAllSeriesAnalyzer = new BackgroundWorker {WorkerReportsProgress = true};
+            this._scanAllSeriesAnalyzer = new BackgroundWorker { WorkerReportsProgress = true };
             this._scanAllSeriesAnalyzer.DoWork += this.ScanAllSeriesAnalyzerDoWork;
             this._scanAllSeriesAnalyzer.RunWorkerCompleted += this.ScanAllSeriesAnalyzerRunWorkerCompleted;
             this._scanAllSeriesAnalyzer.RunWorkerAsync();
         }
 
-        public void analyze_series_folder( IDirectoryItem folder )
+        public void analyze_series_folder(IDirectoryItem folder)
         {
             this._seriesFolder = folder;
-            Factory.Instance.WindowFileBotPp.set_status_text( "Analysing " + folder.FullName + " ..." );
+            Factory.Instance.WindowFileBotPp.set_status_text("Analysing " + folder.FullName + " ...");
 
-            this._scanSeriesAnalyzer = new BackgroundWorker {WorkerReportsProgress = true};
+            this._scanSeriesAnalyzer = new BackgroundWorker { WorkerReportsProgress = true };
             this._scanSeriesAnalyzer.DoWork += this.ScanSeriesAnalyzerDoWork;
             this._scanSeriesAnalyzer.RunWorkerCompleted += this.ScanSeriesAnalyzerRunWorkerCompleted;
             this._scanSeriesAnalyzer.RunWorkerAsync();
         }
 
-        private void clean_series_season_duplicates( IDirectoryItem directory )
+        private void clean_series_season_duplicates(IDirectoryItem directory)
         {
-            var checklist = new List< IFileItem >();
+            var checklist = new List<IFileItem>();
 
-            foreach ( var fileitem in directory.Items.OfType< IFileItem >() )
+            foreach (var fileitem in directory.Items.OfType<IFileItem>())
             {
-                foreach ( var checkitem in checklist )
+                foreach (var checkitem in checklist)
                 {
-                    if ( checkitem.ShortName != fileitem.ShortName )
+                    if (checkitem.ShortName != fileitem.ShortName)
                     {
                         continue;
                     }
 
-                    Factory.Instance.ItemProvider.DuplicateFiles.Enqueue( new DuplicateUpdate {Directory = directory, FileA = checkitem, FileB = fileitem} );
+                    Factory.Instance.ItemProvider.DuplicateFiles.Enqueue(new DuplicateUpdate { Directory = directory, FileA = checkitem, FileB = fileitem });
                 }
 
-                checklist.Add( fileitem );
+                checklist.Add(fileitem);
             }
         }
 
-        private void clean_series_season_files( IDirectoryItem directory )
+        private void clean_series_season_files(IDirectoryItem directory)
         {
-            foreach ( var subdirectory in directory.Items.OfType< IDirectoryItem >() )
+            foreach (var subdirectory in directory.Items.OfType<IDirectoryItem>())
             {
                 string seasonNum;
 
                 try
                 {
-                    seasonNum = subdirectory.FullName?.Length < 8 ? "99" : subdirectory.FullName?.Substring( 7 ).Trim();
+                    seasonNum = subdirectory.FullName?.Length < 8 ? "99" : subdirectory.FullName?.Substring(7).Trim();
                 }
-                catch ( Exception ex )
+                catch (Exception ex)
                 {
-                    Factory.Instance.LogLines.Enqueue( ex.Message );
-                    Factory.Instance.LogLines.Enqueue( ex.StackTrace );
-                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = subdirectory, File = null, SuggestName = ""} );
+                    Factory.Instance.LogLines.Enqueue(ex.Message);
+                    Factory.Instance.LogLines.Enqueue(ex.StackTrace);
+                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue(new BadNameUpdate { Directory = subdirectory, File = null, SuggestName = "" });
                     seasonNum = "99";
                 }
 
-                foreach ( var file in subdirectory.Items.OfType< IFileItem >() )
+                foreach (var file in subdirectory.Items.OfType<IFileItem>())
                 {
-                    if ( String.Compare( file.FullName, "Thumbs.db", StringComparison.Ordinal ) == 0 )
+                    if (String.Compare(file.FullName, "Thumbs.db", StringComparison.Ordinal) == 0)
                     {
-                        Factory.Instance.ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = subdirectory, File = file} );
+                        Factory.Instance.ItemProvider.DirectoryDeletions.Enqueue(new DeletionUpdate { Directory = subdirectory, File = file });
                         continue;
                     }
 
-                    var test1 = @"^" + Regex.Escape( directory.FullName ) + @"\s+-\s+(" + seasonNum + @")x[0-9]{2}";
-                    var test2 = @"^" + Regex.Escape( directory.FullName ) + @"\s+-\s+(" + seasonNum + @")xSpecial\s+[0-9]+";
+                    var test1 = @"^" + Regex.Escape(directory.FullName) + @"\s+-\s+(" + seasonNum + @")x[0-9]{2}";
+                    var test2 = @"^" + Regex.Escape(directory.FullName) + @"\s+-\s+(" + seasonNum + @")xSpecial\s+[0-9]+";
 
-                    if ( Regex.IsMatch( file.FullName, test1, RegexOptions.IgnoreCase ) || Regex.IsMatch( file.FullName, test2, RegexOptions.IgnoreCase ) )
+                    if (Regex.IsMatch(file.FullName, test1, RegexOptions.IgnoreCase) || Regex.IsMatch(file.FullName, test2, RegexOptions.IgnoreCase))
                     {
-                        this.clean_series_season_files_check_episode_name( directory, subdirectory, file );
-                        this.clean_series_season_file_check_extra( directory, subdirectory, file );
+                        this.clean_series_season_files_check_episode_name(directory, subdirectory, file);
+                        this.clean_series_season_file_check_extra(directory, subdirectory, file);
                         continue;
                     }
-                    if ( Regex.IsMatch( file.FullName, @"^" + Regex.Escape( directory.FullName ) + @"\.? - (\[(.*?)\]).*?(\[(.*)\])", RegexOptions.IgnoreCase ) )
+                    if (Regex.IsMatch(file.FullName, @"^" + Regex.Escape(directory.FullName) + @"\.? - (\[(.*?)\]).*?(\[(.*)\])", RegexOptions.IgnoreCase))
                     {
                         continue;
                     }
 
-                    if ( Regex.IsMatch( file.FullName, @"^" + Regex.Escape( directory.FullName ) + @".*" ) == false )
+                    if (Regex.IsMatch(file.FullName, @"^" + Regex.Escape(directory.FullName) + @".*") == false)
                     {
-                        Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = file, SuggestName = ""} );
+                        Factory.Instance.ItemProvider.BadNameFiles.Enqueue(new BadNameUpdate { Directory = directory, File = file, SuggestName = "" });
                     }
-                    else if ( Regex.IsMatch( file.FullName, @".*?(" + seasonNum + @")x([0-9]{2}|(" + seasonNum + @")xSpecial\s+?[0-9]+)" ) == false )
+                    else if (Regex.IsMatch(file.FullName, @".*?(" + seasonNum + @")x([0-9]{2}|(" + seasonNum + @")xSpecial\s+?[0-9]+)") == false)
                     {
                         const string stest1 = @".*?([0-9]+)x([0-9]{2})";
                         const string stest2 = @"([0-9]+)xSpecial\s+?([0-9]+)";
 
-                        var match1 = Regex.Match( file.FullName, stest1 );
-                        var match2 = Regex.Match( file.FullName, stest2 );
+                        var match1 = Regex.Match(file.FullName, stest1);
+                        var match2 = Regex.Match(file.FullName, stest2);
 
-                        if ( !match1.Success && !match2.Success )
+                        if (!match1.Success && !match2.Success)
                         {
-                            Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = file, SuggestName = ""} );
+                            Factory.Instance.ItemProvider.BadNameFiles.Enqueue(new BadNameUpdate { Directory = directory, File = file, SuggestName = "" });
                             continue;
                         }
 
-                        var seasonint = match1.Success ? match1.Groups[ 1 ].Value : match2.Groups[ 1 ].Value;
+                        var seasonint = match1.Success ? match1.Groups[1].Value : match2.Groups[1].Value;
 
                         var newdirectory = directory.Path + "\\Season " + seasonint;
                         var newfilelocation = directory.Path + "\\Season " + seasonint + "\\" + file.FullName;
 
-                        Factory.Instance.ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = subdirectory, File = file, NewPath = newfilelocation} );
+                        Factory.Instance.ItemProvider.BadLocationFiles.Enqueue(new BadLocationUpdate { Directory = subdirectory, File = file, NewPath = newfilelocation });
 
-                        if ( Directory.Exists( newdirectory ) )
+                        if (Directory.Exists(newdirectory))
                         {
                             continue;
                         }
 
-                        var missingdirectory = new DirectoryItem {Parent = directory, FullName = "Season " + seasonint, Path = newdirectory};
-                        var di = new DirectoryInsert {Directory = directory, SubDirectory = missingdirectory, Seasonnum = int.Parse( seasonint )};
-                        Factory.Instance.ItemProvider.NewDirectoryUpdates.Enqueue( di );
+                        var missingdirectory = new DirectoryItem { Parent = directory, FullName = "Season " + seasonint, Path = newdirectory };
+                        var di = new DirectoryInsert { Directory = directory, SubDirectory = missingdirectory, Seasonnum = int.Parse(seasonint) };
+                        Factory.Instance.ItemProvider.NewDirectoryUpdates.Enqueue(di);
                     }
                 }
 
-                this.clean_series_season_files_find_missing( directory, subdirectory );
-                this.clean_series_season_duplicates( directory );
+                this.clean_series_season_files_find_missing(directory, subdirectory);
+                this.clean_series_season_duplicates(directory);
             }
         }
 
-        private void clean_series_season_files_check_episode_name( IDirectoryItem directory, IItem subdirectory, IFileItem item )
+        private bool TryGetSeasonEpisodes(IDirectoryItem directory, IItem subdirectory, out List<ITvdbEpisode> episodes)
         {
-            if ( Factory.Instance.Tvdb == null )
+            episodes = null;
+
+            if (Factory.Instance.Tvdb == null)
+            {
+                return false;
+            }
+
+            var cSeasonNum = int.Parse(subdirectory.FullName.Substring(7).Trim());
+            var series = Factory.Instance.Tvdb.get_series_by_name(directory.FullName);
+
+            if (series == null || series.has_seasons(cSeasonNum) == false)
+            {
+                return false;
+            }
+
+            episodes = series.get_season(cSeasonNum).get_episodes();
+            return true;
+        }
+
+        private void clean_series_season_files_check_episode_name(IDirectoryItem directory, IItem subdirectory, IFileItem item)
+        {
+            List<ITvdbEpisode> episodes;
+            if (this.TryGetSeasonEpisodes(directory, subdirectory, out episodes) == false)
             {
                 return;
             }
-
-            var cSeasonNum = int.Parse( subdirectory.FullName.Substring( 7 ).Trim() );
-
-            var series = Factory.Instance.Tvdb.get_series_by_name( directory.FullName );
-
-            if ( series == null )
-            {
-                return;
-            }
-
-            if ( series.has_seasons( cSeasonNum ) == false )
-            {
-                return;
-            }
-
-            var season = series.get_season( cSeasonNum );
-            var episodes = season.get_episodes();
 
             var clean = false;
 
-            foreach ( var episode in episodes )
+            foreach (var episode in episodes)
             {
                 var epnameclean = episode.get_episode_name().ToLower();
                 var invalid = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
-                epnameclean = invalid.Aggregate( epnameclean, ( current, c ) => current.Replace( c.ToString(), "" ) );
+                epnameclean = invalid.Aggregate(epnameclean, (current, c) => current.Replace(c.ToString(), ""));
                 epnameclean = Regex.Replace(epnameclean, ".+", ".");
 
-                if ( item.FullName.ToLower().Contains( epnameclean ) )
+                if (item.FullName.ToLower().Contains(epnameclean))
                 {
                     clean = true;
                     break;
                 }
             }
 
-            if ( clean == false )
+            if (clean == false)
             {
-                Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = item, SuggestName = ""} );
+                Factory.Instance.ItemProvider.BadNameFiles.Enqueue(new BadNameUpdate { Directory = directory, File = item, SuggestName = "" });
             }
         }
 
-        private void clean_series_season_file_check_extra( IDirectoryItem directory, IItem subdirectory, IFileItem item )
+        private void clean_series_season_file_check_extra(IDirectoryItem directory, IItem subdirectory, IFileItem item)
         {
-            if ( Factory.Instance.Tvdb == null )
-            {
-                return;
-            }
-
-            var cSeasonNum = int.Parse( subdirectory.FullName.Substring( 7 ).Trim() );
-
-            var series = Factory.Instance.Tvdb.get_series_by_name( directory.FullName );
-
-            if ( series == null )
-            {
-                return;
-            }
-
-            if ( series.has_seasons( cSeasonNum ) == false )
+            List<ITvdbEpisode> episodes;
+            if (this.TryGetSeasonEpisodes(directory, subdirectory, out episodes) == false)
             {
                 return;
             }
@@ -208,22 +200,22 @@ namespace FileBotPP.Tree
             const string stest1 = @".*?([0-9]+)x([0-9]{2})";
             const string stest2 = @"([0-9]+)xSpecial\s+?([0-9]+)";
 
-            var match1 = Regex.Match( item.FullName, stest1 );
-            var match2 = Regex.Match( item.FullName, stest2 );
+            var match1 = Regex.Match(item.FullName, stest1);
+            var match2 = Regex.Match(item.FullName, stest2);
 
-            var epint = match1.Success ? match1.Groups[ 2 ].Value : match2.Groups[ 2 ].Value;
+            var epint = match1.Success ? match1.Groups[2].Value : match2.Groups[2].Value;
 
-            if ( series.get_season( cSeasonNum ).get_episodes().Any( episode => episode.get_episode_num() == int.Parse( epint ) ) )
+            if (episodes.Any(episode => episode.get_episode_num() == int.Parse(epint)))
             {
                 return;
             }
 
-            Factory.Instance.ItemProvider.ExtraFiles.Enqueue( new ExtraFileUpdate {Directory = directory, File = item} );
+            Factory.Instance.ItemProvider.ExtraFiles.Enqueue(new ExtraFileUpdate { Directory = directory, File = item });
         }
 
-        private void clean_series_season_files_find_missing( IDirectoryItem directory, IDirectoryItem subdirectory )
+        private void clean_series_season_files_find_missing(IDirectoryItem directory, IDirectoryItem subdirectory)
         {
-            if ( Factory.Instance.Tvdb == null )
+            if (Factory.Instance.Tvdb == null)
             {
                 return;
             }
@@ -232,97 +224,97 @@ namespace FileBotPP.Tree
 
             try
             {
-                if ( subdirectory.FullName.ToLower().Contains( "season " ) == false )
+                if (subdirectory.FullName.ToLower().Contains("season ") == false)
                 {
-                    Factory.Instance.LogLines.Enqueue( "Unable to determine season number: " + subdirectory.Path );
-                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
+                    Factory.Instance.LogLines.Enqueue("Unable to determine season number: " + subdirectory.Path);
+                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue(new BadNameUpdate { Directory = directory, File = null, SuggestName = "" });
                     return;
                 }
 
-                if ( Regex.IsMatch( subdirectory.FullName.Substring( 7 ).Trim(), @"^\d+$", RegexOptions.IgnoreCase ) == false )
+                if (Regex.IsMatch(subdirectory.FullName.Substring(7).Trim(), @"^\d+$", RegexOptions.IgnoreCase) == false)
                 {
-                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
+                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue(new BadNameUpdate { Directory = directory, File = null, SuggestName = "" });
                     return;
                 }
 
-                cSeasonNum = int.Parse( subdirectory.FullName.Substring( 7 ).Trim() );
+                cSeasonNum = int.Parse(subdirectory.FullName.Substring(7).Trim());
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
-                Factory.Instance.LogLines.Enqueue( "Unable to determine season number: " + subdirectory.Path );
-                Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = null, SuggestName = ""} );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
+                Factory.Instance.LogLines.Enqueue("Unable to determine season number: " + subdirectory.Path);
+                Factory.Instance.ItemProvider.BadNameFiles.Enqueue(new BadNameUpdate { Directory = directory, File = null, SuggestName = "" });
                 return;
             }
 
-            var series = Factory.Instance.Tvdb.get_series_by_name( directory.FullName );
+            var series = Factory.Instance.Tvdb.get_series_by_name(directory.FullName);
 
-            if ( series == null )
-            {
-                return;
-            }
-
-            if ( series.has_seasons( cSeasonNum ) == false )
+            if (series == null)
             {
                 return;
             }
 
-            var episodes = series.get_season( cSeasonNum ).get_episodes();
-
-            foreach ( var episode in episodes )
+            if (series.has_seasons(cSeasonNum) == false)
             {
-                var epnum = cSeasonNum + "x" + string.Format( "{0:00}", episode.get_episode_num() );
-                var found = subdirectory.Items.OfType< IFileItem >().Any( file => Regex.IsMatch( file.FullName, ".*?" + epnum + ".*?" ) );
+                return;
+            }
 
-                if ( found )
+            var episodes = series.get_season(cSeasonNum).get_episodes();
+
+            foreach (var episode in episodes)
+            {
+                var epnum = cSeasonNum + "x" + string.Format("{0:00}", episode.get_episode_num());
+                var found = subdirectory.Items.OfType<IFileItem>().Any(file => Regex.IsMatch(file.FullName, ".*?" + epnum + ".*?"));
+
+                if (found)
                 {
                     continue;
                 }
 
-                var newfile = new FileItem {FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Parent = subdirectory, Missing = true};
+                var newfile = new FileItem { FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Parent = subdirectory, Missing = true };
 
-                var fi = new FileInsert {Directory = subdirectory, File = newfile, EpisodeNum = episode.get_episode_num()};
+                var fi = new FileInsert { Directory = subdirectory, File = newfile, EpisodeNum = episode.get_episode_num() };
 
-                var torrent = this.clean_series_season_files_find_torrent( series.ImdbId, episode.get_episode_num(), cSeasonNum );
+                var torrent = this.clean_series_season_files_find_torrent(series.ImdbId, episode.get_episode_num(), cSeasonNum);
 
-                if ( torrent.Epname != null && String.CompareOrdinal( torrent.Epname, "" ) != 0 )
+                if (torrent.Epname != null && String.CompareOrdinal(torrent.Epname, "") != 0)
                 {
                     newfile.Torrent = true;
                     newfile.TorrentLink = torrent.Magnetlink;
                 }
 
-                Factory.Instance.ItemProvider.NewFilesUpdates.Enqueue( fi );
+                Factory.Instance.ItemProvider.NewFilesUpdates.Enqueue(fi);
             }
         }
 
-        private ITorrent clean_series_season_files_find_torrent( string imdbid, int epnum, int seasonnum )
+        private ITorrent clean_series_season_files_find_torrent(string imdbid, int epnum, int seasonnum)
         {
             ITorrent preferred = null;
             ITorrent t720 = null;
             ITorrent t1080 = null;
             ITorrent thdtv = null;
 
-            foreach ( var torrent in Factory.Instance.Torrents )
+            foreach (var torrent in Factory.Instance.Torrents)
             {
-                if ( String.Compare( torrent.Imbdid, imdbid, StringComparison.Ordinal ) != 0 )
+                if (String.Compare(torrent.Imbdid, imdbid, StringComparison.Ordinal) != 0)
                 {
                     continue;
                 }
-                
-                if (torrent.EpnameLower.Contains( "s" + String.Format( "{0:00}", seasonnum ) + "e" + string.Format( "{0:00}", epnum ) ) )
+
+                if (torrent.EpnameLower.Contains("s" + String.Format("{0:00}", seasonnum) + "e" + string.Format("{0:00}", epnum)))
                 {
-                    if (torrent.EpnameLower.Contains( Factory.Instance.Settings.TorrentPreferredQuality ) )
+                    if (torrent.EpnameLower.Contains(Factory.Instance.Settings.TorrentPreferredQuality))
                     {
                         preferred = torrent;
                         continue;
                     }
-                    if (torrent.EpnameLower.Contains( "720p" ) )
+                    if (torrent.EpnameLower.Contains("720p"))
                     {
                         t720 = torrent;
                         continue;
                     }
-                    if (torrent.EpnameLower.Contains( "1080p" ) )
+                    if (torrent.EpnameLower.Contains("1080p"))
                     {
                         t1080 = torrent;
                         continue;
@@ -332,22 +324,22 @@ namespace FileBotPP.Tree
                 }
             }
 
-            if ( preferred?.Magnetlink?.Length > 0 )
+            if (preferred?.Magnetlink?.Length > 0)
             {
                 return preferred;
             }
 
-            if ( t1080?.Magnetlink?.Length > 0 )
+            if (t1080?.Magnetlink?.Length > 0)
             {
                 return t1080;
             }
 
-            if ( t720?.Magnetlink?.Length > 0 )
+            if (t720?.Magnetlink?.Length > 0)
             {
                 return t720;
             }
 
-            if ( thdtv?.Magnetlink?.Length > 0 )
+            if (thdtv?.Magnetlink?.Length > 0)
             {
                 return thdtv;
             }
@@ -355,165 +347,165 @@ namespace FileBotPP.Tree
             return new Torrent();
         }
 
-        private void clean_series_season_directories( IItem directory )
+        private void clean_series_season_directories(IItem directory)
         {
-            foreach ( var seasondirectory in directory.Items.OfType< IDirectoryItem >() )
+            foreach (var seasondirectory in directory.Items.OfType<IDirectoryItem>())
             {
-                foreach ( var subdirectory in seasondirectory.Items.OfType< IDirectoryItem >() )
+                foreach (var subdirectory in seasondirectory.Items.OfType<IDirectoryItem>())
                 {
-                    Factory.Instance.ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = subdirectory, File = null, NewPath = ""} );
+                    Factory.Instance.ItemProvider.BadLocationFiles.Enqueue(new BadLocationUpdate { Directory = subdirectory, File = null, NewPath = "" });
 
-                    if ( subdirectory.Items.Count != 0 )
+                    if (subdirectory.Items.Count != 0)
                     {
                         continue;
                     }
 
-                    Factory.Instance.ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = subdirectory} );
+                    Factory.Instance.ItemProvider.DirectoryDeletions.Enqueue(new DeletionUpdate { Directory = subdirectory });
                 }
             }
         }
 
-        private void clean_series_top_level_files( IDirectoryItem directory )
+        private void clean_series_top_level_files(IDirectoryItem directory)
         {
-            foreach ( var item in directory.Items.OfType< IFileItem >() )
+            foreach (var item in directory.Items.OfType<IFileItem>())
             {
-                Factory.Instance.LogLines.Enqueue( @"Found files at top level " + directory.FullName );
+                Factory.Instance.LogLines.Enqueue(@"Found files at top level " + directory.FullName);
 
-                if ( String.Compare( item.FullName, "Thumbs.db", StringComparison.Ordinal ) == 0 )
+                if (String.Compare(item.FullName, "Thumbs.db", StringComparison.Ordinal) == 0)
                 {
-                    Factory.Instance.ItemProvider.DirectoryDeletions.Enqueue( new DeletionUpdate {Directory = directory, File = item} );
+                    Factory.Instance.ItemProvider.DirectoryDeletions.Enqueue(new DeletionUpdate { Directory = directory, File = item });
                     continue;
                 }
 
-                var match = Regex.Match( item.FullName, "^" + Regex.Escape( directory.FullName ) + "\\.? - (\\d+)x[0-9]+" );
+                var match = Regex.Match(item.FullName, "^" + Regex.Escape(directory.FullName) + "\\.? - (\\d+)x[0-9]+");
 
-                if ( match.Success )
+                if (match.Success)
                 {
-                    var seasonNum = int.Parse( match.Groups[ 1 ].ToString() );
+                    var seasonNum = int.Parse(match.Groups[1].ToString());
                     var checkdir = directory.Path + "\\Season " + seasonNum;
 
                     item.BadLocation = true;
 
-                    if ( File.Exists( checkdir ) == false )
+                    if (File.Exists(checkdir) == false)
                     {
-                        Factory.Instance.LogLines.Enqueue( @"Created season directory: " + checkdir );
+                        Factory.Instance.LogLines.Enqueue(@"Created season directory: " + checkdir);
                     }
 
-                    if ( File.Exists( checkdir + "\\" + item.FullName ) )
+                    if (File.Exists(checkdir + "\\" + item.FullName))
                     {
                         item.NewPathExists = true;
                     }
 
-                    Factory.Instance.ItemProvider.BadLocationFiles.Enqueue( new BadLocationUpdate {Directory = directory, File = item, NewPath = checkdir + "\\" + item.FullName} );
+                    Factory.Instance.ItemProvider.BadLocationFiles.Enqueue(new BadLocationUpdate { Directory = directory, File = item, NewPath = checkdir + "\\" + item.FullName });
                 }
                 else
                 {
-                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = directory, File = item, SuggestName = ""} );
+                    Factory.Instance.ItemProvider.BadNameFiles.Enqueue(new BadNameUpdate { Directory = directory, File = item, SuggestName = "" });
                 }
             }
         }
 
-        private void clean_series_top_level_directories( IDirectoryItem directory )
+        private void clean_series_top_level_directories(IDirectoryItem directory)
         {
-            if ( directory?.Items == null )
+            if (directory?.Items == null)
             {
                 return;
             }
 
-            foreach ( var inode in directory.Items.OfType< IDirectoryItem >() )
+            foreach (var inode in directory.Items.OfType<IDirectoryItem>())
             {
-                if ( Regex.IsMatch( inode.FullName, @"^Season ([0-9]+)" ) )
+                if (Regex.IsMatch(inode.FullName, @"^Season ([0-9]+)"))
                 {
                     continue;
                 }
 
-                Factory.Instance.LogLines.Enqueue( @"Dirty directory name : " + inode.Path );
-                Factory.Instance.ItemProvider.BadNameFiles.Enqueue( new BadNameUpdate {Directory = inode, File = null, SuggestName = ""} );
+                Factory.Instance.LogLines.Enqueue(@"Dirty directory name : " + inode.Path);
+                Factory.Instance.ItemProvider.BadNameFiles.Enqueue(new BadNameUpdate { Directory = inode, File = null, SuggestName = "" });
             }
 
-            if ( Factory.Instance.Tvdb == null )
+            if (Factory.Instance.Tvdb == null)
             {
                 return;
             }
 
-            foreach ( var series in Factory.Instance.Tvdb.get_series() )
+            foreach (var series in Factory.Instance.Tvdb.get_series())
             {
-                if ( String.Compare( directory.FullName, series.get_name(), StringComparison.Ordinal ) != 0 )
+                if (String.Compare(directory.FullName, series.get_name(), StringComparison.Ordinal) != 0)
                 {
                     continue;
                 }
 
-                foreach ( var season in series.get_seasons() )
+                foreach (var season in series.get_seasons())
                 {
                     var check = @"Season " + season.get_season_num();
 
-                    if ( Factory.Instance.ItemProvider.contains_child( directory, check ) )
+                    if (Factory.Instance.ItemProvider.contains_child(directory, check))
                     {
                         continue;
                     }
 
-                    var missingseason = new DirectoryItem {FullName = check, Path = directory.Path + "\\" + check, Missing = true, Parent = directory};
+                    var missingseason = new DirectoryItem { FullName = check, Path = directory.Path + "\\" + check, Missing = true, Parent = directory };
 
-                    foreach ( var episode in season.get_episodes() )
+                    foreach (var episode in season.get_episodes())
                     {
-                        var epnum = season.get_season_num() + "x" + string.Format( "{0:00}", episode.get_episode_num() );
-                        var fileitem = new FileItem {FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Missing = true, Parent = missingseason, Path = directory.Path + "\\" + check + "\\" + directory.FullName + " - " + epnum + " - " + episode.get_episode_name()};
-                        missingseason.Items.Add( fileitem );
+                        var epnum = season.get_season_num() + "x" + string.Format("{0:00}", episode.get_episode_num());
+                        var fileitem = new FileItem { FullName = directory.FullName + " - " + epnum + " - " + episode.get_episode_name(), Missing = true, Parent = missingseason, Path = directory.Path + "\\" + check + "\\" + directory.FullName + " - " + epnum + " - " + episode.get_episode_name() };
+                        missingseason.Items.Add(fileitem);
 
-                        var torrent = this.clean_series_season_files_find_torrent( series.ImdbId, episode.get_episode_num(), season.get_season_num() );
+                        var torrent = this.clean_series_season_files_find_torrent(series.ImdbId, episode.get_episode_num(), season.get_season_num());
 
-                        if ( torrent.Epname != null && String.CompareOrdinal( torrent.Epname, "" ) != 0 )
+                        if (torrent.Epname != null && String.CompareOrdinal(torrent.Epname, "") != 0)
                         {
                             fileitem.Torrent = true;
                             fileitem.TorrentLink = torrent.Magnetlink;
                         }
                     }
 
-                    var di = new DirectoryInsert {Directory = directory, SubDirectory = missingseason, Seasonnum = season.get_season_num()};
-                    Factory.Instance.ItemProvider.NewDirectoryUpdates.Enqueue( di );
+                    var di = new DirectoryInsert { Directory = directory, SubDirectory = missingseason, Seasonnum = season.get_season_num() };
+                    Factory.Instance.ItemProvider.NewDirectoryUpdates.Enqueue(di);
                 }
 
                 break;
             }
         }
 
-        private void ScanAllSeriesAnalyzerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        private void ScanAllSeriesAnalyzerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             Factory.Instance.ItemProvider.update_model();
-            Factory.Instance.WindowFileBotPp.set_status_text( "Analysis complete" );
+            Factory.Instance.WindowFileBotPp.set_status_text("Analysis complete");
             Factory.Instance.MetaDataReady += 1;
         }
 
-        private void ScanSeriesAnalyzerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        private void ScanSeriesAnalyzerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             Factory.Instance.ItemProvider.update_model();
         }
 
-        private void ScanAllSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
+        private void ScanAllSeriesAnalyzerDoWork(object sender, DoWorkEventArgs e)
         {
-            foreach ( var inode in Factory.Instance.ItemProvider.Items.OfType< IFileItem >() )
+            foreach (var inode in Factory.Instance.ItemProvider.Items.OfType<IFileItem>())
             {
-                Factory.Instance.LogLines.Enqueue( @"File found outside tvdbSeries directory: " + inode.Path );
+                Factory.Instance.LogLines.Enqueue(@"File found outside tvdbSeries directory: " + inode.Path);
             }
 
-            foreach ( var inode in Factory.Instance.ItemProvider.Items.OfType< IDirectoryItem >() )
+            foreach (var inode in Factory.Instance.ItemProvider.Items.OfType<IDirectoryItem>())
             {
-                this.clean_series_top_level_directories( inode );
-                this.clean_series_top_level_files( inode );
-                this.clean_series_season_directories( inode );
-                this.clean_series_season_files( inode );
+                this.clean_series_top_level_directories(inode);
+                this.clean_series_top_level_files(inode);
+                this.clean_series_season_directories(inode);
+                this.clean_series_season_files(inode);
             }
 
             // here
         }
 
-        private void ScanSeriesAnalyzerDoWork( object sender, DoWorkEventArgs e )
+        private void ScanSeriesAnalyzerDoWork(object sender, DoWorkEventArgs e)
         {
-            Thread.Sleep( 500 );
-            this.clean_series_top_level_directories( this._seriesFolder );
-            this.clean_series_top_level_files( this._seriesFolder );
-            this.clean_series_season_directories( this._seriesFolder );
-            this.clean_series_season_files( this._seriesFolder );
+            Thread.Sleep(500);
+            this.clean_series_top_level_directories(this._seriesFolder);
+            this.clean_series_top_level_files(this._seriesFolder);
+            this.clean_series_season_directories(this._seriesFolder);
+            this.clean_series_season_files(this._seriesFolder);
         }
     }
 }

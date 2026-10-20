@@ -11,26 +11,26 @@ namespace FileBotPP.Metadata
     public class Tvdb : ITvdb, ISupportsStop, IDisposable
     {
         private readonly string[] _dirs;
-        private readonly List< ITvdbSeries > _series;
-        private readonly List< ITvdbWorker > _workers;
+        private readonly List<ITvdbSeries> _series;
+        private readonly List<ITvdbWorker> _workers;
         private BackgroundWorker _allSeriesWorker;
         private BackgroundWorker _artworkWorker;
         private string _seriesName;
         private BackgroundWorker _seriesWorker;
         private bool _stop;
 
-        public Tvdb( string[] dirs )
+        public Tvdb(string[] dirs)
         {
             this._dirs = dirs;
-            this._series = new List< ITvdbSeries >();
-            this._workers = new List< ITvdbWorker >();
+            this._series = new List<ITvdbSeries>();
+            this._workers = new List<ITvdbWorker>();
             this.create_folders();
         }
 
         public void Dispose()
         {
-            this.Dispose( true );
-            GC.SuppressFinalize( this );
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         public void downloads_series_data()
@@ -44,10 +44,10 @@ namespace FileBotPP.Metadata
                 this._allSeriesWorker.WorkerReportsProgress = true;
                 this._allSeriesWorker.RunWorkerAsync();
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
@@ -55,35 +55,35 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                foreach ( var worker in this._workers.Where( worker => worker.get_series() != null ) )
+                foreach (var worker in this._workers.Where(worker => worker.get_series() != null))
                 {
-                    this._series.Add( worker.get_series() );
+                    this._series.Add(worker.get_series());
                 }
 
                 this._workers.Clear();
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        public List< ITvdbSeries > get_series()
+        public List<ITvdbSeries> get_series()
         {
             return this._series;
         }
 
-        public ITvdbSeries get_series_by_name( string name )
+        public ITvdbSeries get_series_by_name(string name)
         {
             try
             {
-                return this._series.FirstOrDefault( series => String.Compare( series.get_name(), name, StringComparison.Ordinal ) == 0 );
+                return this._series.FirstOrDefault(series => String.Compare(series.get_name(), name, StringComparison.Ordinal) == 0);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
                 return null;
             }
         }
@@ -94,10 +94,10 @@ namespace FileBotPP.Metadata
             {
                 this._workers.Clear();
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
@@ -106,7 +106,7 @@ namespace FileBotPP.Metadata
             this._stop = true;
         }
 
-        public void downloads_series_data( string name )
+        public void downloads_series_data(string name)
         {
             try
             {
@@ -116,58 +116,58 @@ namespace FileBotPP.Metadata
                 this._seriesWorker.WorkerReportsProgress = true;
                 this._seriesWorker.RunWorkerAsync();
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
         private void create_folders()
         {
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/" ) )
+            if (!Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/"))
             {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork" );
+                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork");
             }
 
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/banner" ) )
+            if (!Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/banner"))
             {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/banner" );
+                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork/banner");
             }
 
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" ) )
+            if (!Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/fanart"))
             {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/fanart" );
+                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork/fanart");
             }
 
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/tvdbartwork/poster" ) )
+            if (!Directory.Exists(Factory.Instance.AppDataFolder + "/tvdbartwork/poster"))
             {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/tvdbartwork/poster" );
+                Directory.CreateDirectory(Factory.Instance.AppDataFolder + "/tvdbartwork/poster");
             }
         }
 
-        private void SeriesWorkerDoWork( object sender, DoWorkEventArgs e )
+        private void SeriesWorkerDoWork(object sender, DoWorkEventArgs e)
         {
             try
             {
-                Factory.Instance.LogLines.Enqueue( @"Fetching TVDB metadata for " + this._seriesName + "..." );
+                Factory.Instance.LogLines.Enqueue(@"Fetching TVDB metadata for " + this._seriesName + "...");
 
-                var tvdbwoker = new TvdbWorker( this._seriesName );
+                var tvdbwoker = new TvdbWorker(this._seriesName);
                 tvdbwoker.Run();
 
-                Thread.Sleep( 50 );
+                Thread.Sleep(50);
 
-                while ( tvdbwoker.is_working() )
+                while (tvdbwoker.is_working())
                 {
-                    Thread.Sleep( 1000 );
+                    Thread.Sleep(1000);
                 }
 
-                this._series.Add( tvdbwoker.get_series() );
+                this._series.Add(tvdbwoker.get_series());
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
@@ -179,102 +179,102 @@ namespace FileBotPP.Metadata
                 this._artworkWorker.DoWork += this.ArtWorkerDoWork;
                 this._artworkWorker.RunWorkerAsync();
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        private void AllSeriesWorkerProgressChanged( object sender, ProgressChangedEventArgs e )
+        private void AllSeriesWorkerProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             try
             {
-                var percent = e.ProgressPercentage/100.0;
-                Factory.Instance.WindowFileBotPp.set_tvdb_progress( percent + "%" );
+                var percent = e.ProgressPercentage / 100.0;
+                Factory.Instance.WindowFileBotPp.set_tvdb_progress(percent + "%");
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        private void AllSeriesWorkerRunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        private void AllSeriesWorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             try
             {
-                Factory.Instance.WindowFileBotPp.set_status_text( "Tvdb done..." );
+                Factory.Instance.WindowFileBotPp.set_status_text("Tvdb done...");
                 Factory.Instance.MetaDataReady += 1;
                 this.start_artwork_downloader();
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        private void AllSeriesWorkerDoWork( object sender, DoWorkEventArgs e )
+        private void AllSeriesWorkerDoWork(object sender, DoWorkEventArgs e)
         {
             try
             {
-                Factory.Instance.LogLines.Enqueue( @"Fetching TVDB metadata..." );
+                Factory.Instance.LogLines.Enqueue(@"Fetching TVDB metadata...");
 
                 var wait = true;
 
-                foreach ( var inode in this._dirs )
+                foreach (var inode in this._dirs)
                 {
-                    if ( this._stop )
+                    if (this._stop)
                     {
                         break;
                     }
 
-                    this.wait_limit_workers( 5, wait );
+                    this.wait_limit_workers(5, wait);
 
-                    var tvdbwoker = new TvdbWorker( inode );
-                    this._workers.Add( tvdbwoker );
+                    var tvdbwoker = new TvdbWorker(inode);
+                    this._workers.Add(tvdbwoker);
                     wait = !tvdbwoker.is_cached();
                     tvdbwoker.Run();
 
-                    var percent = ( this._workers.Count/( double ) this._dirs.Length )*10000.0;
-                    this._allSeriesWorker.ReportProgress( ( int ) percent );
+                    var percent = (this._workers.Count / (double)this._dirs.Length) * 10000.0;
+                    this._allSeriesWorker.ReportProgress((int)percent);
                 }
 
                 this.wait_for_workers();
 
-                if ( this._stop )
+                if (this._stop)
                 {
                     return;
                 }
 
                 this.get_series_from_workers();
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        private void ArtWorkerDoWork( object sender, DoWorkEventArgs e )
+        private void ArtWorkerDoWork(object sender, DoWorkEventArgs e)
         {
             try
             {
-                Factory.Instance.LogLines.Enqueue( @"Fetching TVDB metadata..." );
+                Factory.Instance.LogLines.Enqueue(@"Fetching TVDB metadata...");
 
-                foreach ( var worker in this._workers )
+                foreach (var worker in this._workers)
                 {
                     var aw = worker.get_artwork_links();
-                    Factory.Instance.Utils.download_file( aw[ 0 ], aw[ 1 ] );
-                    Factory.Instance.Utils.download_file( aw[ 2 ], aw[ 3 ] );
-                    Factory.Instance.Utils.download_file( aw[ 4 ], aw[ 5 ] );
+                    Factory.Instance.Utils.download_file(aw[0], aw[1]);
+                    Factory.Instance.Utils.download_file(aw[2], aw[3]);
+                    Factory.Instance.Utils.download_file(aw[4], aw[5]);
                 }
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
@@ -282,53 +282,43 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                Thread.Sleep( 50 );
+                Thread.Sleep(50);
 
-                Factory.Instance.LogLines.Enqueue( @"Waiting for threads" );
+                Factory.Instance.LogLines.Enqueue(@"Waiting for threads");
 
                 var count = 2;
 
-                while ( count > 1 )
+                while (count > 1)
                 {
-                    count = this._workers.Count( worker => worker.is_working() );
+                    count = this._workers.Count(worker => worker.is_working());
 
-                    Thread.Sleep( 50 );
+                    Thread.Sleep(50);
                 }
 
-                Thread.Sleep( 50 );
+                Thread.Sleep(50);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                Factory.Instance.LogLines.Enqueue(ex.Message);
+                Factory.Instance.LogLines.Enqueue(ex.StackTrace);
             }
         }
 
-        private void wait_limit_workers( int num, bool wait )
+        private void wait_limit_workers(int num, bool wait)
         {
             try
             {
-                var count = num + 1;
-
-                while ( count > num )
-                {
-                    count = this._workers.Count( worker => worker.is_working() );
-
-                    Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
-                }
-
-                Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
+                WorkerThrottle.Limit(() => this._workers.Count(worker => worker.is_working()), num, wait);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception(ex);
             }
         }
 
-        protected virtual void Dispose( bool disposing )
+        protected virtual void Dispose(bool disposing)
         {
-            if ( !disposing )
+            if (!disposing)
             {
                 return;
             }

@@ -187,7 +187,18 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Helpers\AppLog.cs" />
+    <Compile Include="Helpers\BackgroundTasks.cs" />
+    <Compile Include="Helpers\CacheFiles.cs" />
     <Compile Include="Helpers\Factory.cs" />
+    <Compile Include="Helpers\ItemTreeScan.cs" />
+    <Compile Include="Helpers\QueueDrain.cs" />
+    <Compile Include="Helpers\QueuedFileWorker.cs" />
+    <Compile Include="Helpers\SeriesMetadataFetch.cs" />
+    <Compile Include="Helpers\WebProxyConfig.cs" />
+    <Compile Include="Helpers\WorkerThrottle.cs" />
+    <Compile Include="Metadata\TorrentRows.cs" />
+    <Compile Include="Tree\ScannedFileItems.cs" />
     <Compile Include="Helpers\FfmpegCorruptWorker.cs" />
     <Compile Include="Tree\SeriesAnalyzer.cs" />
     <Compile Include="Helpers\Utils.cs" />

@@ -15,22 +15,19 @@ namespace FileBotPP.Metadata
         private string _imdbid;
         private bool _working;
 
-        public KatWorker( string link, string seriesname )
+        public KatWorker(string link, string seriesname)
         {
             this._serieslink = link;
             this._seriesname = seriesname;
 
-            var invalid = new string( Path.GetInvalidFileNameChars() ) + new string( Path.GetInvalidPathChars() );
-            this._seriesnameClean = invalid.Aggregate( this._seriesname, ( current, c ) => current.Replace( c.ToString(), "" ) );
+            var invalid = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            this._seriesnameClean = invalid.Aggregate(this._seriesname, (current, c) => current.Replace(c.ToString(), ""));
         }
 
         public void Run()
         {
             this._working = true;
-            var worker = new BackgroundWorker();
-            worker.DoWork += this.Worker_DoWork;
-            worker.RunWorkerCompleted += this.Worker_RunWorkerCompleted;
-            worker.RunWorkerAsync();
+            BackgroundTasks.RunOnce(this.get_series_data, () => this._working = false);
         }
 
         public bool is_working()
@@ -47,181 +44,135 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                var tempFile = Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean;
-
-                if ( File.Exists( tempFile ) )
-                {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        return true;
-                    }
-
-                    File.Delete( tempFile );
-                }
-
-                return false;
+                return CacheFiles.IsFresh(Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception(ex);
                 return false;
             }
-        }
-
-        private void Worker_DoWork( object sender, DoWorkEventArgs e )
-        {
-            this.get_series_data();
-        }
-
-        private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            this._working = false;
         }
 
         private void get_series_data()
         {
-            if ( Directory.Exists( Factory.Instance.AppDataFolder + "/kat/" ) == false )
+            var folder = Factory.Instance.AppDataFolder + "/kat/";
+            CacheFiles.EnsureDirectory(folder);
+
+            var tempFile = folder + this._seriesnameClean + ".tmp";
+            var cached = CacheFiles.ReadIfFresh(tempFile, true);
+            if (cached != null)
             {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/kat" );
+                this.parse_imdb_id(cached);
+                this.parse_episodes_pages();
+                return;
             }
 
-            var tempFile = Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean + ".tmp";
+            Factory.Instance.LogLines.Enqueue(@"Downloading " + this._seriesname + @" torrents...");
 
-            if ( File.Exists( tempFile ) )
-            {
-                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                {
-                    var filehtml = File.ReadAllText( tempFile );
-                    this.parse_imdb_id( filehtml );
-                    this.parse_episodes_pages();
-                    return;
-                }
+            var temp = Factory.Instance.Utils.FetchDeCompressed("https://kat.cr" + this._serieslink);
 
-                File.Delete( tempFile );
-            }
-
-            Factory.Instance.LogLines.Enqueue( @"Dowloading " + this._seriesname + @" torrents..." );
-
-            var temp = Factory.Instance.Utils.FetchDeCompressed( "https://kat.cr" + this._serieslink );
-
-            if ( String.Compare( temp, "", StringComparison.Ordinal ) == 0 || temp == null )
+            if (String.Compare(temp, "", StringComparison.Ordinal) == 0 || temp == null)
             {
                 return;
             }
 
-            if ( Factory.Instance.Utils.write_file( tempFile, temp ) == false )
+            if (Factory.Instance.Utils.write_file(tempFile, temp) == false)
             {
                 return;
             }
 
-            this.parse_imdb_id( temp );
+            this.parse_imdb_id(temp);
             this.parse_episodes_pages();
         }
 
-        private void parse_imdb_id( string html )
+        private void parse_imdb_id(string html)
         {
-            var imdbmatch = Regex.Match( html, "http://www.imdb.com/title/(tt.*?)/", RegexOptions.IgnoreCase );
+            var imdbmatch = Regex.Match(html, "http://www.imdb.com/title/(tt.*?)/", RegexOptions.IgnoreCase);
 
-            this._imdbid = imdbmatch.Success ? imdbmatch.Groups[ 1 ].Value : null;
+            this._imdbid = imdbmatch.Success ? imdbmatch.Groups[1].Value : null;
         }
 
         private void parse_episodes_pages()
         {
-            if ( this._imdbid == null )
+            if (this._imdbid == null)
             {
-                Factory.Instance.LogLines.Enqueue( @"skipping " + this._seriesname + @", no imdb id..." );
+                Factory.Instance.LogLines.Enqueue(@"skipping " + this._seriesname + @", no imdb id...");
                 return;
             }
 
-            Factory.Instance.LogLines.Enqueue( @"Parsing " + this._seriesnameClean + @" metadata..." );
+            Factory.Instance.LogLines.Enqueue(@"Parsing " + this._seriesnameClean + @" metadata...");
 
-            if ( Directory.Exists( Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean ) == false )
-            {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean );
-            }
+            CacheFiles.EnsureDirectory(Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean);
 
-            for ( var x = 1; x < this.get_series_torrents_pages_count(); x++ )
+            for (var x = 1; x < this.get_series_torrents_pages_count(); x++)
             {
-                var torrentPage = this.get_series_torrent_page( x );
-                if ( String.Compare( torrentPage, "", StringComparison.Ordinal ) == 0 )
+                var torrentPage = this.get_series_torrent_page(x);
+                if (String.Compare(torrentPage, "", StringComparison.Ordinal) == 0)
                 {
                     continue;
                 }
-                this.parse_page_torrents( torrentPage );
+                this.parse_page_torrents(torrentPage);
             }
         }
 
         private int get_series_torrents_pages_count()
         {
-            var torrentPage = this.get_series_torrent_page( 1 );
+            var torrentPage = this.get_series_torrent_page(1);
 
-            if ( String.Compare( torrentPage, "", StringComparison.Ordinal ) == 0 )
+            if (String.Compare(torrentPage, "", StringComparison.Ordinal) == 0)
             {
                 return 1;
             }
 
-            var pagesButtons = Regex.Matches( torrentPage, "<a rel=\"nofollow\" href=\".*?\" class=\"turnoverButton siteButton bigButton\">(.*?)</a>", RegexOptions.IgnoreCase | RegexOptions.Singleline );
+            var pagesButtons = Regex.Matches(torrentPage, "<a rel=\"nofollow\" href=\".*?\" class=\"turnoverButton siteButton bigButton\">(.*?)</a>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-            if ( pagesButtons.Count <= 0 )
+            if (pagesButtons.Count <= 0)
             {
                 return 1;
             }
 
-            var lastPage = pagesButtons[ pagesButtons.Count - 1 ];
-            return int.Parse( lastPage.Groups[ 1 ].Value );
+            var lastPage = pagesButtons[pagesButtons.Count - 1];
+            return int.Parse(lastPage.Groups[1].Value);
         }
 
-        private string get_series_torrent_page( int page )
+        private string get_series_torrent_page(int page)
         {
             var tempFile = Factory.Instance.AppDataFolder + "/kat/" + this._seriesnameClean + "/page" + page;
             string torrentPage;
 
-            if ( File.Exists( tempFile ) == false )
+            if (File.Exists(tempFile) == false)
             {
-                torrentPage = Factory.Instance.Utils.FetchDeCompressed( "https://kat.cr" + this._serieslink + "torrents/" );
+                torrentPage = Factory.Instance.Utils.FetchDeCompressed("https://kat.cr" + this._serieslink + "torrents/");
 
-                if ( torrentPage == null )
+                if (torrentPage == null)
                 {
                     return "";
                 }
 
-                Factory.Instance.Utils.write_file( tempFile, torrentPage );
+                Factory.Instance.Utils.write_file(tempFile, torrentPage);
                 return torrentPage;
             }
 
-            if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
+            if (CacheFiles.IsWithinTimeout(tempFile))
             {
-                return File.ReadAllText( tempFile );
+                return File.ReadAllText(tempFile);
             }
 
-            torrentPage = Factory.Instance.Utils.FetchDeCompressed( "https://kat.cr" + this._serieslink + "torrents/" );
+            torrentPage = Factory.Instance.Utils.FetchDeCompressed("https://kat.cr" + this._serieslink + "torrents/");
 
-            if ( torrentPage == null )
+            if (torrentPage == null)
             {
                 return "";
             }
 
-            File.Delete( tempFile );
+            File.Delete(tempFile);
 
             return torrentPage;
         }
 
-        private void parse_page_torrents( string page )
+        private void parse_page_torrents(string page)
         {
-            foreach ( Match match in Regex.Matches( page, "<tr.*?>(.*?)</tr>", RegexOptions.IgnoreCase | RegexOptions.Singleline ) )
-            {
-                var epname = Regex.Match( match.Groups[ 1 ].Value, "<a href=\".*?\" class=\"cellMainLink\">(.*?)</a>" );
-                var epmagnet = Regex.Match( match.Groups[ 1 ].Value, "\"(magnet:.*?)\"" );
-
-                if ( !epmagnet.Success || !epname.Success )
-                {
-                    continue;
-                }
-
-                var torrent = new Torrent {Epname = epname.Groups[ 1 ].Value.Trim(), Magnetlink = epmagnet.Groups[ 1 ].Value.Trim(), Series = this._seriesname, Imbdid = this._imdbid};
-                Factory.Instance.Torrents.Add( torrent );
-            }
+            TorrentRows.AddFromHtml(page, "<a href=\".*?\" class=\"cellMainLink\">(.*?)</a>", this._seriesname, this._imdbid);
         }
     }
 }

@@ -1,144 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
+﻿using System.Text.RegularExpressions;
 using FileBotPP.Helpers;
 
 namespace FileBotPP.Metadata
 {
-    public class Eztv : ISupportsStop, IEztv, IDisposable
+    public class Eztv : SeriesMetadataFetch<IEztvWorker>, IEztv
     {
-        private readonly List< IEztvWorker > _workers;
-        private BackgroundWorker _mainWorker;
-        private bool _stop;
-
-        public Eztv()
+        protected override string LogMessage
         {
-            this._workers = new List< IEztvWorker >();
+            get { return @"Fetching EZTV metadata..."; }
         }
 
-        public void Dispose()
+        protected override MatchCollection LoadMatches()
         {
-            this.Dispose( true );
-            GC.SuppressFinalize( this );
-        }
+            var data = Factory.Instance.Utils.Fetch("https://eztv.ag");
 
-        public void downloads_series_data()
-        {
-            this._mainWorker = new BackgroundWorker();
-            this._mainWorker.RunWorkerCompleted += this._mainWorker_RunWorkerCompleted;
-            this._mainWorker.ProgressChanged += this._mainWorker_ProgressChanged;
-            this._mainWorker.DoWork += this._mainWorker_DoWork;
-            this._mainWorker.WorkerReportsProgress = true;
-            this._mainWorker.RunWorkerAsync();
-        }
-
-        public void free_workers()
-        {
-            this._workers.Clear();
-        }
-
-        public void stop_worker()
-        {
-            this._stop = true;
-        }
-
-        private void _mainWorker_DoWork( object sender, DoWorkEventArgs e )
-        {
-            Factory.Instance.LogLines.Enqueue( @"Fetching EZTV metadata..." );
-
-            var data = Factory.Instance.Utils.Fetch( "https://eztv.ag" );
-
-            var selectMatch = Regex.Match( data, "<select.*?>(.*?)</select>", RegexOptions.IgnoreCase | RegexOptions.Singleline );
-            if ( selectMatch.Success == false )
+            var selectMatch = Regex.Match(data, "<select.*?>(.*?)</select>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            if (selectMatch.Success == false)
             {
-                return;
+                return null;
             }
 
-            var optionMatches = Regex.Matches( selectMatch.Value, "<option value=\"(.*?)\">(.*?)</option>", RegexOptions.IgnoreCase | RegexOptions.Singleline );
-
-            var wait = true;
-
-            foreach ( Match option in optionMatches )
-            {
-                if ( this._stop )
-                {
-                    break;
-                }
-
-                if ( String.Compare( option.Groups[ 1 ].Value, "", StringComparison.Ordinal ) == 0 )
-                {
-                    continue;
-                }
-
-                this.wait_limit_workers( 5, wait );
-
-                var eztvwoker = new EztvWorker( int.Parse( option.Groups[ 1 ].Value ), option.Groups[ 2 ].Value );
-                this._workers.Add( eztvwoker );
-                wait = !eztvwoker.is_cached();
-                eztvwoker.Run();
-
-                var percent = ( this._workers.Count/( double ) optionMatches.Count )*10000.0;
-                this._mainWorker.ReportProgress( ( int ) percent );
-            }
-
-            this.wait_for_workers();
-            if ( this._stop )
-            {
-            }
+            return Regex.Matches(selectMatch.Value, "<option value=\"(.*?)\">(.*?)</option>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
         }
 
-        private void _mainWorker_ProgressChanged( object sender, ProgressChangedEventArgs e )
+        protected override IEztvWorker CreateWorker(Match option)
         {
-            var percent = e.ProgressPercentage/100.0;
-            Factory.Instance.WindowFileBotPp.set_eztv_progress( percent + "%" );
+            return new EztvWorker(int.Parse(option.Groups[1].Value), option.Groups[2].Value);
         }
 
-        private void _mainWorker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
+        protected override bool IsCached(IEztvWorker worker)
         {
-            Factory.Instance.WindowFileBotPp.set_eztv_progress( "100%" );
-            Factory.Instance.WindowFileBotPp.set_status_text( "Eztv done..." );
-            Factory.Instance.MetaDataReady += 1;
+            return worker.is_cached();
         }
 
-        private void wait_for_workers()
+        protected override void RunWorker(IEztvWorker worker)
         {
-            Thread.Sleep( Factory.Instance.Random.Next( 10, 40 ) );
-
-            Factory.Instance.LogLines.Enqueue( "Waiting for threads" );
-
-            var count = 2;
-
-            while ( count > 1 )
-            {
-                count = this._workers.Count( worker => worker.is_working() );
-
-                Thread.Sleep( Factory.Instance.Random.Next( 10, 40 ) );
-            }
+            worker.Run();
         }
 
-        private void wait_limit_workers( int num, bool wait )
+        protected override bool IsWorking(IEztvWorker worker)
         {
-            var count = num + 1;
-
-            while ( count > num )
-            {
-                count = this._workers.Count( worker => worker.is_working() );
-
-                Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
-            }
-
-            Thread.Sleep( wait ? Factory.Instance.Random.Next( 10, 40 ) : 5 );
+            return worker.is_working();
         }
 
-        protected virtual void Dispose( bool disposing )
+        protected override void ReportFetchProgress(double percent)
         {
-            if ( disposing )
-            {
-                this._mainWorker.Dispose();
-            }
+            Factory.Instance.WindowFileBotPp.set_eztv_progress(percent + "%");
+        }
+
+        protected override void ReportFinished()
+        {
+            Factory.Instance.WindowFileBotPp.set_eztv_progress("100%");
+            Factory.Instance.WindowFileBotPp.set_status_text("Eztv done...");
         }
     }
 }

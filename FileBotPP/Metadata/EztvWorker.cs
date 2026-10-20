@@ -15,7 +15,7 @@ namespace FileBotPP.Metadata
         private bool _processed;
         private bool _working;
 
-        public EztvWorker( int seriesid, string seriesname )
+        public EztvWorker(int seriesid, string seriesname)
         {
             this._series = seriesname;
             this._seriesid = seriesid;
@@ -24,10 +24,7 @@ namespace FileBotPP.Metadata
         public void Run()
         {
             this._working = true;
-            var worker = new BackgroundWorker();
-            worker.DoWork += this.Worker_DoWork;
-            worker.RunWorkerCompleted += this.Worker_RunWorkerCompleted;
-            worker.RunWorkerAsync();
+            BackgroundTasks.RunOnce(this.get_series_data, () => this._working = false);
         }
 
         public bool is_working()
@@ -55,129 +52,86 @@ namespace FileBotPP.Metadata
         {
             try
             {
-                var tempFile = Factory.Instance.AppDataFolder + "/eztv/" + this._seriesid;
-
-                if ( File.Exists( tempFile ) )
-                {
-                    if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                    {
-                        return true;
-                    }
-
-                    File.Delete( tempFile );
-                }
-
-                return false;
+                return CacheFiles.IsFresh(Factory.Instance.AppDataFolder + "/eztv/" + this._seriesid);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
-                Factory.Instance.LogLines.Enqueue( ex.Message );
-                Factory.Instance.LogLines.Enqueue( ex.StackTrace );
+                AppLog.Exception(ex);
                 return false;
             }
-        }
-
-        private void Worker_DoWork( object sender, DoWorkEventArgs e )
-        {
-            this.get_series_data();
-        }
-
-        private void Worker_RunWorkerCompleted( object sender, RunWorkerCompletedEventArgs e )
-        {
-            this._working = false;
         }
 
         private void get_series_data()
         {
-            if ( !Directory.Exists( Factory.Instance.AppDataFolder + "/eztv/" ) )
+            var folder = Factory.Instance.AppDataFolder + "/eztv/";
+            CacheFiles.EnsureDirectory(folder);
+
+            var tempFile = folder + this._seriesid;
+            var cached = CacheFiles.ReadIfFresh(tempFile, true);
+            if (cached != null)
             {
-                Directory.CreateDirectory( Factory.Instance.AppDataFolder + "/eztv" );
+                this.parse_imdb_id(cached);
+                this.strip_unneeded(cached);
+                this.parse_episodes();
+                return;
             }
 
-            var tempFile = Factory.Instance.AppDataFolder + "/eztv/" + this._seriesid;
+            Factory.Instance.LogLines.Enqueue(@"Downloading " + this._series + @" metadata...");
 
-            if ( File.Exists( tempFile ) )
-            {
-                if ( ( File.GetLastWriteTime( tempFile ).Ticks/TimeSpan.TicksPerSecond + ( Factory.Instance.Settings.CacheTimeout ) ) > ( DateTime.Now.Ticks/TimeSpan.TicksPerSecond ) )
-                {
-                    var filehtml = File.ReadAllText( tempFile );
-                    this.parse_imdb_id( filehtml );
-                    this.strip_unneeded( filehtml );
-                    this.parse_episodes();
-                    return;
-                }
+            var temp = Factory.Instance.Utils.Fetch("https://eztv.ag/shows/" + this._seriesid + "/" + this._series);
 
-                File.Delete( tempFile );
-            }
-
-            Factory.Instance.LogLines.Enqueue( @"Downloading " + this._series + @" metadata..." );
-
-            var temp = Factory.Instance.Utils.Fetch( "https://eztv.ag/shows/" + this._seriesid + "/" + this._series );
-
-            if ( String.Compare( temp, "", StringComparison.Ordinal ) == 0 )
+            if (String.Compare(temp, "", StringComparison.Ordinal) == 0)
             {
                 return;
             }
 
-            if ( Factory.Instance.Utils.write_file( tempFile, temp ) == false )
+            if (Factory.Instance.Utils.write_file(tempFile, temp) == false)
             {
                 return;
             }
 
-            this.parse_imdb_id( temp );
-            this.strip_unneeded( temp );
+            this.parse_imdb_id(temp);
+            this.strip_unneeded(temp);
             this.parse_episodes();
         }
 
-        private void strip_unneeded( string temp )
+        private void strip_unneeded(string temp)
         {
             string[] parts;
 
-            if ( temp.Contains( "Episode Name" ) )
+            if (temp.Contains("Episode Name"))
             {
-                parts = temp.Split( new[] {"Episode Name"}, StringSplitOptions.None );
+                parts = temp.Split(new[] { "Episode Name" }, StringSplitOptions.None);
             }
-            else if ( temp.Contains( "Episode FullName" ) )
+            else if (temp.Contains("Episode FullName"))
             {
-                parts = temp.Split( new[] {"Episode FullName"}, StringSplitOptions.None );
+                parts = temp.Split(new[] { "Episode FullName" }, StringSplitOptions.None);
             }
             else
             {
                 return;
             }
 
-            var torrents = parts[ 1 ].Split( new[] {"</table>"}, StringSplitOptions.None );
+            var torrents = parts[1].Split(new[] { "</table>" }, StringSplitOptions.None);
 
-            this._html = torrents[ 0 ];
+            this._html = torrents[0];
         }
 
-        private void parse_imdb_id( string html )
+        private void parse_imdb_id(string html)
         {
-            var imdbmatch = Regex.Match( html, "http://www.imdb.com/title/(tt.*?)/", RegexOptions.IgnoreCase );
+            var imdbmatch = Regex.Match(html, "http://www.imdb.com/title/(tt.*?)/", RegexOptions.IgnoreCase);
 
-            if ( imdbmatch.Success )
+            if (imdbmatch.Success)
             {
-                this._imdbid = imdbmatch.Groups[ 1 ].Value;
+                this._imdbid = imdbmatch.Groups[1].Value;
             }
         }
 
         private void parse_episodes()
         {
-            Factory.Instance.LogLines.Enqueue( @"Parsing " + this._series + @" metadata..." );
+            Factory.Instance.LogLines.Enqueue(@"Parsing " + this._series + @" metadata...");
 
-            foreach ( Match match in Regex.Matches( this._html, "<tr.*?>(.*?)</tr>", RegexOptions.IgnoreCase | RegexOptions.Singleline ) )
-            {
-                var epname = Regex.Match( match.Groups[ 1 ].Value, @"class=.epinfo.>(.*?)<\/a>" );
-                var epmagnet = Regex.Match( match.Groups[ 1 ].Value, "\"(magnet:.*?)\"" );
-
-                if ( !epmagnet.Success || !epname.Success )
-                {
-                    continue;
-                }
-
-                var torrent = new Torrent {Epname = epname.Groups[ 1 ].Value.Trim(), Magnetlink = epmagnet.Groups[ 1 ].Value.Trim(), Series = this._series, Imbdid = this._imdbid};
-                Factory.Instance.Torrents.Add( torrent );
-            }
+            TorrentRows.AddFromHtml(this._html, @"class=.epinfo.>(.*?)<\/a>", this._series, this._imdbid);
 
             this._html = null;
         }
